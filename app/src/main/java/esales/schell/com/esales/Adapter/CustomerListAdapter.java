@@ -130,7 +130,7 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
             notifyDataSetChanged();
         }
     }
-
+//
    /* public class CustomeFilter extends Filter
     {
         private CustomerListAdapter adapter;
