@@ -16,9 +16,9 @@ public class SettingConstant {
     protected static final String CustomerId = "CustomerId";
     protected static final String CustomerName = "CustomerName";
     protected static final String AuthCode = "AuthCode";
-    protected static final String GalleryImage = "GalleryImage";
-    protected static final String MemberShipId = "membershipid";
-    protected static final String CodeName = "codeName";
-    protected static final String RegistartionDate = "registartion_date";
+    protected static final String DestinationLog = "Destination_Lognitude";
+    protected static final String DestinationLat = "Destination_Latitude";
+    protected static final String Sourcelog = "Source_Lognitude";
+    protected static final String SourceLat = "Source_Latitude";
 
 }

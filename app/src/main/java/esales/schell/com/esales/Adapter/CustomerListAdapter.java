@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import esales.schell.com.esales.Interface.CustomerNameInterface;
 import esales.schell.com.esales.MainActivity.ShowMapsActivity;
 import esales.schell.com.esales.R;
 
@@ -28,12 +29,14 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
     public ArrayList<String> list = new ArrayList<>();
     public ValueFilter valueFilter;
     public ArrayList<String> filterlistlist = new ArrayList<>();
+    public CustomerNameInterface anInterface;
 
-    public CustomerListAdapter(Context context , ArrayList<String> list)
+    public CustomerListAdapter(Context context , ArrayList<String> list , CustomerNameInterface anInterface)
     {
         this.context = context;
         this.list = list;
         this.filterlistlist = list;
+        this.anInterface = anInterface;
     }
 
     @Override
@@ -52,7 +55,8 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
         holder.custName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "Customer Name is "+ list.get(position), Toast.LENGTH_SHORT).show();
+
+                anInterface.getCustomerName(list.get(position));
 
             }
         });

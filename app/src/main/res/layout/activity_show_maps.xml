@@ -34,35 +34,37 @@
     <include layout="@layout/content_show_map_activity"/>
 
     <LinearLayout
-        android:layout_gravity="bottom|end"
         android:layout_width="match_parent"
-        android:orientation="horizontal"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/rechecdbtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".3"
             android:background="@drawable/rippileefact"
             android:text="Reached"
-            android:textColor="@color/white"
-            android:layout_width="0dp"
-            android:layout_weight=".3"
-            android:layout_height="wrap_content" />
+            android:textColor="@color/white" />
+
         <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
+            android:layout_weight=".3"
             android:background="@drawable/rippileefact"
             android:text="Show List"
-            android:textColor="@color/white"
-            android:layout_width="0dp"
-            android:layout_weight=".3"
-            android:layout_height="wrap_content" />
+            android:textColor="@color/white" />
+
         <Button
-            android:layout_marginLeft="5dp"
-            android:background="@drawable/rippileefact"
-            android:text="Finish"
-            android:textColor="@color/white"
             android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
             android:layout_weight=".3"
-            android:layout_height="wrap_content" />
+            android:background="@drawable/rippileefact"
+            android:text="Day End"
+            android:textColor="@color/white" />
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>
 

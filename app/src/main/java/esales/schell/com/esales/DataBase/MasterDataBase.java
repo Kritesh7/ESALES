@@ -26,7 +26,8 @@ public class MasterDataBase
     // insert data in a databse
 
     public void setSourceTableData(String sourceLat , String sourceLog, String destinationLat , String destinationLog,
-                                   String calculateDistance , String customerName , String timeDuration)
+                                   String calculateDistance , String cust_id , String startAt,
+                                   String reachedAt , String pointType)
     {
 
         sqLiteDatabase = dataBaseHelper.getWritableDatabase();
@@ -36,8 +37,10 @@ public class MasterDataBase
         values.put(sourceAndDestinationPointTable.destinationLat ,destinationLat);
         values.put(sourceAndDestinationPointTable.destinationLog ,destinationLog);
         values.put(sourceAndDestinationPointTable.calculateDistance,calculateDistance);
-        values.put(sourceAndDestinationPointTable.customerName ,customerName);
-        values.put(sourceAndDestinationPointTable.timeDuration,timeDuration);
+        values.put(sourceAndDestinationPointTable.customerId ,cust_id);
+        values.put(sourceAndDestinationPointTable.startAt,startAt);
+        values.put(sourceAndDestinationPointTable.reachedAt,reachedAt);
+        values.put(sourceAndDestinationPointTable.pointType,pointType);
 
         sqLiteDatabase.insertWithOnConflict(sourceAndDestinationPointTable.tableName,null,values,SQLiteDatabase.CONFLICT_IGNORE);
     }

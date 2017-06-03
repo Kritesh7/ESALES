@@ -12,9 +12,11 @@ public class SourceAndDestinationPointTable
     public static final String sourceLog = "Source_Log";
     public static final String destinationLat = "Destination_Lat";
     public static final String destinationLog = "Destination_Log";
-    public static final String customerName = "Customer_Name";
+    public static final String customerId = "Customer_Id";
     public static final String calculateDistance = "Calculate_Distance";
-    public static final String timeDuration = "Time_Duration";
+    public static final String startAt = "Start_At";
+    public static final String reachedAt = "Reached_At";
+    public static final String pointType = "Point_Type";
 
     public static final String sourceAndDestinationTableData =
             "create table " + tableName +
@@ -24,7 +26,9 @@ public class SourceAndDestinationPointTable
                     destinationLat + " text, " +
                     destinationLog + " text, " +
                     calculateDistance + " text, " +
-                    customerName + " text, " +
-                    timeDuration + " text" +
+                    customerId + " text, " +
+                    startAt + " text, " +
+                    reachedAt + " text, " +
+                    pointType + " text" +
                     ");";
 }

@@ -1,6 +1,8 @@
 package esales.schell.com.esales.MainActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -14,6 +16,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,20 +27,38 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import esales.schell.com.esales.Adapter.CustomerListAdapter;
+import esales.schell.com.esales.Interface.CustomerNameInterface;
+import esales.schell.com.esales.Interface.RetrofitMaps;
+import esales.schell.com.esales.Model.MapRouteModel.Example;
 import esales.schell.com.esales.R;
+import esales.schell.com.esales.Sources.GPSTracker;
 import esales.schell.com.esales.Sources.RecyclerItemClickListener;
+import esales.schell.com.esales.Sources.SharedPrefs;
+import esales.schell.com.esales.Sources.UtilsMethods;
+import retrofit.Call;
+import retrofit.Callback;
+import retrofit.GsonConverterFactory;
+import retrofit.Response;
+import retrofit.Retrofit;
 
-public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCallback,CustomerNameInterface {
 
     private GoogleMap mMap;
     public double lat,log;
@@ -50,6 +71,20 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public CustomerListAdapter adapter;
     public Button rechedBtn;
     public SearchView serchTxt;
+    public Context context;
+    public boolean flag = true;
+    public GPSTracker gpsTracker;
+    public String sourceLat="";
+    public String sourceLog="";
+
+    public LatLng origin;
+    public LatLng dest;
+    public LatLng point;
+    public ArrayList<LatLng> MarkerPoints;
+    public Polyline line;
+    public String ShowDistanceDuration = "";
+    public MarkerOptions options;
+
 
 
     @Override
@@ -61,9 +96,29 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        context = ShowMapsActivity.this;
+        MarkerPoints = new ArrayList<>();
+        gpsTracker = new GPSTracker(context,ShowMapsActivity.this);
         custome_Toolbar = (LinearLayout)findViewById(R.id.custome_bar);
         backBtn = (ImageView)custome_Toolbar.findViewById(R.id.backbtn);
         rechedBtn = (Button)findViewById(R.id.rechecdbtn);
+
+
+        //show error dialog if Google Play Services not available
+        if (!isGooglePlayServicesAvailable()) {
+            Log.d("onCreate", "Google Play Services not available. Ending Test case.");
+            finish();
+        }
+        else {
+            Log.d("onCreate", "Google Play Services available. Continuing.");
+        }
+
+
+        sourceLat = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
+        sourceLog =  UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));
+
+
+
        // custSpiiner = (Spinner)custome_Toolbar.findViewById(R.id.customer_name_spinner);
 
         backBtn.setOnClickListener(new View.OnClickListener() {
@@ -81,12 +136,29 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         }
 
 
-        rechedBtn.setOnClickListener(new View.OnClickListener() {
+       /* rechedBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                callPopup();
+
+                sourceLat = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
+                sourceLog =  UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));
+
+
+                    if (!rechedBtn.getText().toString().equalsIgnoreCase("Reached")) {
+
+                        mMap.clear();
+                        MarkerPoints.clear();
+                        MarkerPoints = new ArrayList<>();
+
+
+
+                    }else
+                        {
+
+                        }
+
             }
-        });
+        });*/
 
         //spinner work
 
@@ -117,12 +189,14 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         View popupView = layoutInflater.inflate(R.layout.popup, null);
 
         popupWindow = new PopupWindow(popupView,
-                RelativeLayout.LayoutParams.WRAP_CONTENT,  800,
+                RelativeLayout.LayoutParams.MATCH_PARENT,    RelativeLayout.LayoutParams.WRAP_CONTENT,
                 true);
 
 
         popupWindow.setTouchable(true);
         popupWindow.setFocusable(true);
+
+        popupWindow.setAnimationStyle(R.style.animationName);
 
         popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);
 
@@ -134,7 +208,72 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                         /*Toast.makeText(getApplicationContext(),
                                 Name.getText().toString(),Toast.LENGTH_LONG).show();*/
 
+
+                        rechedBtn.setText("Restart");
+                        flag = false;
+
+
+                        double dstLat = gpsTracker.getLatitude();
+                        double dstLog = gpsTracker.getLongitude();
+                        double srcLat = Double.parseDouble(sourceLat);
+                        double srcLog = Double.parseDouble(sourceLog);
+
+                        Log.e("checking srclat is :" ,srcLat + " null");
+                        Log.e("checking srcLog is :" ,srcLog + " null");
+                        Log.e("checking dstLat is :" ,dstLat + " null");
+                        Log.e("checking dstLog is :" ,dstLog + " null");
+
+
+
+                        origin = new LatLng(srcLat,srcLog);
+                        dest = new LatLng(dstLat,dstLog);
+
+
+                        // working to shown root and calculate the distance
+
+
+                        // check condition ,condition is true then clear all points and String
+                        if (MarkerPoints.size() > 1) {
+                            mMap.clear();
+                            MarkerPoints.clear();
+                            MarkerPoints = new ArrayList<>();
+                            ShowDistanceDuration = "";
+                        }
+
+
+                        mMap.addMarker(options.position(dest).title("Customer Place"));
+                        /**
+                         * For the start location, the color of marker is GREEN and
+                         * for the end location, the color of marker is RED.
+                         */
+                        if (MarkerPoints.size() == 1) {
+                            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                        } else if (MarkerPoints.size() == 2) {
+                            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                        }
+
+                        // add marker
+
+                        mMap.addMarker(options);
+
+                        // Checks, whether start and end locations are captured
+                        if (MarkerPoints.size() >= 2) {
+                            origin = MarkerPoints.get(0);
+                            dest = MarkerPoints.get(1);
+                        }
+
+
+
+                        build_retrofit_and_get_response("driving");
+
+                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLat(ShowMapsActivity.this,
+                                String.valueOf(lat))));
+                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLog(ShowMapsActivity.this,
+                                String.valueOf(log))));
+
                         popupWindow.dismiss();
+
+
 
                     }
 
@@ -180,12 +319,17 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         custNameList.add("Sunil Jaiswal dffgfdghghgfhgfhffhjfhjhgjgujgjgjhgj");
 
 
-        adapter = new CustomerListAdapter(ShowMapsActivity.this,custNameList);
+        adapter = new CustomerListAdapter(context,custNameList,ShowMapsActivity.this);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(ShowMapsActivity.this);
         recyelerCustomerList.setLayoutManager(mLayoutManager);
         recyelerCustomerList.setItemAnimator(new DefaultItemAnimator());
         recyelerCustomerList.setAdapter(adapter);
 
+        serchTxt.setIconified(false);
+        //The above line will expand it to fit the area as well as throw up the keyboard
+
+        //To remove the keyboard, but make sure you keep the expanded version:
+        serchTxt.clearFocus();
 
         SearchView.OnQueryTextListener onQueryTextListener = new SearchView.OnQueryTextListener() {
             @Override
@@ -245,9 +389,225 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(lat, log);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f));
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+
+        double sourceInnerLat = Double.parseDouble(sourceLat);
+        double sourceInnerLog = Double.parseDouble(sourceLog);
+        point = new LatLng(sourceInnerLat,sourceInnerLog);
+
+
+        //add point in a array list
+        MarkerPoints.add(point);
+
+        //show marker points -----------
+        options = new MarkerOptions();
+        mMap.addMarker(options.position(point).title("Customer Place"));
+
+
+        rechedBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                sourceLat = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
+                sourceLog =  UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));
+
+                if (flag)
+                {
+
+
+                    Log.e("checked buttn name",rechedBtn.getText().toString());
+                    if (rechedBtn.getText().toString().equalsIgnoreCase("Reached")) {
+
+
+                       /* double dstLat = gpsTracker.getLatitude();
+                        double dstLog = gpsTracker.getLongitude();
+                        double srcLat = Double.parseDouble(sourceLat);
+                        double srcLog = Double.parseDouble(sourceLog);
+
+                        Log.e("checking srclat is :" ,srcLat + " null");
+                        Log.e("checking srcLog is :" ,srcLog + " null");
+                        Log.e("checking dstLat is :" ,dstLat + " null");
+                        Log.e("checking dstLog is :" ,dstLog + " null");
+
+
+
+                        origin = new LatLng(srcLat,srcLog);
+                        dest = new LatLng(28.6562,77.2410);
+
+
+                        // working to shown root and calculate the distance
+
+
+                        // check condition ,condition is true then clear all points and String
+                        if (MarkerPoints.size() > 1) {
+                            mMap.clear();
+                            MarkerPoints.clear();
+                            MarkerPoints = new ArrayList<>();
+                            ShowDistanceDuration = "";
+                        }
+
+
+                        mMap.addMarker(options.position(dest).title("Customer Place"));
+                        *//**
+                         * For the start location, the color of marker is GREEN and
+                         * for the end location, the color of marker is RED.
+                         *//*
+                        if (MarkerPoints.size() == 1) {
+                            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                        } else if (MarkerPoints.size() == 2) {
+                            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                        }
+
+                        // add marker
+
+                        mMap.addMarker(options);
+
+                        // Checks, whether start and end locations are captured
+                        if (MarkerPoints.size() >= 2) {
+                            origin = MarkerPoints.get(0);
+                            dest = MarkerPoints.get(1);
+                        }
+
+
+
+                        build_retrofit_and_get_response("driving");
+
+                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLat(ShowMapsActivity.this,
+                                String.valueOf(lat))));
+                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLog(ShowMapsActivity.this,
+                                String.valueOf(log))));
+*/
+                      /*  UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setDestinationLat(ShowMapsActivity.this,
+                                String.valueOf(lat))));
+                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setDestinationLog(ShowMapsActivity.this,
+                                String.valueOf(log))));*/
+                        callPopup();
+
+                    }else
+                        {
+                            mMap.clear();
+                            MarkerPoints.clear();
+                            MarkerPoints = new ArrayList<>();
+                        }
+
+
+
+                }else
+                {
+                    flag = true;
+                    rechedBtn.setText("Reached");
+
+                }
+
+            }
+        });
+    }
+
+    @Override
+    public void getCustomerName(String name) {
+
+        Toast.makeText(context, "Customer Name is "+ name, Toast.LENGTH_SHORT).show();
+    }
+
+    private void build_retrofit_and_get_response(String type) {
+
+        String url = "https://maps.googleapis.com/maps/";
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(url)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        RetrofitMaps service = retrofit.create(RetrofitMaps.class);
+
+        Call<Example> call = service.getDistanceDuration("metric", origin.latitude + "," + origin.longitude,dest.latitude + "," + dest.longitude, type);
+
+        call.enqueue(new Callback<Example>() {
+            @Override
+            public void onResponse(Response<Example> response, Retrofit retrofit) {
+
+                try {
+                    //Remove previous line from map
+                    if (line != null) {
+                        line.remove();
+                    }
+                    // This loop will go through all the results and add marker on each location.
+                    for (int i = 0; i < response.body().getRoutes().size(); i++) {
+                        String distance = response.body().getRoutes().get(i).getLegs().get(i).getDistance().getText();
+                        String time = response.body().getRoutes().get(i).getLegs().get(i).getDuration().getText();
+                        ShowDistanceDuration = distance ;
+
+                        Toast.makeText(getApplicationContext(), "My Calculate Distance is  -" + distance + "Time - " + time , Toast.LENGTH_LONG).show();
+
+                        String encodedString = response.body().getRoutes().get(0).getOverviewPolyline().getPoints();
+                        List<LatLng> list = decodePoly(encodedString);
+                        line = mMap.addPolyline(new PolylineOptions()
+                                .addAll(list)
+                                .width(20)
+                                .color(Color.RED)
+                                .geodesic(true)
+                        );
+                    }
+                } catch (Exception e) {
+                    Log.d("onResponse", "There is an error");
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.d("onFailure", t.toString());
+            }
+        });
+
+    }
+
+    private List<LatLng> decodePoly(String encoded) {
+        List<LatLng> poly = new ArrayList<LatLng>();
+        int index = 0, len = encoded.length();
+        int lat = 0, lng = 0;
+
+        while (index < len) {
+            int b, shift = 0, result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lat += dlat;
+
+            shift = 0;
+            result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lng += dlng;
+
+            LatLng p = new LatLng( (((double) lat / 1E5)),
+                    (((double) lng / 1E5) ));
+            poly.add(p);
+        }
+
+        return poly;
+    }
+
+    // Checking if Google Play Services Available or not
+    private boolean isGooglePlayServicesAvailable() {
+        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+        int result = googleAPI.isGooglePlayServicesAvailable(this);
+        if(result != ConnectionResult.SUCCESS) {
+            if(googleAPI.isUserResolvableError(result)) {
+                googleAPI.getErrorDialog(this, result,
+                        0).show();
+            }
+            return false;
+        }
+        return true;
     }
 }

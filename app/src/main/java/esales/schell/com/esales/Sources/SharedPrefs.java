@@ -70,10 +70,10 @@ public class SharedPrefs
         SharedPreferences sp = getSetting(context);
         return  sp.getString(SettingConstant.ProfilePic, null);
     }
-    public static String getGallerryImage(Context context)
+    public static String getDestinationLog(Context context)
     {
         SharedPreferences sp = getSetting(context);
-        return  sp.getString(SettingConstant.GalleryImage, null);
+        return  sp.getString(SettingConstant.DestinationLog, null);
     }
     public static boolean setProfilePic(Context context, String authKey)
     {
@@ -82,48 +82,49 @@ public class SharedPrefs
         editor.putString(SettingConstant.ProfilePic, authKey);
         return editor.commit();
     }
-    public static boolean setGalleryImage(Context context, String authKey)
+    public static boolean setDestinationLog(Context context, String authKey)
     {
         SharedPreferences sp = getSetting(context);
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString(SettingConstant.GalleryImage, authKey);
+        editor.putString(SettingConstant.DestinationLog, authKey);
         return editor.commit();
     }
-    public static boolean setMembershipId(Context context, String authKey)
+    public static boolean setDestinationLat(Context context, String authKey)
     {
         SharedPreferences sp = getSetting(context);
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString(SettingConstant.MemberShipId, authKey);
+        editor.putString(SettingConstant.DestinationLat, authKey);
         return editor.commit();
     }
 
-    public static boolean setMemberShipCode(Context context, String authKey)
+    public static boolean setSourceLog(Context context, String authKey)
     {
         SharedPreferences sp = getSetting(context);
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString(SettingConstant.CodeName, authKey);
+        editor.putString(SettingConstant.Sourcelog, authKey);
         return editor.commit();
     }
-    public static boolean setRegistrationDate(Context context, String authKey)
+    public static boolean setSourceLat(Context context, String authKey)
     {
         SharedPreferences sp = getSetting(context);
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString(SettingConstant.RegistartionDate, authKey);
+        editor.putString(SettingConstant.SourceLat, authKey);
         return editor.commit();
     }
-    public static String getRegistrationDate(Context context)
+    public static String getSourceLet(Context context)
     {
         SharedPreferences sp = getSetting(context);
-        return  sp.getString(SettingConstant.RegistartionDate, null);
+        return  sp.getString(SettingConstant.SourceLat, null);
     }
-    public static String getMemberShipCode(Context context)
+    public static String getSourceLog(Context context)
     {
         SharedPreferences sp = getSetting(context);
-        return  sp.getString(SettingConstant.CodeName, null);
+        return  sp.getString(SettingConstant.Sourcelog, null);
     }
-    public static String getMemberShipId(Context context)
+    public static String getDestinationLat(Context context)
     {
         SharedPreferences sp = getSetting(context);
-        return  sp.getString(SettingConstant.MemberShipId, null);
+        return  sp.getString(SettingConstant.DestinationLat, null);
     }
+
 }

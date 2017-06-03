@@ -15,6 +15,8 @@ import android.widget.Toast;
 
 import esales.schell.com.esales.R;
 import esales.schell.com.esales.Sources.GPSTracker;
+import esales.schell.com.esales.Sources.SharedPrefs;
+import esales.schell.com.esales.Sources.UtilsMethods;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -56,7 +58,12 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(i);
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
 
-                Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + lat + "\nLong: " + log, Toast.LENGTH_LONG).show();
+                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLat(HomeActivity.this,
+                        String.valueOf(lat))));
+                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLog(HomeActivity.this,
+                        String.valueOf(log))));
+
+             //   Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + lat + "\nLong: " + log, Toast.LENGTH_LONG).show();
             }
         });
        /* FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
