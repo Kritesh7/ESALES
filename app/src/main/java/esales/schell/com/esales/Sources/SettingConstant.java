@@ -11,7 +11,8 @@ public class SettingConstant {
     public static final String BASEURL = "http://skydigitalvalue.com/";
     public static final int Retry_Time = 15000;
     protected static final String SP_NAME = "myPref";
-    protected static final String ProfilePic = "profile_pic";
+    protected static final String FirstHomePage = "First_Home_Page";
+    protected static final String SecondHomePage = "Second_Home_Page";
     protected static final String LoginStatus = "Login Status";
     protected static final String CustomerId = "CustomerId";
     protected static final String CustomerName = "CustomerName";

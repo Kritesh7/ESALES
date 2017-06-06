@@ -1,16 +1,22 @@
 package esales.schell.com.esales.MainActivity;
 
 import android.Manifest;
+import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -25,9 +31,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.Status;
+
+import java.util.List;
+
+import esales.schell.com.esales.BuildConfig;
 import esales.schell.com.esales.R;
 import esales.schell.com.esales.Sources.ConnectionDetector;
 import esales.schell.com.esales.Sources.GPSTracker;
+import esales.schell.com.esales.Sources.SharedPrefs;
+import esales.schell.com.esales.Sources.UtilsMethods;
 
 public class SplashScreen extends AppCompatActivity {
 
@@ -42,6 +55,7 @@ public class SplashScreen extends AppCompatActivity {
     private boolean internetConnected=true;
     public double latitude , longitude;
     public ConnectionDetector conn;
+    public String status = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,23 +72,42 @@ public class SplashScreen extends AppCompatActivity {
 
 
         mContext = SplashScreen.this;
+        status = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getStatusFirstHomePage(mContext)));
         conn = new ConnectionDetector(SplashScreen.this);
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.main_lay);
         gps = new GPSTracker(mContext, SplashScreen.this);
 
-       /* new Handler().postDelayed(new Runnable(){
-            @Override
-            public void run() {
-                Intent i = new Intent(getApplicationContext(),LoginActivity.class);
-                startActivity(i);
-                finish();
-                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+        /*if(isMockSettingsON(SplashScreen.this))
+       {
 
-            }
-        },
-                SPLASH_DISPLAY_LENGTH);*/
 
-        checkGPS();
+           Log.e("stop","Stop");
+          *//* LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+           try {
+               Log.d("checking" ,"Removing Test providers");
+               lm.removeTestProvider(LocationManager.GPS_PROVIDER);
+           } catch (IllegalArgumentException error) {
+               Log.d("Checking","Got exception in removing test  provider");
+           }*//*
+
+         //  lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
+
+           gps.showSettingsAlertDeveloper();
+       }else
+           {
+
+               if (areThereMockPermissionApps(SplashScreen.this))
+               {
+                   gps.showSettingsAlertDeveloper();
+               }else {
+                   checkGPS();
+               }
+           }*/
+
+
+
+            checkGPS();
 
     }
 
@@ -91,10 +124,26 @@ public class SplashScreen extends AppCompatActivity {
                     public void run() {
                         // This method will be executed once the timer is over
                         // Start your app main activity
-                        Intent i = new Intent(SplashScreen.this, LoginActivity.class);
-                        startActivity(i);
-                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                        finish();
+
+                        if (status .equalsIgnoreCase("1"))
+                        {
+                            Intent i = new Intent(SplashScreen.this, HomeActivity.class);
+                            startActivity(i);
+                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                            finish();
+                        }else if (status.equalsIgnoreCase("2"))
+                        {
+                            Intent i = new Intent(SplashScreen.this, ShowMapsActivity.class);
+                            startActivity(i);
+                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                            finish();
+                        }
+                        else {
+                            Intent i = new Intent(SplashScreen.this, LoginActivity.class);
+                            startActivity(i);
+                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                            finish();
+                        }
 
                         latitude = gps.getLatitude();
                         longitude = gps.getLongitude();
@@ -198,7 +247,7 @@ public class SplashScreen extends AppCompatActivity {
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
 
-                    Toast.makeText(mContext, "You need to grant permission", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(mContext, "You need to grant permission", Toast.LENGTH_SHORT).show();
                 }
                 return;
             }
@@ -264,5 +313,77 @@ public class SplashScreen extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         finish();
+    }
+
+
+    public static boolean isMockSettingsON(Context context) {
+        // returns true if mock location enabled, false if not enabled.
+        if (Settings.Secure.getString(context.getContentResolver(),
+                Settings.Secure.ALLOW_MOCK_LOCATION).equals("0")) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+
+    public static boolean areThereMockPermissionApps(Context context) {
+        int count = 0;
+
+        PackageManager pm = context.getPackageManager();
+        List<ApplicationInfo> packages =
+                pm.getInstalledApplications(PackageManager.GET_META_DATA);
+
+        for (ApplicationInfo applicationInfo : packages) {
+            try {
+                PackageInfo packageInfo = pm.getPackageInfo(applicationInfo.packageName,
+                        PackageManager.GET_PERMISSIONS);
+
+                // Get Permissions
+                String[] requestedPermissions = packageInfo.requestedPermissions;
+
+                if (requestedPermissions != null) {
+                    for (int i = 0; i < requestedPermissions.length; i++) {
+                        if (requestedPermissions[i]
+                                .equals("android.permission.ACCESS_MOCK_LOCATION")
+                                && !applicationInfo.packageName.equals(context.getPackageName())) {
+                            count++;
+                        }
+                    }
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+              //  Log.e("Got exception " + e.getMessage());
+            }
+        }
+
+        if (count > 0)
+            return true;
+        return false;
+    }
+
+    public boolean isMockLocationEnabled()
+    {
+        boolean isMockLocation = false;
+        try
+        {
+            //if marshmallow
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            {
+                AppOpsManager opsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+                isMockLocation = (opsManager.checkOp(AppOpsManager.OPSTR_MOCK_LOCATION, android.os.Process.myUid(), BuildConfig.APPLICATION_ID)== AppOpsManager.MODE_ALLOWED);
+            }
+            else
+            {
+                // in marshmallow this will always return true
+                isMockLocation = !android.provider.Settings.Secure.getString(mContext.getContentResolver(), "mock_location").equals("0");
+            }
+        }
+        catch (Exception e)
+        {
+            return isMockLocation;
+        }
+
+        return isMockLocation;
     }
 }

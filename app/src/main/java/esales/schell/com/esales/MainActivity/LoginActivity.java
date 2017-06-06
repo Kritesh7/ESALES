@@ -14,6 +14,8 @@ import android.view.WindowManager;
 import android.widget.Button;
 
 import esales.schell.com.esales.R;
+import esales.schell.com.esales.Sources.SharedPrefs;
+import esales.schell.com.esales.Sources.UtilsMethods;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -39,6 +41,10 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(i);
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                 finish();
+
+
+                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(LoginActivity.this,
+                        "1")));
             }
         });
     }

@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -84,6 +85,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public Polyline line;
     public String ShowDistanceDuration = "";
     public MarkerOptions options;
+    public Button dayEndBtn;
 
 
 
@@ -99,9 +101,24 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         context = ShowMapsActivity.this;
         MarkerPoints = new ArrayList<>();
         gpsTracker = new GPSTracker(context,ShowMapsActivity.this);
-        custome_Toolbar = (LinearLayout)findViewById(R.id.custome_bar);
-        backBtn = (ImageView)custome_Toolbar.findViewById(R.id.backbtn);
+        //custome_Toolbar = (LinearLayout)findViewById(R.id.custome_bar);
+       // backBtn = (ImageView)custome_Toolbar.findViewById(R.id.backbtn);
         rechedBtn = (Button)findViewById(R.id.rechecdbtn);
+        dayEndBtn = (Button)findViewById(R.id.day_endBtn);
+
+        dayEndBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent i = new Intent(getApplicationContext(),HomeActivity.class);
+                startActivity(i);
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                finish();
+
+                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(ShowMapsActivity.this,
+                        "1")));
+            }
+        });
 
 
         //show error dialog if Google Play Services not available
@@ -121,12 +138,12 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
        // custSpiiner = (Spinner)custome_Toolbar.findViewById(R.id.customer_name_spinner);
 
-        backBtn.setOnClickListener(new View.OnClickListener() {
+       /* backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
             }
-        });
+        });*/
 
         Intent i = getIntent();
         if (i!=null)
@@ -205,18 +222,23 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 .setOnClickListener(new View.OnClickListener() {
 
                     public void onClick(View arg0) {
-                        /*Toast.makeText(getApplicationContext(),
-                                Name.getText().toString(),Toast.LENGTH_LONG).show();*/
 
 
                         rechedBtn.setText("Restart");
                         flag = false;
 
-
                         double dstLat = gpsTracker.getLatitude();
                         double dstLog = gpsTracker.getLongitude();
+
+                      /*  double dstLat = 27.1767;
+                        double dstLog = 78.0081;*/
+
+
                         double srcLat = Double.parseDouble(sourceLat);
                         double srcLog = Double.parseDouble(sourceLog);
+
+                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLat(ShowMapsActivity.this, String.valueOf(dstLat))));
+                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLog(ShowMapsActivity.this, String.valueOf(dstLog))));
 
                         Log.e("checking srclat is :" ,srcLat + " null");
                         Log.e("checking srcLog is :" ,srcLog + " null");
@@ -227,6 +249,10 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
                         origin = new LatLng(srcLat,srcLog);
                         dest = new LatLng(dstLat,dstLog);
+
+                        point = new LatLng(dstLat,dstLog);
+                        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, 17.0f);
+                        mMap.animateCamera(cameraUpdate);
 
 
                         // working to shown root and calculate the distance
@@ -266,10 +292,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
                         build_retrofit_and_get_response("driving");
 
-                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLat(ShowMapsActivity.this,
-                                String.valueOf(lat))));
-                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLog(ShowMapsActivity.this,
-                                String.valueOf(log))));
 
                         popupWindow.dismiss();
 
@@ -390,12 +412,16 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(lat, log);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f));
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+
+        Log.e("checking lat is :", sourceLat);
 
         double sourceInnerLat = Double.parseDouble(sourceLat);
         double sourceInnerLog = Double.parseDouble(sourceLog);
         point = new LatLng(sourceInnerLat,sourceInnerLog);
+
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, 17.0f);
+        mMap.animateCamera(cameraUpdate);
 
 
         //add point in a array list
@@ -421,68 +447,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                     if (rechedBtn.getText().toString().equalsIgnoreCase("Reached")) {
 
 
-                       /* double dstLat = gpsTracker.getLatitude();
-                        double dstLog = gpsTracker.getLongitude();
-                        double srcLat = Double.parseDouble(sourceLat);
-                        double srcLog = Double.parseDouble(sourceLog);
-
-                        Log.e("checking srclat is :" ,srcLat + " null");
-                        Log.e("checking srcLog is :" ,srcLog + " null");
-                        Log.e("checking dstLat is :" ,dstLat + " null");
-                        Log.e("checking dstLog is :" ,dstLog + " null");
-
-
-
-                        origin = new LatLng(srcLat,srcLog);
-                        dest = new LatLng(28.6562,77.2410);
-
-
-                        // working to shown root and calculate the distance
-
-
-                        // check condition ,condition is true then clear all points and String
-                        if (MarkerPoints.size() > 1) {
-                            mMap.clear();
-                            MarkerPoints.clear();
-                            MarkerPoints = new ArrayList<>();
-                            ShowDistanceDuration = "";
-                        }
-
-
-                        mMap.addMarker(options.position(dest).title("Customer Place"));
-                        *//**
-                         * For the start location, the color of marker is GREEN and
-                         * for the end location, the color of marker is RED.
-                         *//*
-                        if (MarkerPoints.size() == 1) {
-                            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                        } else if (MarkerPoints.size() == 2) {
-                            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                        }
-
-                        // add marker
-
-                        mMap.addMarker(options);
-
-                        // Checks, whether start and end locations are captured
-                        if (MarkerPoints.size() >= 2) {
-                            origin = MarkerPoints.get(0);
-                            dest = MarkerPoints.get(1);
-                        }
-
-
-
-                        build_retrofit_and_get_response("driving");
-
-                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLat(ShowMapsActivity.this,
-                                String.valueOf(lat))));
-                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLog(ShowMapsActivity.this,
-                                String.valueOf(log))));
-*/
-                      /*  UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setDestinationLat(ShowMapsActivity.this,
-                                String.valueOf(lat))));
-                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setDestinationLog(ShowMapsActivity.this,
-                                String.valueOf(log))));*/
                         callPopup();
 
                     }else
@@ -494,13 +458,52 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
 
 
-                }else
-                {
+                }
+                else {
+
+
                     flag = true;
                     rechedBtn.setText("Reached");
 
-                }
+                    // again
 
+                    mMap.clear();
+                    MarkerPoints.clear();
+                    MarkerPoints = new ArrayList<>();
+
+
+                    // again
+
+
+
+                    String innerSrc  = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
+                    String innersrclog =UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));
+
+
+                    double sourceInnerLat = Double.parseDouble(innerSrc);
+                    double sourceInnerLog = Double.parseDouble(innersrclog);
+                    point = new LatLng(sourceInnerLat,sourceInnerLog);
+
+
+                    //add point in a array list
+                    MarkerPoints.add(point);
+
+                    //show marker points -----------
+                    options = new MarkerOptions();
+                    mMap.addMarker(options.position(point).title("Customer Place"));
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, 17.0f);
+                    mMap.animateCamera(cameraUpdate);
+
+
+                  /*  UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLat(ShowMapsActivity.this, String.valueOf(28.4960))));
+                    UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLog(ShowMapsActivity.this, String.valueOf(77.4022))));
+*/
+
+                    /*Intent intent = getIntent();
+                    finish();
+                    startActivity(intent);*/
+
+                }
             }
         });
     }

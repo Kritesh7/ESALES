@@ -30,12 +30,12 @@ public class SharedPrefs
         SharedPreferences sp = getSetting(context);
         return  sp.getString(SettingConstant.AuthCode, null);
     }
-    public static String getCustomerName(Context context)
+  /*  public static String getStatusFirstHomePage(Context context)
     {
         SharedPreferences sp = getSetting(context);
         return  sp.getString(SettingConstant.CustomerName, null);
     }
-
+*/
     public static boolean setLoginStatus(Context context, String authKey)
     {
         SharedPreferences sp = getSetting(context);
@@ -65,23 +65,40 @@ public class SharedPrefs
         editor.putString(SettingConstant.AuthCode, authKey);
         return editor.commit();
     }
-    public static String getProfilepic(Context context)
-    {
-        SharedPreferences sp = getSetting(context);
-        return  sp.getString(SettingConstant.ProfilePic, null);
-    }
+
     public static String getDestinationLog(Context context)
     {
         SharedPreferences sp = getSetting(context);
         return  sp.getString(SettingConstant.DestinationLog, null);
     }
-    public static boolean setProfilePic(Context context, String authKey)
+
+    //status Refrence--------------------
+    public static String getStatusSecondHomePage(Context context)
+    {
+        SharedPreferences sp = getSetting(context);
+        return  sp.getString(SettingConstant.SecondHomePage, null);
+    }
+    public static String getStatusFirstHomePage(Context context)
+    {
+        SharedPreferences sp = getSetting(context);
+        return  sp.getString(SettingConstant.FirstHomePage, null);
+    }
+    public static boolean setStatusFirstHomePage(Context context, String authKey)
     {
         SharedPreferences sp = getSetting(context);
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString(SettingConstant.ProfilePic, authKey);
+        editor.putString(SettingConstant.FirstHomePage, authKey);
         return editor.commit();
     }
+    public static boolean setStatusSecondHomePage(Context context, String authKey)
+    {
+        SharedPreferences sp = getSetting(context);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(SettingConstant.SecondHomePage, authKey);
+        return editor.commit();
+    }
+
+
     public static boolean setDestinationLog(Context context, String authKey)
     {
         SharedPreferences sp = getSetting(context);
