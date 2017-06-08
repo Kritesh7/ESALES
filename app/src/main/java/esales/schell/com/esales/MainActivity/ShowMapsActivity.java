@@ -85,7 +85,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public Polyline line;
     public String ShowDistanceDuration = "";
     public MarkerOptions options;
-    public Button dayEndBtn;
+    public Button dayEndBtn , showListBtn;
 
 
 
@@ -105,6 +105,18 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
        // backBtn = (ImageView)custome_Toolbar.findViewById(R.id.backbtn);
         rechedBtn = (Button)findViewById(R.id.rechecdbtn);
         dayEndBtn = (Button)findViewById(R.id.day_endBtn);
+        showListBtn = (Button)findViewById(R.id.showListBtn);
+
+        showListBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent i = new Intent(getApplicationContext(),ShowListActivity.class);
+                startActivity(i);
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+
+            }
+        });
 
         dayEndBtn.setOnClickListener(new View.OnClickListener() {
             @Override
