@@ -9,16 +9,19 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -68,62 +71,185 @@ public class SplashScreen extends AppCompatActivity {
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.main_lay);
         gps = new GPSTracker(mContext, SplashScreen.this);
 
+
         checkGPS();
     }
 
     public void  checkGPS()
     {
-        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-        ActivityCompat.requestPermissions(SplashScreen.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
 
-    } else {
-       // Toast.makeText(mContext, "You need have granted permission", Toast.LENGTH_SHORT).show();
-        if (conn.getConnectivityStatus() > 0) {
-            if (gps.canGetLocation()) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        // This method will be executed once the timer is over
-                        // Start your app main activity
+        if (Build.VERSION.SDK_INT == 16 || Build.VERSION.SDK_INT == 17 ||
+                Build.VERSION.SDK_INT == 18 || Build.VERSION.SDK_INT == 19)
+        {
+            LocationManager   lm = (LocationManager)SplashScreen.this.getSystemService(SplashScreen.this.LOCATION_SERVICE);
 
-                        if (status .equalsIgnoreCase("1"))
-                        {
-                            Intent i = new Intent(SplashScreen.this, HomeActivity.class);
-                            startActivity(i);
-                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                            finish();
-                        }else if (status.equalsIgnoreCase("2"))
-                        {
-                            Intent i = new Intent(SplashScreen.this, ShowMapsActivity.class);
-                            startActivity(i);
-                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                            finish();
+            if (conn.getConnectivityStatus() > 0) {
+                if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    gps.showSettingsAlert();
+                } else {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            // This method will be executed once the timer is over
+                            // Start your app main activity
+
+                            if (status.equalsIgnoreCase("1")) {
+                                Intent i = new Intent(SplashScreen.this, HomeActivity.class);
+                                startActivity(i);
+                                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                finish();
+                            } else if (status.equalsIgnoreCase("2")) {
+                                Intent i = new Intent(SplashScreen.this, ShowMapsActivity.class);
+                                startActivity(i);
+                                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                finish();
+                            } else {
+                                Intent i = new Intent(SplashScreen.this, LoginActivity.class);
+                                startActivity(i);
+                                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                finish();
+                            }
+
+                            latitude = gps.getLatitude();
+                            longitude = gps.getLongitude();
+                            // Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
+
                         }
-                        else {
-                            Intent i = new Intent(SplashScreen.this, LoginActivity.class);
-                            startActivity(i);
-                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                            finish();
-                        }
+                    }, SPLASH_DISPLAY_LENGTH);
+                }
+            }else
+            {
+                conn.showNoInternetAlret();
+            }
 
-                        latitude = gps.getLatitude();
-                        longitude = gps.getLongitude();
-                       // Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
+            /*if (conn.getConnectivityStatus() > 0) {
+                if (gps.canGetLocation()) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            // This method will be executed once the timer is over
+                            // Start your app main activity
+
+                            if (status .equalsIgnoreCase("1"))
+                            {
+                                Intent i = new Intent(SplashScreen.this, HomeActivity.class);
+                                startActivity(i);
+                                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                finish();
+                            }else if (status.equalsIgnoreCase("2"))
+                            {
+                                Intent i = new Intent(SplashScreen.this, ShowMapsActivity.class);
+                                startActivity(i);
+                                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                finish();
+                            }
+                            else {
+                                Intent i = new Intent(SplashScreen.this, LoginActivity.class);
+                                startActivity(i);
+                                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                finish();
+                            }
+
+                            latitude = gps.getLatitude();
+                            longitude = gps.getLongitude();
+                            // Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
+
+                        }
+                    }, SPLASH_DISPLAY_LENGTH);
+                } else {
+                    // Can't get location.
+                    // GPS or network is not enabled.
+                    // Ask user to enable GPS/network in settings.
+                    gps.showSettingsAlert();
+
+                }
+            }else
+            {
+                conn.showNoInternetAlret();
+            }*/
+        }
+        else
+        {
+            if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(SplashScreen.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+
+            } else {
+                // Toast.makeText(mContext, "You need have granted permission", Toast.LENGTH_SHORT).show();
+                if (conn.getConnectivityStatus() > 0) {
+                    if (gps.canGetLocation()) {
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                // This method will be executed once the timer is over
+                                // Start your app main activity
+
+                                if (status .equalsIgnoreCase("1"))
+                                {
+                                    Intent i = new Intent(SplashScreen.this, HomeActivity.class);
+                                    startActivity(i);
+                                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                    finish();
+                                }else if (status.equalsIgnoreCase("2"))
+                                {
+                                    Intent i = new Intent(SplashScreen.this, ShowMapsActivity.class);
+                                    startActivity(i);
+                                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                    finish();
+                                }
+                                else {
+                                    Intent i = new Intent(SplashScreen.this, LoginActivity.class);
+                                    startActivity(i);
+                                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                    finish();
+                                }
+
+                                latitude = gps.getLatitude();
+                                longitude = gps.getLongitude();
+                                // Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
+
+                            }
+                        }, SPLASH_DISPLAY_LENGTH);
+                    } else {
+                        // Can't get location.
+                        // GPS or network is not enabled.
+                        // Ask user to enable GPS/network in settings.
+                        gps.showSettingsAlert();
 
                     }
-                }, SPLASH_DISPLAY_LENGTH);
-            } else {
-                // Can't get location.
-                // GPS or network is not enabled.
-                // Ask user to enable GPS/network in settings.
-                gps.showSettingsAlert();
-
-            }
-        }else
-        {
-            conn.showNoInternetAlret();
+                }else
+                {
+                    conn.showNoInternetAlret();
+                }
         }
+
+
+
+
+
     }
+    }
+
+    public static boolean isLocationEnabled(Context context) {
+        int locationMode = 0;
+        String locationProviders;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            try {
+                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+
+            } catch (Settings.SettingNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+
+        }else{
+            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !TextUtils.isEmpty(locationProviders);
+        }
+
+
     }
 
     @Override

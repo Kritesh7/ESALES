@@ -62,18 +62,17 @@
                     android:layout_gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/buttonshape"
                     android:text="Start"
                     android:textColor="@color/white"
                     android:id="@+id/startbtn"/>
 
                     <Button
+                        android:id="@+id/voucherBtn"
                         android:layout_marginTop="5dp"
                         android:elevation="10dp"
                         android:layout_gravity="center"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/buttonshape"
                         android:text="Voucher"
                         android:textColor="@color/white"
                         />
@@ -91,6 +90,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|right"/>
+            <ImageView
+                android:id="@+id/setting"
+                android:padding="@dimen/fab_margin"
+                android:src="@drawable/setting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|left"/>
         </FrameLayout>
 
     </LinearLayout>

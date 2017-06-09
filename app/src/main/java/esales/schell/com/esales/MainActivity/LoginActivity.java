@@ -1,25 +1,53 @@
 package esales.schell.com.esales.MainActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.StringRequest;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import esales.schell.com.esales.R;
+import esales.schell.com.esales.Sources.AppController;
+import esales.schell.com.esales.Sources.SettingConstant;
 import esales.schell.com.esales.Sources.SharedPrefs;
 import esales.schell.com.esales.Sources.UtilsMethods;
 
 public class LoginActivity extends AppCompatActivity {
 
     public Button logintBtn;
+    public String loginUrl = SettingConstant.BASEURL + "LoginSchellService.asmx/AppUserLogin";
+    public EditText emailTxt,passTxt;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,21 +61,170 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         logintBtn = (Button)findViewById(R.id.btn_login);
+        emailTxt = (EditText)findViewById(R.id.input_email);
+        passTxt = (EditText)findViewById(R.id.input_password);
 
         logintBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(),HomeActivity.class);
-                startActivity(i);
-                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                finish();
+
+                String AuthCode = "";
+                // Device model
+                String PhoneModel = android.os.Build.MODEL;
+
+                // Android version
+                String AndroidVersion = android.os.Build.VERSION.RELEASE;
+
+                long randomNumber = (long) ((Math.random() * 9000000) + 1000000);
+                AuthCode = String.valueOf(randomNumber);
+
+                if (emailTxt.getText().toString().equalsIgnoreCase(""))
+                {
+                    emailTxt.setError("Please enter valid User Name");
+                }else if (passTxt.getText().toString().equalsIgnoreCase(""))
+                {
+                    passTxt.setError("Please Enter Valid Password");
+                }else
+                    {
+
+                        Login_Api(emailTxt.getText().toString(),passTxt.getText().toString(),AuthCode,PhoneModel,AndroidVersion);
+                    }
 
 
-                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(LoginActivity.this,
-                        "1")));
+
+
             }
         });
+
+
+        Log.e("checking url is ", loginUrl);
+
+        // CHECKED PERMISSION
+
+        if (Build.VERSION.SDK_INT == 16 || Build.VERSION.SDK_INT == 17 ||
+                Build.VERSION.SDK_INT == 18 || Build.VERSION.SDK_INT == 19)
+        {
+
+            logintBtn.setBackgroundColor(getResources().getColor(R.color.red_700));
+        }
+        else
+            {
+                logintBtn.setBackgroundResource(R.drawable.rippileefact);
+            }
     }
+
+
+
+    public void Login_Api(final String emailinner  , final String passinner, final String authcode ,
+                          final String brandName , final String clientVersion)
+    {
+        final ProgressDialog pDialog = new ProgressDialog(LoginActivity.this);
+        pDialog.setMessage("Loading...");
+        pDialog.show();
+
+        StringRequest historyInquiry = new StringRequest(
+                Request.Method.POST, loginUrl, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                try {
+                    Log.e("Login", response);
+                    JSONArray jsonArray = new JSONArray(response.substring(response.indexOf("["),response.lastIndexOf("]") +1 ));
+
+
+                    for (int i=0 ; i<jsonArray.length();i++)
+                    {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        if (jsonObject.has("MsgNotification"))
+                        {
+                            String MsgNotification = jsonObject.getString("MsgNotification");
+                            final Toast toast = Toast.makeText(LoginActivity.this, MsgNotification, Toast.LENGTH_LONG);
+                            View view = toast.getView();
+                            view.setBackgroundResource(R.drawable.button_rounded_shape);
+                            TextView text = (TextView) view.findViewById(android.R.id.message);
+                            text.setTextColor(Color.parseColor("#ffffff"));
+                            text.setPadding(10, 10, 10, 10);
+                            toast.setGravity(Gravity.CENTER, 0, 0);
+                            toast.show();Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    toast.cancel();
+                                }
+                            }, 2000);
+
+                        }else
+                        {
+
+                            String userId = jsonObject.getString("UserID");
+                            Log.e("checking userId", userId);
+
+                            Intent ik = new Intent(getApplicationContext(),HomeActivity.class);
+                            startActivity(ik);
+                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                            finish();
+
+
+                            UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(LoginActivity.this,
+                                    "1")));
+
+                        }
+                    }
+
+                    pDialog.dismiss();
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d("Login", "Error: " + error.getMessage());
+                // Log.e("checking now ",error.getMessage());
+
+                final Toast toast = Toast.makeText(LoginActivity.this, "Server Error", Toast.LENGTH_LONG);
+                View view = toast.getView();
+                view.setBackgroundResource(R.drawable.button_rounded_shape);
+                TextView text = (TextView) view.findViewById(android.R.id.message);
+                text.setTextColor(Color.parseColor("#ffffff"));
+                text.setPadding(10, 10, 10, 10);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        toast.cancel();
+                    }
+                }, 2000);
+
+                pDialog.dismiss();
+
+
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("UserName", emailinner);
+                params.put("Password",passinner);
+                params.put("AuthCode",authcode);
+                params.put("BrandName",brandName);
+                params.put("ClientVersion",clientVersion);
+
+                // Log.e(TAG, "auth_key");
+                return params;
+            }
+
+        };
+        historyInquiry.setRetryPolicy(new DefaultRetryPolicy(SettingConstant.Retry_Time,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        AppController.getInstance().addToRequestQueue(historyInquiry, "Login");
+
+
+    }
+
 
    /* @Override
     public void onBackPressed() {
@@ -82,4 +259,7 @@ public class LoginActivity extends AppCompatActivity {
     public void onBackPressed() {
         finish();
     }
+
+
+
 }

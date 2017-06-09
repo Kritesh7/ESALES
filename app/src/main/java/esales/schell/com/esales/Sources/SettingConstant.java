@@ -8,7 +8,7 @@ public class SettingConstant {
 
     //public static final String BASEURL = "http://192.168.1.17:94/";
 
-    public static final String BASEURL = "http://skydigitalvalue.com/";
+    public static final String BASEURL = "http://192.168.1.17:94/WebApi/";
     public static final int Retry_Time = 15000;
     protected static final String SP_NAME = "myPref";
     protected static final String FirstHomePage = "First_Home_Page";

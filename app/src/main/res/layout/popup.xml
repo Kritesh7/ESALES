@@ -45,7 +45,6 @@
         android:layout_height="wrap_content">
         <Button
             android:id="@+id/saveBtn"
-            android:background="@drawable/rippileefact"
             android:textColor="@color/white"
             android:layout_width="0dp"
             android:layout_weight=".5"
@@ -54,7 +53,6 @@
         <Button
             android:id="@+id/cancelbtutton"
             android:layout_marginLeft="10dp"
-            android:background="@drawable/rippileefact"
             android:textColor="@color/white"
             android:layout_width="0dp"
             android:layout_weight=".5"

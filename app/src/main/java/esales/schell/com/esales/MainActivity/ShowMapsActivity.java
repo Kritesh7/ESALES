@@ -4,17 +4,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.os.Build;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
@@ -86,6 +89,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public String ShowDistanceDuration = "";
     public MarkerOptions options;
     public Button dayEndBtn , showListBtn;
+    public ImageView menuItemImg;
+
 
 
 
@@ -101,11 +106,71 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         context = ShowMapsActivity.this;
         MarkerPoints = new ArrayList<>();
         gpsTracker = new GPSTracker(context,ShowMapsActivity.this);
-        //custome_Toolbar = (LinearLayout)findViewById(R.id.custome_bar);
-       // backBtn = (ImageView)custome_Toolbar.findViewById(R.id.backbtn);
+        custome_Toolbar = (LinearLayout)findViewById(R.id.custome_bar);
+        menuItemImg = (ImageView)custome_Toolbar.findViewById(R.id.menu_item);
         rechedBtn = (Button)findViewById(R.id.rechecdbtn);
         dayEndBtn = (Button)findViewById(R.id.day_endBtn);
         showListBtn = (Button)findViewById(R.id.showListBtn);
+
+
+        // menu item popup
+
+        menuItemImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Creating the instance of PopupMenu
+                PopupMenu popup = new PopupMenu(ShowMapsActivity.this,v);
+                //Inflating the Popup using xml file
+                popup.getMenuInflater().inflate(R.menu.homepage_menu, popup.getMenu());
+
+                //registering popup with OnMenuItemClickListener
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                      /*  Toast.makeText(MainActivity.this,"You Clicked : " + item.getTitle(),Toast.LENGTH_SHORT).show();
+                        return true;*/
+                      int id  = item.getItemId();
+
+                        if (id == R.id.action_menu_change_pass)
+                        {
+                            Intent i = new Intent(getApplicationContext(),ChnagePasswordActivity.class);
+                            startActivity(i);
+                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                        }
+                      return true;
+                    }
+                });
+
+                popup.show();//showing popup menu
+
+        }
+        });
+
+        // check android version
+
+        if (Build.VERSION.SDK_INT == 16 || Build.VERSION.SDK_INT == 17 ||
+                Build.VERSION.SDK_INT == 18 || Build.VERSION.SDK_INT == 19)
+        {
+
+            dayEndBtn.setBackgroundColor(getResources().getColor(R.color.red_700));
+            showListBtn.setBackgroundColor(getResources().getColor(R.color.red_700));
+            rechedBtn.setBackgroundColor(getResources().getColor(R.color.red_700));
+        }
+        else
+        {
+            dayEndBtn.setBackgroundResource(R.drawable.rippileefact);
+            showListBtn.setBackgroundResource(R.drawable.rippileefact);
+            rechedBtn.setBackgroundResource(R.drawable.rippileefact);
+
+            //show error dialog if Google Play Services not available
+            if (!isGooglePlayServicesAvailable()) {
+                Log.d("onCreate", "Google Play Services not available. Ending Test case.");
+                finish();
+            }
+            else {
+                Log.d("onCreate", "Google Play Services available. Continuing.");
+            }
+        }
+
 
         showListBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,14 +198,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         });
 
 
-        //show error dialog if Google Play Services not available
-        if (!isGooglePlayServicesAvailable()) {
-            Log.d("onCreate", "Google Play Services not available. Ending Test case.");
-            finish();
-        }
-        else {
-            Log.d("onCreate", "Google Play Services available. Continuing.");
-        }
+
 
 
         sourceLat = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
@@ -207,6 +265,9 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         updaetTypeAdapter.setDropDownViewResource(R.layout.customizespinner);
         custSpiiner.setAdapter(updaetTypeAdapter);*/
 
+
+
+
     }
 
 
@@ -216,6 +277,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 .getSystemService(LAYOUT_INFLATER_SERVICE);
 
         View popupView = layoutInflater.inflate(R.layout.popup, null);
+
+        Button cancel , save;
 
         popupWindow = new PopupWindow(popupView,
                 RelativeLayout.LayoutParams.MATCH_PARENT,    RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -230,8 +293,30 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);
 
 
-        ((Button) popupView.findViewById(R.id.saveBtn))
-                .setOnClickListener(new View.OnClickListener() {
+
+
+        save = (Button)popupView.findViewById(R.id.saveBtn);
+        cancel = (Button)popupView.findViewById(R.id.cancelbtutton);
+
+        // checked permission
+
+        if (Build.VERSION.SDK_INT == 16 || Build.VERSION.SDK_INT == 17 ||
+                Build.VERSION.SDK_INT == 18 || Build.VERSION.SDK_INT == 19)
+        {
+
+            save.setBackgroundColor(getResources().getColor(R.color.red_700));
+            cancel.setBackgroundColor(getResources().getColor(R.color.red_700));
+        }
+        else
+        {
+            save.setBackgroundResource(R.drawable.rippileefact);
+            cancel.setBackgroundResource(R.drawable.rippileefact);
+
+
+        }
+
+        /*((Button) popupView.findViewById(R.id.saveBtn))*/
+        save .setOnClickListener(new View.OnClickListener() {
 
                     public void onClick(View arg0) {
 
@@ -313,8 +398,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
                 });
 
-        ((Button) popupView.findViewById(R.id.cancelbtutton))
-                .setOnClickListener(new View.OnClickListener() {
+
+        cancel.setOnClickListener(new View.OnClickListener() {
 
                     public void onClick(View arg0) {
 
