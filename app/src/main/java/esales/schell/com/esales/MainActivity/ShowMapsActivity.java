@@ -66,6 +66,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
     private GoogleMap mMap;
     public double lat,log;
+    public String vechileType="",startTime = "", sourceName = "";
     public Spinner custSpiiner;
     public LinearLayout custome_Toolbar;
     public ImageView backBtn;
@@ -220,6 +221,15 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         {
             lat = i.getDoubleExtra("lat",-34);
             log = i.getDoubleExtra("log",151);
+            vechileType = i.getStringExtra("vechile_Type");
+            startTime = i.getStringExtra("start_Time");
+            sourceName = i.getStringExtra("Source_Name");
+
+            Log.e("intent lat",lat + "null");
+            Log.e("intent log",log + "null");
+            Log.e("intent start Time",startTime + "null");
+            Log.e("intent Source Name",sourceName + "null");
+
         }
 
 

@@ -56,14 +56,19 @@
             android:label="@string/title_activity_show_maps"
             android:screenOrientation="portrait" />
         <activity
-            android:screenOrientation="portrait"
             android:name=".MainActivity.ShowListActivity"
             android:label="@string/title_activity_show_list"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".MainActivity.ChnagePasswordActivity"
+            android:label="@string/title_activity_chnage_password"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:screenOrientation="portrait"
-            android:name=".MainActivity.ChnagePasswordActivity"
-            android:label="@string/title_activity_chnage_password"
+            android:name=".MainActivity.ForgetPasswordActivity"
+            android:label="@string/title_activity_forget_password"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

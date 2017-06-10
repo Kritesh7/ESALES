@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:id="@+id/main_pop_up_layout">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_margin="5dp"
+        android:id="@+id/serchlay"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Vehicle Type"
+            android:textColor="@color/red_800"/>
+        <RadioGroup
+            android:id="@+id/popupradio"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <RadioButton
+                android:id="@+id/two_wheeler"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Two Wheeler"/>
+            <RadioButton
+                android:id="@+id/four_wheeler"
+                android:layout_marginLeft="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Four Wheeler"/>
+        </RadioGroup>
+
+        <LinearLayout
+            android:id="@+id/adderass_lay"
+            android:layout_marginTop="5dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.design.widget.TextInputLayout
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:textColorHint="#800200">
+
+                <EditText
+                    android:id="@+id/input_add"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Address"
+                    android:inputType="textMultiLine"
+                    android:textColor="@color/red_700" />
+            </android.support.design.widget.TextInputLayout>
+
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/tooltip_layout"
+                android:padding="5dp"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/homeTxt"
+                android:textSize="16dp"
+                android:textColor="@color/red_800"
+                android:layout_marginTop="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Home"/>
+            <TextView
+                android:id="@+id/officeTxt"
+                android:textSize="16dp"
+                android:textColor="@color/red_800"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Office"/>
+
+            </LinearLayout>
+
+            <!--<LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Manuel Select"/>
+            </LinearLayout>-->
+        </LinearLayout>
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/lay"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/first_popup_saveBtn"
+            android:textColor="@color/white"
+            android:layout_width="0dp"
+            android:layout_weight=".5"
+            android:layout_height="wrap_content"
+            android:text="Ok"/>
+        <Button
+            android:id="@+id/first_popup_cancelbtutton"
+            android:layout_marginLeft="10dp"
+            android:textColor="@color/white"
+            android:layout_width="0dp"
+            android:layout_weight=".5"
+            android:layout_height="wrap_content"
+            android:text="Cancel"/>
+
+    </LinearLayout>
+</LinearLayout>

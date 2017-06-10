@@ -14,7 +14,7 @@ public class SettingConstant {
     protected static final String FirstHomePage = "First_Home_Page";
     protected static final String SecondHomePage = "Second_Home_Page";
     protected static final String LoginStatus = "Login Status";
-    protected static final String CustomerId = "CustomerId";
+    protected static final String UserId = "UserId";
     protected static final String CustomerName = "CustomerName";
     protected static final String AuthCode = "AuthCode";
     protected static final String DestinationLog = "Destination_Lognitude";

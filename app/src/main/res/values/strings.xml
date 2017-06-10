@@ -6,4 +6,5 @@
     <string name="title_activity_show_maps">Map</string>
     <string name="title_activity_show_list">ShowListActivity</string>
     <string name="title_activity_chnage_password">ChnagePasswordActivity</string>
+    <string name="title_activity_forget_password">ForgetPasswordActivity</string>
 </resources>

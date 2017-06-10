@@ -38,6 +38,7 @@ import java.util.Map;
 
 import esales.schell.com.esales.R;
 import esales.schell.com.esales.Sources.AppController;
+import esales.schell.com.esales.Sources.ConnectionDetector;
 import esales.schell.com.esales.Sources.SettingConstant;
 import esales.schell.com.esales.Sources.SharedPrefs;
 import esales.schell.com.esales.Sources.UtilsMethods;
@@ -47,6 +48,8 @@ public class LoginActivity extends AppCompatActivity {
     public Button logintBtn;
     public String loginUrl = SettingConstant.BASEURL + "LoginSchellService.asmx/AppUserLogin";
     public EditText emailTxt,passTxt;
+    public TextView forgetPassTxt;
+    public ConnectionDetector conn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,9 +63,23 @@ public class LoginActivity extends AppCompatActivity {
             window.setStatusBarColor(this.getResources().getColor(R.color.red_900));
         }
 
+        conn = new ConnectionDetector(LoginActivity.this);
+
         logintBtn = (Button)findViewById(R.id.btn_login);
         emailTxt = (EditText)findViewById(R.id.input_email);
         passTxt = (EditText)findViewById(R.id.input_password);
+        forgetPassTxt = (TextView)findViewById(R.id.forget_pass_txt);
+
+        forgetPassTxt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent i = new Intent(getApplicationContext(),ForgetPasswordActivity.class);
+                startActivity(i);
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+
+            }
+        });
 
         logintBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,7 +104,12 @@ public class LoginActivity extends AppCompatActivity {
                 }else
                     {
 
-                        Login_Api(emailTxt.getText().toString(),passTxt.getText().toString(),AuthCode,PhoneModel,AndroidVersion);
+                        if (conn.getConnectivityStatus()>0) {
+                            Login_Api(emailTxt.getText().toString(), passTxt.getText().toString(), AuthCode, PhoneModel, AndroidVersion);
+                        }else
+                            {
+                                conn.showNoInternetAlret();
+                            }
                     }
 
 
@@ -157,6 +179,7 @@ public class LoginActivity extends AppCompatActivity {
                         {
 
                             String userId = jsonObject.getString("UserID");
+                            String authCodeinner = jsonObject.getString("AuthCode");
                             Log.e("checking userId", userId);
 
                             Intent ik = new Intent(getApplicationContext(),HomeActivity.class);
@@ -167,6 +190,10 @@ public class LoginActivity extends AppCompatActivity {
 
                             UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(LoginActivity.this,
                                     "1")));
+
+                            UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setUserId(LoginActivity.this,
+                                    userId)));
+                            UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setAuthCode(LoginActivity.this, authCodeinner)));
 
                         }
                     }

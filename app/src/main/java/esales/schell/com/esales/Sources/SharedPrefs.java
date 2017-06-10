@@ -20,10 +20,10 @@ public class SharedPrefs
         SharedPreferences sp = getSetting(context);
         return  sp.getString(SettingConstant.LoginStatus, null);
     }
-    public static String getCustomerId(Context context)
+    public static String getUserId(Context context)
     {
         SharedPreferences sp = getSetting(context);
-        return  sp.getString(SettingConstant.CustomerId, null);
+        return  sp.getString(SettingConstant.UserId, null);
     }
     public static String getAuthCode(Context context)
     {
@@ -50,11 +50,11 @@ public class SharedPrefs
         editor.putString(SettingConstant.CustomerName, authKey);
         return editor.commit();
     }
-    public static boolean setCustomerId(Context context, String authKey)
+    public static boolean setUserId(Context context, String authKey)
     {
         SharedPreferences sp = getSetting(context);
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString(SettingConstant.CustomerId, authKey);
+        editor.putString(SettingConstant.UserId, authKey);
         return editor.commit();
     }
 
