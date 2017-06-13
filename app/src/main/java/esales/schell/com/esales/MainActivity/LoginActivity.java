@@ -2,6 +2,7 @@ package esales.schell.com.esales.MainActivity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -36,6 +37,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import esales.schell.com.esales.DataBase.MasterDataBase;
 import esales.schell.com.esales.R;
 import esales.schell.com.esales.Sources.AppController;
 import esales.schell.com.esales.Sources.ConnectionDetector;
@@ -50,6 +52,7 @@ public class LoginActivity extends AppCompatActivity {
     public EditText emailTxt,passTxt;
     public TextView forgetPassTxt;
     public ConnectionDetector conn;
+    public MasterDataBase masterDataBase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +72,8 @@ public class LoginActivity extends AppCompatActivity {
         emailTxt = (EditText)findViewById(R.id.input_email);
         passTxt = (EditText)findViewById(R.id.input_password);
         forgetPassTxt = (TextView)findViewById(R.id.forget_pass_txt);
+
+        masterDataBase = new MasterDataBase(LoginActivity.this);
 
         forgetPassTxt.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -153,7 +158,8 @@ public class LoginActivity extends AppCompatActivity {
                     Log.e("Login", response);
                     JSONArray jsonArray = new JSONArray(response.substring(response.indexOf("["),response.lastIndexOf("]") +1 ));
 
-
+                    //delete record in database
+                    masterDataBase.deleteRecord();
                     for (int i=0 ; i<jsonArray.length();i++)
                     {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -165,7 +171,7 @@ public class LoginActivity extends AppCompatActivity {
                             view.setBackgroundResource(R.drawable.button_rounded_shape);
                             TextView text = (TextView) view.findViewById(android.R.id.message);
                             text.setTextColor(Color.parseColor("#ffffff"));
-                            text.setPadding(10, 10, 10, 10);
+                            text.setPadding(20, 20, 20, 20);
                             toast.setGravity(Gravity.CENTER, 0, 0);
                             toast.show();Handler handler = new Handler();
                             handler.postDelayed(new Runnable() {
@@ -180,7 +186,20 @@ public class LoginActivity extends AppCompatActivity {
 
                             String userId = jsonObject.getString("UserID");
                             String authCodeinner = jsonObject.getString("AuthCode");
-                            Log.e("checking userId", userId);
+                            JSONArray vecheleType = jsonObject.getJSONArray("VehicleType");
+                            for (int j = 0 ; j<vecheleType.length(); j++)
+                            {
+                                JSONObject vechelObj = vecheleType.getJSONObject(j);
+                                String VehicleTypeID = vechelObj.getString("VehicleTypeID");
+                                String AllowedRate = vechelObj.getString("AllowedRate");
+                                String VehicleTypeName = vechelObj.getString("VehicleTypeName");
+                                Log.e("VehicleTypeID",VehicleTypeID);
+                                Log.e("AllowedRate",AllowedRate);
+
+                                // add data in database
+                                masterDataBase.setVecheleTypeDate(VehicleTypeID,VehicleTypeName,AllowedRate,userId);
+
+                            }
 
                             Intent ik = new Intent(getApplicationContext(),HomeActivity.class);
                             startActivity(ik);
@@ -195,12 +214,17 @@ public class LoginActivity extends AppCompatActivity {
                                     userId)));
                             UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setAuthCode(LoginActivity.this, authCodeinner)));
 
+
+
                         }
+
+
                     }
 
                     pDialog.dismiss();
 
                 } catch (JSONException e) {
+                    Log.e("checking json excption" , e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -215,7 +239,7 @@ public class LoginActivity extends AppCompatActivity {
                 view.setBackgroundResource(R.drawable.button_rounded_shape);
                 TextView text = (TextView) view.findViewById(android.R.id.message);
                 text.setTextColor(Color.parseColor("#ffffff"));
-                text.setPadding(10, 10, 10, 10);
+                text.setPadding(20, 20, 20, 20);
                 toast.setGravity(Gravity.CENTER, 0, 0);
                 toast.show();Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
@@ -239,7 +263,7 @@ public class LoginActivity extends AppCompatActivity {
                 params.put("BrandName",brandName);
                 params.put("ClientVersion",clientVersion);
 
-                // Log.e(TAG, "auth_key");
+                Log.e("Parms", params.toString());
                 return params;
             }
 

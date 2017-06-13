@@ -16,6 +16,7 @@ import java.util.ArrayList;
 
 import esales.schell.com.esales.Interface.CustomerNameInterface;
 import esales.schell.com.esales.MainActivity.ShowMapsActivity;
+import esales.schell.com.esales.Model.CustomerDetailsModel;
 import esales.schell.com.esales.R;
 
 /**
@@ -26,12 +27,12 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
 {
 
     public Context context;
-    public ArrayList<String> list = new ArrayList<>();
+    public ArrayList<CustomerDetailsModel> list = new ArrayList<>();
     public ValueFilter valueFilter;
-    public ArrayList<String> filterlistlist = new ArrayList<>();
+    public ArrayList<CustomerDetailsModel> filterlistlist = new ArrayList<>();
     public CustomerNameInterface anInterface;
 
-    public CustomerListAdapter(Context context , ArrayList<String> list , CustomerNameInterface anInterface)
+    public CustomerListAdapter(Context context , ArrayList<CustomerDetailsModel> list , CustomerNameInterface anInterface)
     {
         this.context = context;
         this.list = list;
@@ -49,14 +50,18 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
 
-        holder.custName.setText(list.get(position));
+
+        final CustomerDetailsModel model = list.get(position);
 
 
+        holder.custName.setText(model.getCustomerName());
         holder.custName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                anInterface.getCustomerName(list.get(position));
+                anInterface.getCustomerName(model.getCustomerName());
+                anInterface.getCustomerId(model.getCustomerId());
+
 
             }
         });
@@ -106,12 +111,12 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
 
                 for (int i =0 ; i<filterlistlist.size(); i++)
                 {
-                    if (filterlistlist.get(i)
+                    if (filterlistlist.get(i).getCustomerName()
                             .contains(constraint.toString()))
                     {
 
 
-                        filterList.add( filterlistlist.get(i));
+                        filterList.add( filterlistlist.get(i).getCustomerName());
                     }
 
 
@@ -130,30 +135,9 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
 
-            list = (ArrayList<String>)results.values;
+            list = (ArrayList<CustomerDetailsModel>)results.values;
             notifyDataSetChanged();
         }
     }
 
-   /* public class CustomeFilter extends Filter
-    {
-        private CustomerListAdapter adapter;
-
-        public CustomeFilter(CustomerListAdapter adapter)
-        {
-            super();
-            this.adapter = adapter;
-        }
-
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-
-            return null;
-        }
-
-        @Override
-        protected void publishResults(CharSequence constraint, FilterResults results) {
-
-        }
-    }*/
 }

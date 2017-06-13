@@ -2,6 +2,7 @@ package esales.schell.com.esales.Sources;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -62,7 +63,16 @@ public class ConnectionDetector extends Activity
         internet_dialog.setButton("Setting", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 internet_dialog.dismiss();
-                _context.startActivity(new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS));
+                //_context.startActivity(new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS));
+
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                intent.setComponent(new ComponentName("com.android.settings",
+                        "com.android.settings.Settings$DataUsageSummaryActivity"));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                _context.startActivity(intent);
+               /* Intent intent = new Intent(Intent.ACTION_MAIN);
+                intent.setClassName("com.android.phone","com.android.phone.NetworkSetting");
+                startActivity(intent);*/
             }
         });
         // Showing Alert Message

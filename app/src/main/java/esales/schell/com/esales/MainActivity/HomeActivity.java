@@ -1,7 +1,10 @@
 package esales.schell.com.esales.MainActivity;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Build;
@@ -49,9 +52,13 @@ import java.util.List;
 import java.util.Locale;
 
 import esales.schell.com.esales.Adapter.CustomerListAdapter;
+import esales.schell.com.esales.DataBase.MasterDataBase;
+import esales.schell.com.esales.DataBase.VechileTypeTable;
+import esales.schell.com.esales.Model.VehicleTypeModel;
 import esales.schell.com.esales.R;
 import esales.schell.com.esales.Sources.GPSTracker;
 import esales.schell.com.esales.Sources.LocationAddress;
+import esales.schell.com.esales.Sources.MyAsyncTask;
 import esales.schell.com.esales.Sources.SharedPrefs;
 import esales.schell.com.esales.Sources.UtilsMethods;
 
@@ -62,10 +69,16 @@ public class HomeActivity extends AppCompatActivity {
     public Context context;
     public ImageView logoutBtn , settingBtn;
     public PopupWindow popupWindow;
-    public String vechileType ="2";
+    public String vechileType = "";
     public   boolean visible;
     public  double lat,log;
     public String startTime="";
+    public MasterDataBase masterDataBase;
+    public String userIdString = "";
+    public ArrayList<VehicleTypeModel> vehicleTypeList = new ArrayList<>();
+    public ProgressDialog pDialog;
+    private final int SPLASH_DISPLAY_LENGTH = 5000;
+    public MyAsyncTask myAsyncTask;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,11 +93,15 @@ public class HomeActivity extends AppCompatActivity {
 
 
         context = HomeActivity.this;
+
+        masterDataBase = new MasterDataBase(context);
         gps = new GPSTracker(context,HomeActivity.this);
+
 
         logoutBtn = (ImageView)findViewById(R.id.logoutBtn);
         voucherBtn = (Button)findViewById(R.id.voucherBtn);
         settingBtn = (ImageView)findViewById(R.id.setting);
+        userIdString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getUserId(HomeActivity.this)));
         settingBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -140,6 +157,11 @@ public class HomeActivity extends AppCompatActivity {
 
                 //get current Time
 
+                if (vehicleTypeList.size()>0)
+                {
+                    vehicleTypeList.clear();
+                }
+
                 // get address
                 LocationAddress locationAddress = new LocationAddress();
                 locationAddress.getAddressFromLocation(lat,log,getApplicationContext(),
@@ -179,8 +201,7 @@ public class HomeActivity extends AppCompatActivity {
 
         Button cancel , save;
         RadioGroup radioGroup;
-        RadioButton firstBtn,secondBtn;
-        final LinearLayout toolTipLay ,addlay,mailay;
+        final LinearLayout toolTipLay ,addlay;
         final EditText addTxt;
         final TextView homeTxt,officeTxt;
 
@@ -196,29 +217,69 @@ public class HomeActivity extends AppCompatActivity {
         save = (Button)popupView.findViewById(R.id.first_popup_saveBtn);
         cancel = (Button)popupView.findViewById(R.id.first_popup_cancelbtutton);
         radioGroup = (RadioGroup)popupView.findViewById(R.id.popupradio);
-        firstBtn = (RadioButton)popupView.findViewById(R.id.two_wheeler);
-        secondBtn = (RadioButton)popupView.findViewById(R.id.four_wheeler);
         addTxt = (EditText)popupView.findViewById(R.id.input_add);
         toolTipLay = (LinearLayout)popupView.findViewById(R.id.tooltip_layout);
         addlay = (LinearLayout)popupView.findViewById(R.id.adderass_lay);
         homeTxt = (TextView)popupView.findViewById(R.id.homeTxt);
         officeTxt = (TextView)popupView.findViewById(R.id.officeTxt);
-        mailay = (LinearLayout)popupView.findViewById(R.id.main_pop_up_layout);
 
-        // click btn and find vechile Type
-        firstBtn.setChecked(true);
+        // data is show to database
+        Cursor cursor = masterDataBase.getVecheleTypeData(userIdString);
+
+        if (cursor !=null && cursor.getCount()>0)
+        {
+            if (cursor.moveToFirst())
+            {
+                do
+                {
+                    String vehcleTypeName = cursor.getString(cursor.getColumnIndex(VechileTypeTable.VechileTypeName));
+                    String vechleTypeRate = cursor.getString(cursor.getColumnIndex(VechileTypeTable.vechileRate));
+                    String vechleTypeId = cursor.getString(cursor.getColumnIndex(VechileTypeTable.vechileTypeId));
+
+                    // add data in list
+                    vehicleTypeList.add(new VehicleTypeModel(vechleTypeId,vechleTypeRate,vehcleTypeName));
+
+                    // checked Data
+                    Log.e("vehcleTypeName",vehcleTypeName);
+                    Log.e("vechleTypeRate",vechleTypeRate);
+                    Log.e("vechleTypeId",vechleTypeId);
+                    Log.e("vehicleTypeList size",vehicleTypeList.size()+"");
+
+                }while (cursor.moveToNext());
+            }
+        }
+
+
+        // dynamically  create radio button
+        RadioGroup.LayoutParams rprms;
+        RadioButton radioButton = null;
+        for (int i=0 ; i<vehicleTypeList.size(); i++)
+        {
+            radioButton = new RadioButton(this);
+            radioButton.setText(vehicleTypeList.get(i).getVehicleTypeName());
+            radioButton.setId(Integer.parseInt(vehicleTypeList.get(i).getVehicleTypeId()));
+            rprms= new RadioGroup.LayoutParams(RadioGroup.LayoutParams.WRAP_CONTENT, RadioGroup.LayoutParams.WRAP_CONTENT);
+            radioGroup.addView(radioButton,rprms);
+        }
+
+        // set checked listner
+        ((RadioButton)radioGroup.getChildAt(0)).setChecked(true);
+        vechileType = vehicleTypeList.get(0).getVehicleTypeId();
+        Log.e("first Type---------",vechileType);
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
 
-                if (checkedId == R.id.two_wheeler)
+                Log.e("checked id is ", checkedId+" null");
+
+                if (checkedId == Integer.parseInt(vehicleTypeList.get(0).getVehicleTypeId()))
                 {
-                    vechileType = "2";
-                    Log.e("first Type","2");
-                }else if (checkedId == R.id.four_wheeler)
+                    vechileType = vehicleTypeList.get(0).getVehicleTypeId();
+                    Log.e("first Type",vechileType);
+                }else if (checkedId == Integer.parseInt(vehicleTypeList.get(1).getVehicleTypeId()))
                 {
-                    vechileType = "4";
-                    Log.e("second Type","4");
+                    vechileType = vehicleTypeList.get(1).getVehicleTypeId();
+                    Log.e("second Type",vechileType);
                 }
             }
         });
@@ -246,12 +307,12 @@ public class HomeActivity extends AppCompatActivity {
                 {
                     TransitionManager.beginDelayedTransition(addlay);
                     visible = !visible;
-                    toolTipLay.setVisibility(View.GONE);
+                    toolTipLay.setVisibility(View.VISIBLE);
                 }else
                     {
                         TransitionManager.beginDelayedTransition(addlay);
                         visible = !visible;
-                        toolTipLay.setVisibility(View.VISIBLE);
+                        toolTipLay.setVisibility(View.GONE);
                     }
             }
 
@@ -304,28 +365,67 @@ public class HomeActivity extends AppCompatActivity {
                 {
                     addTxt.setError("Please fill the address");
                 }else {
-                    startTime = getCurrentTime();
-                    Intent i = new Intent(getApplicationContext(), ShowMapsActivity.class);
-                    i.putExtra("lat",lat);
-                    i.putExtra("log",log);
-                    i.putExtra("vechile_Type",vechileType);
-                    i.putExtra("Source_Name", addTxt.getText().toString());
-                    i.putExtra("start_Time",startTime);
-                    startActivity(i);
-                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                    finish();
 
-                    UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLat(HomeActivity.this,
-                            String.valueOf(lat))));
-                    UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLog(HomeActivity.this,
-                            String.valueOf(log))));
+                    pDialog = new ProgressDialog(HomeActivity.this);
+                    pDialog.setMessage("Loading...");
+                    pDialog.setCancelable(false);
+                    pDialog.show();
 
-                 /*   Toast.makeText(getApplicationContext(), "Your current time  is - \nLat: " + getCurrentTime(), Toast.LENGTH_LONG).show();
-*/
-                    UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(HomeActivity.this,
-                            "2")));
+                    // checked lat log get or not
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            if (lat == 0.0)
+                            {
+                                final Toast toast = Toast.makeText(HomeActivity.this, "Please Try Again lat log is not get", Toast.LENGTH_LONG);
+                                View view = toast.getView();
+                                view.setBackgroundResource(R.drawable.button_rounded_shape);
+                                TextView text = (TextView) view.findViewById(android.R.id.message);
+                                text.setTextColor(Color.parseColor("#ffffff"));
+                                text.setPadding(20, 20, 20, 20);
+                                toast.setGravity(Gravity.CENTER, 0, 0);
+                                toast.show();
+                                Handler handler = new Handler();
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        toast.cancel();
+                                    }
+                                }, 2000);
+                            }else
+                            {
+                                pDialog.dismiss();
+                                startTime = getCurrentTime();
+                                Log.e("Start Time is", startTime);
+                                Intent i = new Intent(getApplicationContext(), ShowMapsActivity.class);
+                                i.putExtra("lat", lat);
+                                i.putExtra("log", log);
+                                startActivity(i);
+                                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                finish();
+
+                                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLat(HomeActivity.this,
+                                        String.valueOf(lat))));
+                                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLog(HomeActivity.this,
+                                        String.valueOf(log))));
+                                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setVechileType(HomeActivity.this,
+                                        String.valueOf(vechileType))));
+                                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStartTime(HomeActivity.this,
+                                        String.valueOf(startTime))));
+                                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceName(HomeActivity.this,
+                                        String.valueOf(addTxt.getText().toString()))));
+                                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(HomeActivity.this,
+                                        "2")));
+                                popupWindow.dismiss();
+                            }
+
+                        }
+                    }, SPLASH_DISPLAY_LENGTH);
+
                 }
-                popupWindow.dismiss();
+
             }
 
         });
@@ -342,7 +442,7 @@ public class HomeActivity extends AppCompatActivity {
     //get current time
     public static String getCurrentTime() {
         //date output format
-        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        DateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy kk:mm:ss");
         Calendar cal = Calendar.getInstance();
         return dateFormat.format(cal.getTime());
     }// en
@@ -366,7 +466,7 @@ public class HomeActivity extends AppCompatActivity {
             // call Popup window
             callPopup(locationAddress);
 
-            Toast.makeText(getApplicationContext(), locationAddress+"", Toast.LENGTH_SHORT).show();
+           // Toast.makeText(getApplicationContext(), locationAddress+"", Toast.LENGTH_SHORT).show();
         }
     }
 

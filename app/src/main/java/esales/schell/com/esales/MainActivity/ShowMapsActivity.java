@@ -1,10 +1,12 @@
 package esales.schell.com.esales.MainActivity;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Build;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -28,8 +30,14 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdate;
@@ -44,16 +52,28 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import esales.schell.com.esales.Adapter.CustomerListAdapter;
 import esales.schell.com.esales.Interface.CustomerNameInterface;
 import esales.schell.com.esales.Interface.RetrofitMaps;
+import esales.schell.com.esales.Model.CustomerDetailsModel;
 import esales.schell.com.esales.Model.MapRouteModel.Example;
 import esales.schell.com.esales.R;
+import esales.schell.com.esales.Sources.AppController;
 import esales.schell.com.esales.Sources.GPSTracker;
 import esales.schell.com.esales.Sources.RecyclerItemClickListener;
+import esales.schell.com.esales.Sources.SettingConstant;
 import esales.schell.com.esales.Sources.SharedPrefs;
 import esales.schell.com.esales.Sources.UtilsMethods;
 import retrofit.Call;
@@ -65,12 +85,12 @@ import retrofit.Retrofit;
 public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCallback,CustomerNameInterface {
 
     private GoogleMap mMap;
-    public double lat,log;
+    public double lat,log , mysynclat,mysynclog;
     public String vechileType="",startTime = "", sourceName = "";
     public Spinner custSpiiner;
     public LinearLayout custome_Toolbar;
     public ImageView backBtn;
-    public ArrayList<String> custNameList = new ArrayList<>();
+    public ArrayList<CustomerDetailsModel> custNameList = new ArrayList<>();
     public PopupWindow popupWindow;
     public RecyclerView recyelerCustomerList;
     public CustomerListAdapter adapter;
@@ -80,8 +100,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public boolean flag = true;
     public GPSTracker gpsTracker;
     public String sourceLat="";
-    public String sourceLog="";
-
+    public String sourceLog="", destinationName="", customerId = "", travelDistance = "";
+    public  String authCodeString = "", userIdString = "";
     public LatLng origin;
     public LatLng dest;
     public LatLng point;
@@ -91,6 +111,10 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public MarkerOptions options;
     public Button dayEndBtn , showListBtn;
     public ImageView menuItemImg;
+    private final int SPLASH_DISPLAY_LENGTH = 5000;
+    public ProgressDialog pDialog;
+    public String userDetailUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppddlCustomer";
+    public String reachedPointAPIUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppEmployeeTravelExpenseInsUpdt";
 
 
 
@@ -115,7 +139,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
 
         // menu item popup
-
         menuItemImg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -147,7 +170,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         });
 
         // check android version
-
         if (Build.VERSION.SDK_INT == 16 || Build.VERSION.SDK_INT == 17 ||
                 Build.VERSION.SDK_INT == 18 || Build.VERSION.SDK_INT == 19)
         {
@@ -198,85 +220,47 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
             }
         });
 
-
-
-
-
         sourceLat = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
         sourceLog =  UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));
 
+        // all details start postion
+        /*lat = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
+        log = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));*/
+        vechileType = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getVechileType(ShowMapsActivity.this)));
+        startTime = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getStartTime(ShowMapsActivity.this)));
+        sourceName = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceName(ShowMapsActivity.this)));
+        authCodeString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getAuthCode(ShowMapsActivity.this)));
+        userIdString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getUserId(ShowMapsActivity.this)));
+
+        // checkin data
 
 
-       // custSpiiner = (Spinner)custome_Toolbar.findViewById(R.id.customer_name_spinner);
-
-       /* backBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });*/
+        Log.e("vechileType",vechileType);
+        Log.e("startTime",startTime);
+        Log.e("sourceName",sourceName);
+        Log.e("authCodeString",authCodeString);
+        Log.e("userIdString",userIdString);
 
         Intent i = getIntent();
         if (i!=null)
         {
             lat = i.getDoubleExtra("lat",-34);
             log = i.getDoubleExtra("log",151);
-            vechileType = i.getStringExtra("vechile_Type");
+          /*  mysynclat = i.getDoubleExtra("calculated_Lat",-28.54545);
+            mysynclog = i.getDoubleExtra("calculated_Lon", -77.4546);*/
+           /* vechileType = i.getStringExtra("vechile_Type");
             startTime = i.getStringExtra("start_Time");
             sourceName = i.getStringExtra("Source_Name");
 
             Log.e("intent lat",lat + "null");
             Log.e("intent log",log + "null");
             Log.e("intent start Time",startTime + "null");
-            Log.e("intent Source Name",sourceName + "null");
+            Log.e("intent Source Name",sourceName + "null");*/
 
+           /* Log.e("mysynclat",mysynclat + "null");
+            Log.e("mysynclog",mysynclog + "null");
+*/
         }
-
-
-       /* rechedBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                sourceLat = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
-                sourceLog =  UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));
-
-
-                    if (!rechedBtn.getText().toString().equalsIgnoreCase("Reached")) {
-
-                        mMap.clear();
-                        MarkerPoints.clear();
-                        MarkerPoints = new ArrayList<>();
-
-
-
-                    }else
-                        {
-
-                        }
-
-            }
-        });*/
-
-        //spinner work
-
-     /*   if (custNameList.size()>0)
-        {
-            custNameList.clear();
-        }
-
-
-
-        //change spinner arrow color
-
-        custSpiiner.getBackground().setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_ATOP);
-
-        ArrayAdapter<String> updaetTypeAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.customizespinner,
-                custNameList);
-        updaetTypeAdapter.setDropDownViewResource(R.layout.customizespinner);
-        custSpiiner.setAdapter(updaetTypeAdapter);*/
-
-
-
 
     }
 
@@ -334,30 +318,28 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                         rechedBtn.setText("Restart");
                         flag = false;
 
-                        double dstLat = gpsTracker.getLatitude();
-                        double dstLog = gpsTracker.getLongitude();
 
-                      /*  double dstLat = 27.1767;
-                        double dstLog = 78.0081;*/
+                        final double dstLat = gpsTracker.getLatitude();
+                        final double dstLog = gpsTracker.getLongitude();
 
-
-                        double srcLat = Double.parseDouble(sourceLat);
-                        double srcLog = Double.parseDouble(sourceLog);
+                       /* final double dstLat = 27.1767;
+                        final double dstLog = 78.0081;*/
+                        final double srcLat = Double.parseDouble(sourceLat);
+                        final double srcLog = Double.parseDouble(sourceLog);
 
                         UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLat(ShowMapsActivity.this, String.valueOf(dstLat))));
                         UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLog(ShowMapsActivity.this, String.valueOf(dstLog))));
 
-                        Log.e("checking srclat is :" ,srcLat + " null");
-                        Log.e("checking srcLog is :" ,srcLog + " null");
-                        Log.e("checking dstLat is :" ,dstLat + " null");
-                        Log.e("checking dstLog is :" ,dstLog + " null");
+                        Log.e("checking srclat is :", srcLat + " null");
+                        Log.e("checking srcLog is :", srcLog + " null");
+                        Log.e("checking dstLat is :", dstLat + " null");
+                        Log.e("checking dstLog is :", dstLog + " null");
 
 
+                        origin = new LatLng(srcLat, srcLog);
+                        dest = new LatLng(dstLat, dstLog);
 
-                        origin = new LatLng(srcLat,srcLog);
-                        dest = new LatLng(dstLat,dstLog);
-
-                        point = new LatLng(dstLat,dstLog);
+                        point = new LatLng(dstLat, dstLog);
                         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, 17.0f);
                         mMap.animateCamera(cameraUpdate);
 
@@ -397,13 +379,62 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
 
 
-                        build_retrofit_and_get_response("driving");
+                        // wait until to get lat log
+                        if (destinationName.equalsIgnoreCase("")) {
+                            final Toast toast = Toast.makeText(ShowMapsActivity.this, "Please Select Customer", Toast.LENGTH_LONG);
+                            View view = toast.getView();
+                            view.setBackgroundResource(R.drawable.button_rounded_shape);
+                            TextView text = (TextView) view.findViewById(android.R.id.message);
+                            text.setTextColor(Color.parseColor("#ffffff"));
+                            text.setPadding(20, 20, 20, 20);
+                            toast.setGravity(Gravity.CENTER, 0, 0);
+                            toast.show();
+                            Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    toast.cancel();
+                                }
+                            }, 2000);
 
+                        } else {
+                            pDialog = new ProgressDialog(ShowMapsActivity.this);
+                            pDialog.setMessage("Loading...");
+                            pDialog.setCancelable(false);
+                            pDialog.show();
 
-                        popupWindow.dismiss();
+                            // checked lat log is get or not
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
 
+                                    if (dstLat == 0.0)
+                                    {
+                                        final Toast toast = Toast.makeText(ShowMapsActivity.this, "Please Try Again lat log is not get", Toast.LENGTH_LONG);
+                                        View view = toast.getView();
+                                        view.setBackgroundResource(R.drawable.button_rounded_shape);
+                                        TextView text = (TextView) view.findViewById(android.R.id.message);
+                                        text.setTextColor(Color.parseColor("#ffffff"));
+                                        text.setPadding(20, 20, 20, 20);
+                                        toast.setGravity(Gravity.CENTER, 0, 0);
+                                        toast.show();
+                                        Handler handler = new Handler();
+                                        handler.postDelayed(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                toast.cancel();
+                                            }
+                                        }, 2000);
+                                    }else
+                                    {
+                                        build_retrofit_and_get_response("driving", String.valueOf(srcLat), String.valueOf(srcLog),
+                                                String.valueOf(dstLat), String.valueOf(dstLog));
+                                    }
 
+                                }
+                            }, SPLASH_DISPLAY_LENGTH);
 
+                        }
                     }
 
                 });
@@ -420,33 +451,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         serchTxt = (SearchView)popupView.findViewById(R.id.editserchview);
          recyelerCustomerList= (RecyclerView)popupView.findViewById(R.id.recyeler_customer_list);
 
-
-        if (custNameList.size()>0)
-        {
-            custNameList.clear();
-        }
-        custNameList.add("Himanshu");
-        custNameList.add("Rahul singh updya");
-        custNameList.add("Pradeep Jaiswal");
-        custNameList.add("Harsh jain");
-        custNameList.add("Sunil Jaiswal");
-        custNameList.add("Sunil Jaiswal");
-        custNameList.add("Sunil Jaiswal");
-        custNameList.add("Sunil Jaiswal");
-        custNameList.add("Sunil Jaiswal");
-        custNameList.add("Sunil Jaiswal");
-        custNameList.add("Sunil Jaiswal");
-        custNameList.add("Sunil Jaiswal");
-        custNameList.add("Sunil Jaiswal");
-        custNameList.add("Sunil Jaiswal");
-        custNameList.add("Sunil Jaiswal");
-        custNameList.add("Sunil Jaiswal");
-        custNameList.add("Sunil Jaiswal");
-        custNameList.add("Sunil Jaiswal");
-        custNameList.add("Sunil Jaiswal");
-        custNameList.add("Sunil Jaiswal");
-        custNameList.add("Sunil Jaiswal dffgfdghghgfhgfhffhjfhjhgjgujgjgjhgj");
-
+        userDetailApi(userIdString,authCodeString);
 
         adapter = new CustomerListAdapter(context,custNameList,ShowMapsActivity.this);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(ShowMapsActivity.this);
@@ -480,21 +485,15 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         };
 
         serchTxt.setOnQueryTextListener(onQueryTextListener);
-
-      /*  recyelerCustomerList.addOnItemTouchListener(
-                new RecyclerItemClickListener(ShowMapsActivity.this, new RecyclerItemClickListener.OnItemClickListener() {
-                    @Override public void onItemClick(View view, int position) {
-                        // TODO Handle item click
-
-                        Toast.makeText(ShowMapsActivity.this, "Customer Name is "+ custNameList.get(position), Toast.LENGTH_SHORT).show();
-                    }
-                })
-        );*/
-
-
-
     }
 
+    //get current time
+    public static String getCurrentTime() {
+        //date output format
+        DateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy kk:mm:ss");
+        Calendar cal = Calendar.getInstance();
+        return dateFormat.format(cal.getTime());
+    }
 
     @Override
     public void onBackPressed() {
@@ -517,6 +516,9 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
+
+       /* double converLat = Double.parseDouble(lat);
+        double convertLog = Double.parseDouble(log);*/
         LatLng sydney = new LatLng(lat, log);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
@@ -562,9 +564,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                             MarkerPoints.clear();
                             MarkerPoints = new ArrayList<>();
                         }
-
-
-
                 }
                 else {
 
@@ -600,28 +599,64 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                     mMap.addMarker(options.position(point).title("Customer Place"));
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, 17.0f);
                     mMap.animateCamera(cameraUpdate);
-
-
-                  /*  UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLat(ShowMapsActivity.this, String.valueOf(28.4960))));
-                    UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLog(ShowMapsActivity.this, String.valueOf(77.4022))));
-*/
-
-                    /*Intent intent = getIntent();
-                    finish();
-                    startActivity(intent);*/
-
                 }
             }
         });
     }
 
-    @Override
-    public void getCustomerName(String name) {
+    /*private void build_retrofit_and_get_response(String type) {
 
-        Toast.makeText(context, "Customer Name is "+ name, Toast.LENGTH_SHORT).show();
+        String url = "https://maps.googleapis.com/maps/";
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(url)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        RetrofitMaps service = retrofit.create(RetrofitMaps.class);
+
+        Call<Example> call = service.getDistanceDuration("metric", origin.latitude + "," + origin.longitude,dest.latitude + "," + dest.longitude, type);
+
+        call.enqueue(new Callback<Example>() {
+            @Override
+            public void onResponse(Response<Example> response, Retrofit retrofit) {
+
+                try {
+                    //Remove previous line from map
+                    if (line != null) {
+                        line.remove();
+                    }
+                    // This loop will go through all the results and add marker on each location.
+                    for (int i = 0; i < response.body().getRoutes().size(); i++) {
+                        String distance = response.body().getRoutes().get(i).getLegs().get(i).getDistance().getText();
+                        String time = response.body().getRoutes().get(i).getLegs().get(i).getDuration().getText();
+                        Toast.makeText(getApplicationContext(), "My Calculate Distance is  -" + distance + "Time - " + time , Toast.LENGTH_LONG).show();
+                        String encodedString = response.body().getRoutes().get(0).getOverviewPolyline().getPoints();
+                        List<LatLng> list = decodePoly(encodedString);
+                        line = mMap.addPolyline(new PolylineOptions()
+                                .addAll(list)
+                                .width(20)
+                                .color(Color.RED)
+                                .geodesic(true)
+                        );
+                    }
+                } catch (Exception e) {
+                    Log.d("onResponse", "There is an error");
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.d("onFailure", t.toString());
+            }
+        });
+
     }
+*/
 
-    private void build_retrofit_and_get_response(String type) {
+    private void build_retrofit_and_get_response(String type, final String innersrclat, final String innersrclog,
+                                                 final String innerdstlat, final String innerdstlog) {
 
         String url = "https://maps.googleapis.com/maps/";
 
@@ -649,6 +684,45 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                         String time = response.body().getRoutes().get(i).getLegs().get(i).getDuration().getText();
                         ShowDistanceDuration = distance ;
 
+                        // distance.replaceAll("\\D+","")
+
+                        //checked distance is m and KM
+                        if (distance.equalsIgnoreCase("1 m"))
+                        {
+                            int distanceConvInteger = Integer.parseInt(distance.replaceAll("\\D+",""));
+                            double distanceInKm = distanceConvInteger/1000;
+                            travelDistance = String.valueOf(distanceInKm);
+                            Log.e("Travel Distance in M", travelDistance + " null");
+                        }
+                        else
+                            {
+                                travelDistance = distance.replaceAll("\\D+","");
+                                Log.e("Travel Distance in KM", travelDistance + " null");
+                            }
+
+                        if (rechedBtn.getText().toString().equalsIgnoreCase("Restart"))
+                        {
+
+                            Log.e("checking clicking btn", "Restart");
+
+                            String reachedTime = getCurrentTime();
+
+                            Log.e("REACHED TIME", reachedTime);
+
+                            Log.e("Travel Distance", travelDistance + " null");
+
+
+                                submitDetails("", userIdString, vechileType, startTime, sourceName, reachedTime, destinationName,
+                                        customerId, innersrclat, innersrclog,
+                                        innerdstlat, innerdstlog, travelDistance, "", authCodeString);
+
+                                destinationName = "";
+
+                        }else
+                        {
+                            Log.e("checking clicking btn", "Reached");
+                        }
+
                         Toast.makeText(getApplicationContext(), "My Calculate Distance is  -" + distance + "Time - " + time , Toast.LENGTH_LONG).show();
 
                         String encodedString = response.body().getRoutes().get(0).getOverviewPolyline().getPoints();
@@ -673,7 +747,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         });
 
     }
-
     private List<LatLng> decodePoly(String encoded) {
         List<LatLng> poly = new ArrayList<LatLng>();
         int index = 0, len = encoded.length();
@@ -719,5 +792,246 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
             return false;
         }
         return true;
+    }
+
+    // Api Work-----  User Detail Api ----------->>>>>>>.
+    public void userDetailApi(final String userId  , final String authCode)
+    {
+        final ProgressDialog pDialog = new ProgressDialog(ShowMapsActivity.this);
+        pDialog.setMessage("Loading...");
+        pDialog.show();
+
+        StringRequest historyInquiry = new StringRequest(
+                Request.Method.POST, userDetailUrl, new com.android.volley.Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                try {
+                    Log.e("User Details", response);
+                    JSONArray jsonArray = new JSONArray(response.substring(response.indexOf("["),response.lastIndexOf("]") +1 ));
+
+
+                    for (int i=0 ; i<jsonArray.length();i++)
+                    {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        if (jsonObject.has("MsgNotification"))
+                        {
+                            String MsgNotification = jsonObject.getString("MsgNotification");
+                            final Toast toast = Toast.makeText(ShowMapsActivity.this, MsgNotification, Toast.LENGTH_LONG);
+                            View view = toast.getView();
+                            view.setBackgroundResource(R.drawable.button_rounded_shape);
+                            TextView text = (TextView) view.findViewById(android.R.id.message);
+                            text.setTextColor(Color.parseColor("#ffffff"));
+                            text.setPadding(20, 20, 20, 20);
+                            toast.setGravity(Gravity.CENTER, 0, 0);
+                            toast.show();Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    toast.cancel();
+                                }
+                            }, 2000);
+
+                        }
+
+                        String CustomerID = "" , CustomerName = "";
+                        if (jsonObject.has("CustomerID"))
+                        {
+
+                            CustomerID = jsonObject.getString("CustomerID");
+
+                            Log.e("checking CustomerID", CustomerID);
+                        }
+                        if (jsonObject.has("CustomerName"))
+                        {
+                            CustomerName = jsonObject.getString("CustomerName");
+                            Log.e("checking CustomerName", CustomerName);
+                        }
+
+                        if (custNameList.size()>0)
+                        {
+                            custNameList.clear();
+                        }
+
+                        custNameList.add(new CustomerDetailsModel(CustomerName,CustomerID));
+                    }
+
+                    adapter.notifyDataSetChanged();
+                    pDialog.dismiss();
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new com.android.volley.Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d("Login", "Error: " + error.getMessage());
+                // Log.e("checking now ",error.getMessage());
+
+                final Toast toast = Toast.makeText(ShowMapsActivity.this, "Server Error", Toast.LENGTH_LONG);
+                View view = toast.getView();
+                view.setBackgroundResource(R.drawable.button_rounded_shape);
+                TextView text = (TextView) view.findViewById(android.R.id.message);
+                text.setTextColor(Color.parseColor("#ffffff"));
+                text.setPadding(20, 20, 20, 20);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        toast.cancel();
+                    }
+                }, 2000);
+
+                pDialog.dismiss();
+
+
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("UserID", userId);
+                params.put("AuthCode",authCode);
+
+
+                // Log.e(TAG, "auth_key");
+                return params;
+            }
+
+        };
+        historyInquiry.setRetryPolicy(new DefaultRetryPolicy(SettingConstant.Retry_Time,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        AppController.getInstance().addToRequestQueue(historyInquiry, "User Details");
+
+
+    }
+
+
+    // Hit Api is Reached Point
+    public void submitDetails(final String TExpID  , final String UserID, final String VehicleTypeID, final String StartAtTime,
+                              final String SourceName, final String ReachedAtTime, final String DestinationName,
+                              final String DestinationCustID, final String StartLattitude, final String StartLongitude,
+                              final String EndLattitude, final String EndLongitude, final String TravelledDistance,
+                              final String TravelRemark, final String AuthCode)
+    {
+        /*final ProgressDialog pDialog = new ProgressDialog(ShowMapsActivity.this);
+        pDialog.setMessage("Loading...");
+        pDialog.show();*/
+
+        StringRequest historyInquiry = new StringRequest(
+                Request.Method.POST, reachedPointAPIUrl, new com.android.volley.Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                try {
+                    Log.e("Reached Point", response);
+                    JSONArray jsonArray = new JSONArray(response.substring(response.indexOf("["),response.lastIndexOf("]") +1 ));
+
+
+                    for (int i=0 ; i<jsonArray.length();i++)
+                    {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        if (jsonObject.has("MsgNotification"))
+                        {
+                            String MsgNotification = jsonObject.getString("MsgNotification");
+                            final Toast toast = Toast.makeText(ShowMapsActivity.this, MsgNotification, Toast.LENGTH_LONG);
+                            View view = toast.getView();
+                            view.setBackgroundResource(R.drawable.button_rounded_shape);
+                            TextView text = (TextView) view.findViewById(android.R.id.message);
+                            text.setTextColor(Color.parseColor("#ffffff"));
+                            text.setPadding(20, 20, 20, 20);
+                            toast.setGravity(Gravity.CENTER, 0, 0);
+                            toast.show();Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    toast.cancel();
+                                }
+                            }, 6000);
+
+                            popupWindow.dismiss();
+
+                        }
+                    }
+
+                    pDialog.dismiss();
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new com.android.volley.Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d("Login", "Error: " + error.getMessage());
+                // Log.e("checking now ",error.getMessage());
+
+                final Toast toast = Toast.makeText(ShowMapsActivity.this, "Server Error", Toast.LENGTH_LONG);
+                View view = toast.getView();
+                view.setBackgroundResource(R.drawable.button_rounded_shape);
+                TextView text = (TextView) view.findViewById(android.R.id.message);
+                text.setTextColor(Color.parseColor("#ffffff"));
+                text.setPadding(20, 20, 20, 20);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        toast.cancel();
+                    }
+                }, 2000);
+
+                pDialog.dismiss();
+
+
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("TExpID", "00000000-0000-0000-0000-000000000000");
+                params.put("UserID",UserID);
+                params.put("VehicleTypeID",VehicleTypeID);
+                params.put("StartAtTime",StartAtTime);
+                params.put("SourceName",SourceName);
+                params.put("ReachedAtTime",ReachedAtTime);
+                params.put("DestinationName",DestinationName);
+                params.put("DestinationCustID",DestinationCustID);
+                params.put("StartLattitude",StartLattitude);
+                params.put("StartLongitude",StartLongitude);
+                params.put("EndLattitude",EndLattitude);
+                params.put("EndLongitude",EndLongitude);
+                params.put("TravelledDistance",TravelledDistance);
+                params.put("TravelRemark",TravelRemark);
+                params.put("AuthCode",AuthCode);
+
+
+                // Log.e(TAG, "auth_key");
+                return params;
+            }
+
+        };
+        historyInquiry.setRetryPolicy(new DefaultRetryPolicy(SettingConstant.Retry_Time,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        AppController.getInstance().addToRequestQueue(historyInquiry, "Reached Point");
+
+
+    }
+
+    @Override
+    public void getCustomerName(String name) {
+        //Toast.makeText(context, "Customer Name is "+ name, Toast.LENGTH_SHORT).show();
+
+        destinationName = name;
+    }
+
+    @Override
+    public void getCustomerId(String cusId) {
+
+        customerId = cusId;
     }
 }

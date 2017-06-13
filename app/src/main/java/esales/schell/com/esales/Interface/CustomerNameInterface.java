@@ -7,4 +7,5 @@ package esales.schell.com.esales.Interface;
 public interface CustomerNameInterface
 {
     void getCustomerName(String name);
+    void getCustomerId(String cusId);
 }

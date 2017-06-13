@@ -13,12 +13,12 @@ public class SettingConstant {
     protected static final String SP_NAME = "myPref";
     protected static final String FirstHomePage = "First_Home_Page";
     protected static final String SecondHomePage = "Second_Home_Page";
-    protected static final String LoginStatus = "Login Status";
+    protected static final String VechelType = "VechelType";
     protected static final String UserId = "UserId";
     protected static final String CustomerName = "CustomerName";
     protected static final String AuthCode = "AuthCode";
-    protected static final String DestinationLog = "Destination_Lognitude";
-    protected static final String DestinationLat = "Destination_Latitude";
+    protected static final String StartTime = "StartTime";
+    protected static final String SourceName = "SourceName";
     protected static final String Sourcelog = "Source_Lognitude";
     protected static final String SourceLat = "Source_Latitude";
 

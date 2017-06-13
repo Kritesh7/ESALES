@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DataBaseHelper extends SQLiteOpenHelper {
 
     public SourceAndDestinationPointTable sourceAndDestinationPointTable = new SourceAndDestinationPointTable();
+    public VechileTypeTable vechileTypeTable = new VechileTypeTable();
 
     public  DataBaseHelper(Context context, String databaseName , SQLiteDatabase.CursorFactory factory , int databaseVersion)
     {
@@ -20,11 +21,13 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
 
         db.execSQL(sourceAndDestinationPointTable.sourceAndDestinationTableData);
+        db.execSQL(vechileTypeTable.vechileTypeTableData);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
         db.execSQL("DROP TABLE IF EXISTS " + sourceAndDestinationPointTable.tableName);
+        db.execSQL("DROP TABLE IF EXISTS " + vechileTypeTable.tableName);
     }
 }

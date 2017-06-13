@@ -26,7 +26,7 @@
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-            <RadioButton
+            <!--<RadioButton
                 android:id="@+id/two_wheeler"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Four Wheeler"/>
+                android:text="Four Wheeler"/>-->
         </RadioGroup>
 
         <LinearLayout
