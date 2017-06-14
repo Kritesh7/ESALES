@@ -66,9 +66,15 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:screenOrientation="portrait"
             android:name=".MainActivity.ForgetPasswordActivity"
             android:label="@string/title_activity_forget_password"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".MainActivity.NewManuelAddTravelList"
+            android:label="@string/title_activity_new_manuel_add_travel_list"
+            android:windowSoftInputMode="stateHidden|adjustPan"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

@@ -46,9 +46,9 @@ public class ShowListAdapter extends RecyclerView.Adapter<ShowListAdapter.ViewHo
         holder.dateTxt.setText(model.getDate());
         holder.sourceTxt.setText(model.getSource());
         holder.destinationTxt.setText(model.getDestination());
-        holder.expenseTxt.setText(model.getExpensAmount());
-        holder.rateTxt.setText(model.getRate());
-        holder.travellDisatnceTxt.setText(model.getTravelDisatnce());
+        holder.expenseTxt.setText(model.getTravelDisatnce()+ "*" + model.getRate() + "="+model.getExpensAmount());
+       /* holder.rateTxt.setText(model.getRate());
+        holder.travellDisatnceTxt.setText(model.getTravelDisatnce());*/
         holder.vechileTypeTxt.setText(model.getVechileType());
     }
 
@@ -66,8 +66,8 @@ public class ShowListAdapter extends RecyclerView.Adapter<ShowListAdapter.ViewHo
             sourceTxt = (TextView)itemView.findViewById(R.id.source);
             destinationTxt = (TextView)itemView.findViewById(R.id.destination);
             vechileTypeTxt = (TextView)itemView.findViewById(R.id.vechile);
-            travellDisatnceTxt = (TextView)itemView.findViewById(R.id.travell_ditance);
-            rateTxt = (TextView)itemView.findViewById(R.id.rate);
+           /* travellDisatnceTxt = (TextView)itemView.findViewById(R.id.travell_ditance);
+            rateTxt = (TextView)itemView.findViewById(R.id.rate);*/
             expenseTxt = (TextView)itemView.findViewById(R.id.expense_amount);
 
 

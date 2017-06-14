@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -72,6 +73,7 @@ import esales.schell.com.esales.Model.MapRouteModel.Example;
 import esales.schell.com.esales.R;
 import esales.schell.com.esales.Sources.AppController;
 import esales.schell.com.esales.Sources.GPSTracker;
+import esales.schell.com.esales.Sources.LocationAddress;
 import esales.schell.com.esales.Sources.RecyclerItemClickListener;
 import esales.schell.com.esales.Sources.SettingConstant;
 import esales.schell.com.esales.Sources.SharedPrefs;
@@ -113,6 +115,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public ImageView menuItemImg;
     private final int SPLASH_DISPLAY_LENGTH = 5000;
     public ProgressDialog pDialog;
+    public String loactionDstAdd = "";
     public String userDetailUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppddlCustomer";
     public String reachedPointAPIUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppEmployeeTravelExpenseInsUpdt";
 
@@ -322,8 +325,18 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                         final double dstLat = gpsTracker.getLatitude();
                         final double dstLog = gpsTracker.getLongitude();
 
-                       /* final double dstLat = 27.1767;
+
+                        /* final double dstLat = 27.1767;
                         final double dstLog = 78.0081;*/
+
+                        // get address
+                        LocationAddress locationAddress = new LocationAddress();
+                        locationAddress.getAddressFromLocation(dstLat,dstLog,getApplicationContext(),
+                                new GeocoderHandler());
+
+
+
+
                         final double srcLat = Double.parseDouble(sourceLat);
                         final double srcLog = Double.parseDouble(sourceLog);
 
@@ -428,7 +441,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                                     }else
                                     {
                                         build_retrofit_and_get_response("driving", String.valueOf(srcLat), String.valueOf(srcLog),
-                                                String.valueOf(dstLat), String.valueOf(dstLog));
+                                                String.valueOf(dstLat), String.valueOf(dstLog), loactionDstAdd);
                                     }
 
                                 }
@@ -555,7 +568,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                     Log.e("checked buttn name",rechedBtn.getText().toString());
                     if (rechedBtn.getText().toString().equalsIgnoreCase("Reached")) {
 
-
                         callPopup();
 
                     }else
@@ -656,7 +668,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 */
 
     private void build_retrofit_and_get_response(String type, final String innersrclat, final String innersrclog,
-                                                 final String innerdstlat, final String innerdstlog) {
+                                                 final String innerdstlat, final String innerdstlog, final String locationdstAdd) {
 
         String url = "https://maps.googleapis.com/maps/";
 
@@ -709,10 +721,9 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
                             Log.e("REACHED TIME", reachedTime);
 
-                            Log.e("Travel Distance", travelDistance + " null");
+                            //Log.e("destinationName+locationdstAdd", destinationName+"," +locationdstAdd + " null");
 
-
-                                submitDetails("", userIdString, vechileType, startTime, sourceName, reachedTime, destinationName,
+                            submitDetails("", userIdString, vechileType, startTime, sourceName, reachedTime, destinationName+"," +locationdstAdd,
                                         customerId, innersrclat, innersrclog,
                                         innerdstlat, innerdstlog, travelDistance, "", authCodeString);
 
@@ -1007,6 +1018,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 params.put("TravelledDistance",TravelledDistance);
                 params.put("TravelRemark",TravelRemark);
                 params.put("AuthCode",AuthCode);
+                params.put("ExpAmount","0");
 
 
                 // Log.e(TAG, "auth_key");
@@ -1033,5 +1045,23 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public void getCustomerId(String cusId) {
 
         customerId = cusId;
+    }
+
+    // get address with the help of lat log
+    private class GeocoderHandler extends Handler {
+        @Override
+        public void handleMessage(Message message) {
+            String locationAddress;
+            switch (message.what) {
+                case 1:
+                    Bundle bundle = message.getData();
+                    locationAddress = bundle.getString("address");
+                    break;
+                default:
+                    locationAddress = null;
+            }
+
+            loactionDstAdd = locationAddress;
+        }
     }
 }

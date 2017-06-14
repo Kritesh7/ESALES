@@ -67,7 +67,7 @@
                     android:id="@+id/startbtn"/>
 
                     <Button
-                        android:id="@+id/voucherBtn"
+                        android:id="@+id/trail_listbtn"
                         android:layout_marginTop="5dp"
                         android:elevation="10dp"
                         android:layout_gravity="center"
@@ -83,20 +83,49 @@
 
             </LinearLayout>
 
-            <ImageView
-                android:id="@+id/logoutBtn"
-                android:padding="@dimen/fab_margin"
-                android:src="@drawable/logout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|right"/>
-            <ImageView
-                android:id="@+id/setting"
-                android:padding="@dimen/fab_margin"
-                android:src="@drawable/setting"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|left"/>
+            <FrameLayout
+                android:layout_marginBottom="5dp"
+                android:layout_gravity="bottom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:background="@color/red_800"
+                    android:alpha=".7"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                </LinearLayout>
+
+                <LinearLayout
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:layout_marginRight="40dp"
+                    android:id="@+id/setting"
+                    android:src="@drawable/setting"
+                    android:layout_width="0dp"
+                    android:layout_weight="3.5"
+                    android:layout_height="wrap_content"
+                    />
+
+                <ImageView
+                    android:id="@+id/add_manuely"
+                    android:src="@drawable/edit"
+                    android:layout_width="0dp"
+                    android:layout_weight="3.5"
+                    android:layout_height="wrap_content"
+                />
+
+                <ImageView
+                   android:layout_marginLeft="40dp"
+                    android:id="@+id/logoutBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3.5"
+                    android:src="@drawable/logout" />
+            </LinearLayout>
+            </FrameLayout>
         </FrameLayout>
 
     </LinearLayout>

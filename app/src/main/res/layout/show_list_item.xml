@@ -43,64 +43,7 @@
                 android:text="24-03-2017"/>
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_marginTop="5dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
 
-            <TextView
-                android:textSize="16dp"
-                android:layout_width="0dp"
-                android:layout_weight="4.5"
-                android:layout_height="wrap_content"
-                android:text="Source"
-                android:textColor="@color/gray_700"
-                android:textStyle="bold"/>
-            <TextView
-                android:textSize="16dp"
-                android:textStyle="bold"
-                android:textColor="@color/gray_700"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text=":"/>
-            <TextView
-                android:id="@+id/source"
-                android:textSize="16dp"
-                android:layout_width="0dp"
-                android:layout_weight="4.5"
-                android:layout_height="wrap_content"
-                android:text="Agra"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_marginTop="5dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:textSize="16dp"
-                android:layout_width="0dp"
-                android:layout_weight="4.5"
-                android:layout_height="wrap_content"
-                android:text="Destination"
-                android:textColor="@color/gray_700"
-                android:textStyle="bold"/>
-            <TextView
-                android:textSize="16dp"
-                android:textStyle="bold"
-                android:textColor="@color/gray_700"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text=":"/>
-            <TextView
-                android:id="@+id/destination"
-                android:textSize="16dp"
-                android:layout_width="0dp"
-                android:layout_weight="4.5"
-                android:layout_height="wrap_content"
-                android:text="Delhi"/>
-        </LinearLayout>
         <LinearLayout
             android:layout_marginTop="5dp"
             android:layout_width="match_parent"
@@ -130,7 +73,7 @@
                 android:layout_height="wrap_content"
                 android:text="Two Wheeler"/>
         </LinearLayout>
-        <LinearLayout
+        <!--<LinearLayout
             android:layout_marginTop="5dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -187,7 +130,7 @@
                 android:layout_weight="4.5"
                 android:layout_height="wrap_content"
                 android:text="220Rs"/>
-        </LinearLayout>
+        </LinearLayout>-->
         <LinearLayout
             android:layout_marginTop="5dp"
             android:layout_width="match_parent"
@@ -198,7 +141,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="4.5"
                 android:layout_height="wrap_content"
-                android:text="Expense Amount"
+                android:text="Exp. Amount"
                 android:textColor="@color/gray_700"
                 android:textStyle="bold"/>
             <TextView
@@ -209,6 +152,24 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text=":"/>
+
+            <!--<LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="4.5"
+                android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/travell_ditance"
+                android:textSize="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="280Km"/>
+            <TextView
+                android:id="@+id/rate"
+                android:textSize="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="220Rs"/>-->
             <TextView
                 android:id="@+id/expense_amount"
                 android:textSize="16dp"
@@ -216,25 +177,53 @@
                 android:layout_weight="4.5"
                 android:layout_height="wrap_content"
                 android:text="320Rs"/>
+           <!-- </LinearLayout>-->
         </LinearLayout>
 
-   <!-- <android.support.design.widget.TextInputLayout
-
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="8dp"
-        android:textColorHint="@color/gray_700">
-
-        <EditText
-            android:id="@+id/input_email"
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_marginTop="5dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Email"
-            android:inputType="textEmailAddress"
-            android:textColor="@color/gray_500" />
-    </android.support.design.widget.TextInputLayout>
--->
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:textSize="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Source"
+                android:textColor="@color/gray_700"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="5dp"
+                android:id="@+id/source"
+                android:textSize="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Agra"/>
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_marginTop="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:textSize="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Destination"
+                android:textColor="@color/gray_700"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="5dp"
+                android:id="@+id/destination"
+                android:textSize="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delhi"/>
+        </LinearLayout>
     </LinearLayout>
 
 </android.support.v7.widget.CardView>

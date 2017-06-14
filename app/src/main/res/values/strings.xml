@@ -7,4 +7,5 @@
     <string name="title_activity_show_list">ShowListActivity</string>
     <string name="title_activity_chnage_password">ChnagePasswordActivity</string>
     <string name="title_activity_forget_password">ForgetPasswordActivity</string>
+    <string name="title_activity_new_manuel_add_travel_list">NewManuelAddTravelList</string>
 </resources>

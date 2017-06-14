@@ -127,7 +127,6 @@ public class LoginActivity extends AppCompatActivity {
         Log.e("checking url is ", loginUrl);
 
         // CHECKED PERMISSION
-
         if (Build.VERSION.SDK_INT == 16 || Build.VERSION.SDK_INT == 17 ||
                 Build.VERSION.SDK_INT == 18 || Build.VERSION.SDK_INT == 19)
         {

@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/showlistlay"
-    tools:context="esales.schell.com.esales.MainActivity.ShowListActivity">
+    tools:context="esales.schell.com.esales.MainActivity.NewManuelAddTravelList">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -14,18 +13,21 @@
 
         <include
             layout="@layout/maintolbar"
-            android:id="@+id/show_list_tollbar"/>
+            android:id="@+id/manuel_list_tollbar"/>
+
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_show_list" />
+    <include layout="@layout/content_new_manuel_add_travel_list" />
 
-    <android.support.design.widget.FloatingActionButton
+
+
+   <!-- <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@drawable/plus" />
+        app:srcCompat="@android:drawable/ic_dialog_email" />-->
 
 </android.support.design.widget.CoordinatorLayout>

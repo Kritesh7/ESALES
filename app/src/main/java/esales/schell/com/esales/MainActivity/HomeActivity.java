@@ -56,6 +56,7 @@ import esales.schell.com.esales.DataBase.MasterDataBase;
 import esales.schell.com.esales.DataBase.VechileTypeTable;
 import esales.schell.com.esales.Model.VehicleTypeModel;
 import esales.schell.com.esales.R;
+import esales.schell.com.esales.Sources.ConnectionDetector;
 import esales.schell.com.esales.Sources.GPSTracker;
 import esales.schell.com.esales.Sources.LocationAddress;
 import esales.schell.com.esales.Sources.MyAsyncTask;
@@ -64,10 +65,10 @@ import esales.schell.com.esales.Sources.UtilsMethods;
 
 public class HomeActivity extends AppCompatActivity {
 
-    public Button startBtn ,voucherBtn;
+    public Button startBtn ,trailListbtn;
     public GPSTracker gps;
     public Context context;
-    public ImageView logoutBtn , settingBtn;
+    public ImageView logoutBtn , settingBtn , addBtn;
     public PopupWindow popupWindow;
     public String vechileType = "";
     public   boolean visible;
@@ -78,7 +79,7 @@ public class HomeActivity extends AppCompatActivity {
     public ArrayList<VehicleTypeModel> vehicleTypeList = new ArrayList<>();
     public ProgressDialog pDialog;
     private final int SPLASH_DISPLAY_LENGTH = 5000;
-    public MyAsyncTask myAsyncTask;
+    public ConnectionDetector conn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,11 +97,13 @@ public class HomeActivity extends AppCompatActivity {
 
         masterDataBase = new MasterDataBase(context);
         gps = new GPSTracker(context,HomeActivity.this);
+        conn = new ConnectionDetector(context);
 
 
         logoutBtn = (ImageView)findViewById(R.id.logoutBtn);
-        voucherBtn = (Button)findViewById(R.id.voucherBtn);
+        trailListbtn = (Button)findViewById(R.id.trail_listbtn);
         settingBtn = (ImageView)findViewById(R.id.setting);
+        addBtn = (ImageView)findViewById(R.id.add_manuely);
         userIdString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getUserId(HomeActivity.this)));
         settingBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -147,6 +150,15 @@ public class HomeActivity extends AppCompatActivity {
                         "")));
             }
         });
+
+        addBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getApplicationContext(),NewManuelAddTravelList.class);
+                startActivity(i);
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+            }
+        });
         startBtn = (Button)findViewById(R.id.startbtn);
         startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,15 +174,31 @@ public class HomeActivity extends AppCompatActivity {
                     vehicleTypeList.clear();
                 }
 
-                // get address
-                LocationAddress locationAddress = new LocationAddress();
-                locationAddress.getAddressFromLocation(lat,log,getApplicationContext(),
-                        new GeocoderHandler());
+                // cheked Innternet connection
+                if (conn.getConnectivityStatus()>0)
+                {
+                    // get address
+                    LocationAddress locationAddress = new LocationAddress();
+                    locationAddress.getAddressFromLocation(lat,log,getApplicationContext(),
+                            new GeocoderHandler());
+                }
+                else
+                    {
+                        callPopup("");
+                    }
 
 
 
-                //getCompleteAddressString(lat,log);
+            }
+        });
 
+        trailListbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent i = new Intent(getApplicationContext(), ShowListActivity.class);
+                startActivity(i);
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             }
         });
 
@@ -180,12 +208,12 @@ public class HomeActivity extends AppCompatActivity {
         {
 
             startBtn.setBackgroundColor(getResources().getColor(R.color.red_700));
-            voucherBtn.setBackgroundColor(getResources().getColor(R.color.red_700));
+            trailListbtn.setBackgroundColor(getResources().getColor(R.color.red_700));
         }
         else
         {
             startBtn.setBackgroundResource(R.drawable.buttonshape);
-            voucherBtn.setBackgroundResource(R.drawable.buttonshape);
+            trailListbtn.setBackgroundResource(R.drawable.buttonshape);
         }
     }
 
@@ -247,6 +275,19 @@ public class HomeActivity extends AppCompatActivity {
 
                 }while (cursor.moveToNext());
             }
+        }
+
+        //visibile Tooltip then add text is empety
+        if (addTxt.getText().toString().equalsIgnoreCase(""))
+        {
+            TransitionManager.beginDelayedTransition(addlay);
+            visible = !visible;
+            toolTipLay.setVisibility(View.VISIBLE);
+        }else
+        {
+            TransitionManager.beginDelayedTransition(addlay);
+            visible = !visible;
+            toolTipLay.setVisibility(View.GONE);
         }
 
 
@@ -363,7 +404,23 @@ public class HomeActivity extends AppCompatActivity {
 
                 if (addTxt.getText().toString().equalsIgnoreCase(""))
                 {
-                    addTxt.setError("Please fill the address");
+
+                    final Toast toast = Toast.makeText(HomeActivity.this, "Please Enter the Address", Toast.LENGTH_LONG);
+                    View view = toast.getView();
+                    view.setBackgroundResource(R.drawable.button_rounded_shape);
+                    TextView text = (TextView) view.findViewById(android.R.id.message);
+                    text.setTextColor(Color.parseColor("#ffffff"));
+                    text.setPadding(20, 20, 20, 20);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            toast.cancel();
+                        }
+                    }, 2000);
+     //               addTxt.setError("Please fill the address");
                 }else {
 
                     pDialog = new ProgressDialog(HomeActivity.this);
@@ -454,6 +511,7 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message message) {
             String locationAddress;
+
             switch (message.what) {
                 case 1:
                     Bundle bundle = message.getData();

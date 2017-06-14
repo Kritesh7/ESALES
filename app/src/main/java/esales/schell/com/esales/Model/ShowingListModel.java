@@ -14,9 +14,10 @@ public class ShowingListModel
     public String travelDisatnce;
     public String rate;
     public String expensAmount;
+    public String texpId;
 
     public ShowingListModel(String date, String source, String destination,
-                            String vechileType, String travelDisatnce, String rate, String expensAmount) {
+                            String vechileType, String travelDisatnce, String rate, String expensAmount, String texepId) {
         this.date = date;
         this.source = source;
         this.destination = destination;
@@ -24,6 +25,7 @@ public class ShowingListModel
         this.travelDisatnce = travelDisatnce;
         this.rate = rate;
         this.expensAmount = expensAmount;
+        this.texpId = texepId;
     }
 
     public String getDate() {
@@ -53,4 +55,6 @@ public class ShowingListModel
     public String getExpensAmount() {
         return expensAmount;
     }
+
+    public String getTexpId(){return texpId;}
 }
