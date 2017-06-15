@@ -52,8 +52,6 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
 
 
         final CustomerDetailsModel model = list.get(position);
-
-
         holder.custName.setText(model.getCustomerName());
         holder.custName.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,11 +113,8 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
                             .contains(constraint.toString()))
                     {
 
-
                         filterList.add( filterlistlist.get(i).getCustomerName());
                     }
-
-
                 }
                 filterResults.count = filterList.size();
                 filterResults.values = filterList;

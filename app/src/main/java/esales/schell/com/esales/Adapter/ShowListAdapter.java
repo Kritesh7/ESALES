@@ -1,15 +1,18 @@
 package esales.schell.com.esales.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import esales.schell.com.esales.MainActivity.ShowEmployeDetailActivity;
 import esales.schell.com.esales.MainActivity.ShowMapsActivity;
 import esales.schell.com.esales.Model.ShowingListModel;
 import esales.schell.com.esales.R;
@@ -41,7 +44,7 @@ public class ShowListAdapter extends RecyclerView.Adapter<ShowListAdapter.ViewHo
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
-        ShowingListModel model = list.get(position);
+        final ShowingListModel model = list.get(position);
 
         holder.dateTxt.setText(model.getDate());
         holder.sourceTxt.setText(model.getSource());
@@ -50,6 +53,16 @@ public class ShowListAdapter extends RecyclerView.Adapter<ShowListAdapter.ViewHo
        /* holder.rateTxt.setText(model.getRate());
         holder.travellDisatnceTxt.setText(model.getTravelDisatnce());*/
         holder.vechileTypeTxt.setText(model.getVechileType());
+
+        holder.ownLay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent i = new Intent(context, ShowEmployeDetailActivity.class);
+                i.putExtra("TExpID", model.getTexpId());
+                context.startActivity(i);
+            }
+        });
     }
 
     @Override
@@ -59,6 +72,7 @@ public class ShowListAdapter extends RecyclerView.Adapter<ShowListAdapter.ViewHo
 
     class ViewHolder extends RecyclerView.ViewHolder {
         public TextView dateTxt,sourceTxt,destinationTxt,vechileTypeTxt,travellDisatnceTxt,rateTxt,expenseTxt;
+        public LinearLayout ownLay;
         public ViewHolder(View itemView) {
             super(itemView);
 
@@ -69,6 +83,7 @@ public class ShowListAdapter extends RecyclerView.Adapter<ShowListAdapter.ViewHo
            /* travellDisatnceTxt = (TextView)itemView.findViewById(R.id.travell_ditance);
             rateTxt = (TextView)itemView.findViewById(R.id.rate);*/
             expenseTxt = (TextView)itemView.findViewById(R.id.expense_amount);
+            ownLay = (LinearLayout)itemView.findViewById(R.id.own_lay);
 
 
         }

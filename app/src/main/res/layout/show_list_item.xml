@@ -9,6 +9,7 @@
     >
 
     <LinearLayout
+        android:id="@+id/own_lay"
         android:padding="10dp"
         android:orientation="vertical"
         android:layout_width="match_parent"

@@ -251,6 +251,8 @@ public class HomeActivity extends AppCompatActivity {
         homeTxt = (TextView)popupView.findViewById(R.id.homeTxt);
         officeTxt = (TextView)popupView.findViewById(R.id.officeTxt);
 
+
+
         // data is show to database
         Cursor cursor = masterDataBase.getVecheleTypeData(userIdString);
 
@@ -332,6 +334,19 @@ public class HomeActivity extends AppCompatActivity {
         }else
         {
             addTxt.setText(addString);
+
+            //visibile Tooltip then add text is empety
+            if (addTxt.getText().toString().equalsIgnoreCase(""))
+            {
+                TransitionManager.beginDelayedTransition(addlay);
+                visible = !visible;
+                toolTipLay.setVisibility(View.VISIBLE);
+            }else
+            {
+                TransitionManager.beginDelayedTransition(addlay);
+                visible = !visible;
+                toolTipLay.setVisibility(View.GONE);
+            }
         }
 
         // choose manuel and automatic address

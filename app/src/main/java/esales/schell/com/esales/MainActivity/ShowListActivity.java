@@ -137,51 +137,19 @@ public class ShowListActivity extends AppCompatActivity {
         {
 
             getTravelDetail(userIdString,authCodeString);
+
+           /* noInternetLay.setVisibility(View.GONE);
+            showListRecy.setVisibility(View.VISIBLE);*/
         }
         else
         {
-            connectionDetector.showNoInternetAlret();
+
+           /* noInternetLay.setVisibility(View.VISIBLE);
+            showListRecy.setVisibility(View.GONE);*/
+            //connectionDetector.showNoInternetAlret();
         }
 
     }
-
- /*   private void prepareInsDetails() {
-        ShowingListModel model = new ShowingListModel("04-03-2016","Agra",
-                "Delhi" ,"Two Vechile",
-                "280Km","220Rs","320Rs");
-        list.add(model);
-        model = new ShowingListModel("04-03-2016","Agra",
-                "Delhi" ,"Two Vechile",
-                "280Km","220Rs","320Rs");
-        list.add(model);
-        model = new ShowingListModel("04-03-2016","Agra",
-                "Delhi" ,"Two Vechile",
-                "280Km","220Rs","320Rs");
-        list.add(model);
-        model = new ShowingListModel("04-03-2016","Agra",
-                "Delhi" ,"Two Vechile",
-                "280Km","220Rs","320Rs");
-        list.add(model);
-        model = new ShowingListModel("04-03-2016","Agra",
-                "Delhi" ,"Two Vechile",
-                "280Km","220Rs","320Rs");
-        list.add(model);
-        model = new ShowingListModel("04-03-2016","Agra",
-                "Delhi" ,"Two Vechile",
-                "280Km","220Rs","320Rs");
-        list.add(model);
-        model = new ShowingListModel("04-03-2016","Agra",
-                "Delhi" ,"Two Vechile",
-                "280Km","220Rs","320Rs");
-        list.add(model);
-        model = new ShowingListModel("04-03-2016","Agra",
-                "Delhi" ,"Two Vechile",
-                "280Km","220Rs","320Rs");
-        list.add(model);
-
-        adapter.notifyDataSetChanged();
-    }
-*/
 
     public void getTravelDetail(final String userid  ,final String authcode)
     {
@@ -349,12 +317,18 @@ public class ShowListActivity extends AppCompatActivity {
             if(internetConnected){
                 snackbar.show();
                 internetConnected=false;
+
+                noInternetLay.setVisibility(View.VISIBLE);
+                showListRecy.setVisibility(View.GONE);
             }
         }else{
             if(!internetConnected){
                 internetConnected=true;
                 snackbar.show();
                 getTravelDetail(userIdString,authCodeString);
+
+                noInternetLay.setVisibility(View.GONE);
+                showListRecy.setVisibility(View.VISIBLE);
             }
         }
     }

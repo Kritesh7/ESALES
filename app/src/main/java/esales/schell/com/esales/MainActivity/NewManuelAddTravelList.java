@@ -54,12 +54,14 @@ import java.util.Locale;
 import java.util.Map;
 
 import esales.schell.com.esales.Adapter.CustomerNameSpinnerAdapter;
+import esales.schell.com.esales.DataBase.AppddlCustomer;
 import esales.schell.com.esales.DataBase.MasterDataBase;
 import esales.schell.com.esales.DataBase.VechileTypeTable;
 import esales.schell.com.esales.Model.CustomerDetailsModel;
 import esales.schell.com.esales.Model.VehicleTypeModel;
 import esales.schell.com.esales.R;
 import esales.schell.com.esales.Sources.AppController;
+import esales.schell.com.esales.Sources.ConnectionDetector;
 import esales.schell.com.esales.Sources.SettingConstant;
 import esales.schell.com.esales.Sources.SharedPrefs;
 import esales.schell.com.esales.Sources.UtilsMethods;
@@ -84,6 +86,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
     amountEditTxt, remarkTxt;
     public LinearLayout amountLay, parentLay;
     public   boolean visible;
+    public ConnectionDetector conn;
     public String reachedPointAPIUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppEmployeeTravelExpenseInsUpdt";
 
     @Override
@@ -126,6 +129,8 @@ public class NewManuelAddTravelList extends AppCompatActivity {
 
 
         masterDataBase = new MasterDataBase(NewManuelAddTravelList.this);
+        conn = new ConnectionDetector(NewManuelAddTravelList.this);
+
         subBtn = (Button)findViewById(R.id.btn_manuel_submit);
         travelRadioGruop = (RadioGroup) findViewById(R.id.travel_Type);
         selectSpiner = (Spinner)findViewById(R.id.select_customer_name);
@@ -139,7 +144,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
         parentLay = (LinearLayout)findViewById(R.id.parentlay);
         sourceNameTxt = (EditText)findViewById(R.id.input_sourceName);
         destinationEditTxt = (EditText)findViewById(R.id.input_destinationName);
-        travelDateEditTxt = (EditText)findViewById(R.id.input_travelDistance);
+        travelDistanceEditTxt = (EditText)findViewById(R.id.input_travelDistance);
         amountEditTxt = (EditText)findViewById(R.id.amounttxt);
         remarkTxt = (EditText)findViewById(R.id.remarkEditTxt);
 
@@ -162,11 +167,48 @@ public class NewManuelAddTravelList extends AppCompatActivity {
         selectSpiner.setAdapter(adapter);
 
         custNameList.add(new CustomerDetailsModel("Please Select Customer Name",""));
-        userDetailApi(userIdString,authCodeString);
+
+        //cheaked the Internet Connection
+        if (conn.getConnectivityStatus()>0)
+        {
+            userDetailApi(userIdString,authCodeString);
+        }
+        else
+            {
+                // get the data  to database (Customer Detail)
+                Cursor cursor = masterDataBase.getCustomerDetail(userIdString);
+
+                if (cursor !=null && cursor.getCount()>0)
+                {
+                    if (cursor.moveToFirst())
+                    {
+                        do
+                        {
+                            String CustomerName = cursor.getString(cursor.getColumnIndex(AppddlCustomer.CustomerName));
+                            String CustomerId = cursor.getString(cursor.getColumnIndex(AppddlCustomer.CustomerID));
+
+                            // add data in list
+                            custNameList.add(new CustomerDetailsModel(CustomerName,CustomerId));
+
+                            adapter.notifyDataSetChanged();
+
+                            // checked Data
+                            Log.e("CustomerName",CustomerName);
+                            Log.e("CustomerId",CustomerId);
+
+                        }while (cursor.moveToNext());
+                    }
+                }
+            }
+
 
         selectSpiner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                custName = custNameList.get(position).getCustomerName();
+                custId = custNameList.get(position).getCustomerId();
+
                 Log.e("customer id is ", custNameList.get(position).getCustomerId() + " null");
                 Log.e("customer Name is ", custNameList.get(position).getCustomerName() + " null");
             }
@@ -388,43 +430,76 @@ public class NewManuelAddTravelList extends AppCompatActivity {
 
                 }else if (startEditTxt.getText().toString().equalsIgnoreCase(""))
                 {
-                   // startEditTxt.setError("Plese ");
+                    startEditTxt.setError("Please Select Starting Time");
 
                 }else if (sourceNameTxt.getText().toString().equalsIgnoreCase(""))
                 {
+                    sourceNameTxt.setError("Please Enter Valid Source Name");
 
                 }else if (reachedEditTxt.getText().toString().equalsIgnoreCase(""))
                 {
+                    reachedEditTxt.setError("Please Select Reached Time");
 
-                }else if (custName.equalsIgnoreCase(""))
+                }else if (custId.equalsIgnoreCase(""))
                 {
+                    Toast.makeText(NewManuelAddTravelList.this, "Please Select Customer Name", Toast.LENGTH_SHORT).show();
 
                 }else if (destinationEditTxt.getText().toString().equalsIgnoreCase(""))
                 {
 
+                    destinationEditTxt.setError("Please Enter valid destination Name");
                 }else if (travelDistanceEditTxt.getText().toString().equalsIgnoreCase(""))
                 {
+                    travelDistanceEditTxt.setError("Please Enter Travel Expense");
 
                 }else {
                     if (vechileType.equalsIgnoreCase("1"))
                     {
+                        String amount = amountEditTxt.getText().toString();
+                        if(amount.equalsIgnoreCase(""))
+                        {
+                                amountEditTxt.setError("Please fill the Amount");
+                        }else {
 
-                                submitDetails("",userIdString,vechileType,
-                                        travelDateEditTxt.getText().toString()+" " + startEditTxt.getText().toString(),
+                            if (conn.getConnectivityStatus() > 0) {
+                                submitDetails("", userIdString, vechileType,
+                                        travelDateEditTxt.getText().toString() + " " + startEditTxt.getText().toString(),
                                         sourceNameTxt.getText().toString(),
-                                        travelDateEditTxt.getText().toString()+" " +reachedEditTxt.getText().toString(),
-                                        destinationEditTxt.getText().toString(),custId,"0.0","0.0","0.0","0.0",
-                                        travelDistanceEditTxt.getText().toString(),remarkTxt.getText().toString(),authCodeString,"0");
+                                        travelDateEditTxt.getText().toString() + " " + reachedEditTxt.getText().toString(),
+                                        custName + "," + destinationEditTxt.getText().toString(), custId, "0.0", "0.0", "0.0", "0.0",
+                                        travelDistanceEditTxt.getText().toString(), remarkTxt.getText().toString(), authCodeString,
+                                        amount);
+                            } else {
+                                masterDataBase.setInsertTravelRecords("", userIdString, vechileType,
+                                        travelDateEditTxt.getText().toString() + " " + startEditTxt.getText().toString(),
+                                        sourceNameTxt.getText().toString(),
+                                        travelDateEditTxt.getText().toString() + " " + reachedEditTxt.getText().toString(),
+                                        custName + "," + destinationEditTxt.getText().toString(), custId, "0.0", "0.0", "0.0", "0.0",
+                                        travelDistanceEditTxt.getText().toString(), remarkTxt.getText().toString(), authCodeString,
+                                        amount);
+                            }
+
+                        }
 
                     }else
                         {
-                            submitDetails("",userIdString,vechileType,
-                                    travelDateEditTxt.getText().toString()+" " + startEditTxt.getText().toString(),
-                                    sourceNameTxt.getText().toString(),
-                                    travelDateEditTxt.getText().toString()+" " +reachedEditTxt.getText().toString(),
-                                    destinationEditTxt.getText().toString(),custId,"0.0","0.0","0.0","0.0",
-                                    travelDistanceEditTxt.getText().toString(),remarkTxt.getText().toString(),authCodeString,
-                                    amountEditTxt.getText().toString());
+                            if (conn.getConnectivityStatus() > 0) {
+                                submitDetails("", userIdString, vechileType,
+                                        travelDateEditTxt.getText().toString() + " " + startEditTxt.getText().toString(),
+                                        sourceNameTxt.getText().toString(),
+                                        travelDateEditTxt.getText().toString() + " " + reachedEditTxt.getText().toString(),
+                                        destinationEditTxt.getText().toString(), custId, "0.0", "0.0", "0.0", "0.0",
+                                        travelDistanceEditTxt.getText().toString(), remarkTxt.getText().toString(), authCodeString, "0");
+
+                            } else {
+                                masterDataBase.setInsertTravelRecords("", userIdString, vechileType,
+                                        travelDateEditTxt.getText().toString() + " " + startEditTxt.getText().toString(),
+                                        sourceNameTxt.getText().toString(),
+                                        travelDateEditTxt.getText().toString() + " " + reachedEditTxt.getText().toString(),
+                                        destinationEditTxt.getText().toString(), custId, "0.0", "0.0", "0.0", "0.0",
+                                        travelDistanceEditTxt.getText().toString(), remarkTxt.getText().toString(), authCodeString, "0");
+                            }
+
                         }
                 }
             }
@@ -461,6 +536,9 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                     Log.e("User Details", response);
                     JSONArray jsonArray = new JSONArray(response.substring(response.indexOf("["),response.lastIndexOf("]") +1 ));
 
+
+                    // delet all record to save in customerDetail Table
+                    masterDataBase.deleteCustomerDetailRecord();
 
                     for (int i=0 ; i<jsonArray.length();i++)
                     {
@@ -501,6 +579,8 @@ public class NewManuelAddTravelList extends AppCompatActivity {
 
 
 
+                        // insert record in CustomerDetail Table
+                        masterDataBase.setCustomerDetail(CustomerID,CustomerName,userId);
                         custNameList.add(new CustomerDetailsModel(CustomerName,CustomerID));
                     }
 
@@ -655,7 +735,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                 params.put("ExpAmount",amount);
 
 
-                // Log.e(TAG, "auth_key");
+                 Log.e("Submit All Data", params.toString());
                 return params;
             }
 

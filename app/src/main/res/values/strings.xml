@@ -8,4 +8,5 @@
     <string name="title_activity_chnage_password">ChnagePasswordActivity</string>
     <string name="title_activity_forget_password">ForgetPasswordActivity</string>
     <string name="title_activity_new_manuel_add_travel_list">NewManuelAddTravelList</string>
+    <string name="title_activity_show_employe_detail">Map</string>
 </resources>

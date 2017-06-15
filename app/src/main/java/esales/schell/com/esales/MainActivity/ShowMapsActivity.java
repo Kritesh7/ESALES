@@ -818,9 +818,13 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
             public void onResponse(String response) {
 
                 try {
-                    Log.e("User Details", response);
+                    Log.e("User Details---------------", response);
                     JSONArray jsonArray = new JSONArray(response.substring(response.indexOf("["),response.lastIndexOf("]") +1 ));
 
+                    if (custNameList.size()>0)
+                    {
+                        custNameList.clear();
+                    }
 
                     for (int i=0 ; i<jsonArray.length();i++)
                     {
@@ -857,11 +861,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                         {
                             CustomerName = jsonObject.getString("CustomerName");
                             Log.e("checking CustomerName", CustomerName);
-                        }
-
-                        if (custNameList.size()>0)
-                        {
-                            custNameList.clear();
                         }
 
                         custNameList.add(new CustomerDetailsModel(CustomerName,CustomerID));

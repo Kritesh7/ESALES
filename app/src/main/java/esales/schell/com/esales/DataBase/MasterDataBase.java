@@ -4,7 +4,16 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
+import android.os.Handler;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import esales.schell.com.esales.MainActivity.NewManuelAddTravelList;
+import esales.schell.com.esales.R;
 
 /**
  * Created by Admin on 01-06-2017.
@@ -19,6 +28,8 @@ public class MasterDataBase
     public Context context;
     public SourceAndDestinationPointTable sourceAndDestinationPointTable = new SourceAndDestinationPointTable();
     public VechileTypeTable vechileTypeTable = new VechileTypeTable();
+    public AppEmployeeTravelExpenseInsUpdt appEmployeeTravelExpenseInsUpdt = new AppEmployeeTravelExpenseInsUpdt();
+    public AppddlCustomer appddlCustomer = new AppddlCustomer();
 
     public MasterDataBase(Context context)
     {
@@ -88,6 +99,95 @@ public class MasterDataBase
         sqLiteDatabase.delete(vechileTypeTable.tableName,null,null);
     }
 
+    //-----------------------------//---------------------------------
 
+
+    //AppEmployeeTravelExpenseInsUpdt  insert and update table
+    public void setInsertTravelRecords(String TExpID  ,String UserID, String VehicleTypeID, String StartAtTime,
+                                       String SourceName, String ReachedAtTime, String DestinationName,
+                                       String DestinationCustID, String StartLattitude, String StartLongitude,
+                                       String EndLattitude, String EndLongitude, String TravelledDistance,
+                                       String TravelRemark, String AuthCode, String amount)
+    {
+        sqLiteDatabase = dataBaseHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(appEmployeeTravelExpenseInsUpdt.TExpID,TExpID);
+        values.put(appEmployeeTravelExpenseInsUpdt.UserID,UserID);
+        values.put(appEmployeeTravelExpenseInsUpdt.VehicleTypeID,VehicleTypeID);
+        values.put(appEmployeeTravelExpenseInsUpdt.StartAtTime,StartAtTime);
+        values.put(appEmployeeTravelExpenseInsUpdt.SourceName,SourceName);
+        values.put(appEmployeeTravelExpenseInsUpdt.ReachedAtTime,ReachedAtTime);
+        values.put(appEmployeeTravelExpenseInsUpdt.DestinationName,DestinationName);
+        values.put(appEmployeeTravelExpenseInsUpdt.DestinationCustID,DestinationCustID);
+        values.put(appEmployeeTravelExpenseInsUpdt.StartLattitude,StartLattitude);
+        values.put(appEmployeeTravelExpenseInsUpdt.StartLongitude,StartLongitude);
+        values.put(appEmployeeTravelExpenseInsUpdt.EndLattitude,EndLattitude);
+        values.put(appEmployeeTravelExpenseInsUpdt.EndLongitude,EndLongitude);
+        values.put(appEmployeeTravelExpenseInsUpdt.TravelledDistance,TravelledDistance);
+        values.put(appEmployeeTravelExpenseInsUpdt.TravelRemark,TravelRemark);
+        values.put(appEmployeeTravelExpenseInsUpdt.AuthCode,AuthCode);
+        values.put(appEmployeeTravelExpenseInsUpdt.Amount,amount);
+
+        sqLiteDatabase.insert(appEmployeeTravelExpenseInsUpdt.tableName,null,values);
+
+       // Toast.makeText(context, "Data Insert Successfully", Toast.LENGTH_SHORT).show();
+
+        final Toast toast = Toast.makeText(context, "Data Insert Successfully", Toast.LENGTH_LONG);
+        View view = toast.getView();
+        view.setBackgroundResource(R.drawable.button_rounded_shape);
+        TextView text = (TextView) view.findViewById(android.R.id.message);
+        text.setTextColor(Color.parseColor("#ffffff"));
+        text.setPadding(20, 20, 20, 20);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                toast.cancel();
+            }
+        }, 3000);
+    }
+//-------------------------------//----------------------------------------
+
+
+    // Customer Detail get and set Data
+    public void setCustomerDetail(String CustomerID, String CustomerName,String UserId)
+    {
+        sqLiteDatabase = dataBaseHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(appddlCustomer.CustomerID,CustomerID);
+        values.put(appddlCustomer.CustomerName,CustomerName);
+        values.put(appddlCustomer.userId,UserId);
+
+        sqLiteDatabase.insert(appddlCustomer.tableName,null,values);
+    }
+    public Cursor getCustomerDetail(String userid)
+    {
+        sqLiteDatabase=dataBaseHelper.getReadableDatabase();
+        Cursor cursor=null;
+        cursor = sqLiteDatabase.rawQuery("SELECT " + appddlCustomer.CustomerID + ", " + appddlCustomer.CustomerName  +
+                " FROM " + appddlCustomer.tableName + " WHERE " + appddlCustomer.userId + "=?", new String[]
+                {userid});
+        return cursor;
+
+    }
+  /*  public int getCustomerDetailCunt(String userid)
+    {
+
+        String countQuery = "SELECT  * FROM " + vechileTypeTable.tableName + " WHERE " + vechileTypeTable.userId + "=" + userid;
+        SQLiteDatabase db = dataBaseHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        int cnt = cursor.getCount();
+        cursor.close();
+        return cnt;
+    }*/
+    public void deleteCustomerDetailRecord()
+    {
+        sqLiteDatabase=dataBaseHelper.getReadableDatabase();
+        sqLiteDatabase.delete(appddlCustomer.tableName,null,null);
+    }
+    //------------------------//------------------------
 
 }
