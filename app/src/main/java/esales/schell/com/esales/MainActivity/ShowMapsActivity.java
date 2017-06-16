@@ -17,17 +17,21 @@ import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -66,6 +70,7 @@ import java.util.List;
 import java.util.Map;
 
 import esales.schell.com.esales.Adapter.CustomerListAdapter;
+import esales.schell.com.esales.Adapter.DemoCustomeAdapter;
 import esales.schell.com.esales.Interface.CustomerNameInterface;
 import esales.schell.com.esales.Interface.RetrofitMaps;
 import esales.schell.com.esales.Model.CustomerDetailsModel;
@@ -95,9 +100,11 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public ArrayList<CustomerDetailsModel> custNameList = new ArrayList<>();
     public PopupWindow popupWindow;
     public RecyclerView recyelerCustomerList;
-    public CustomerListAdapter adapter;
+    public ListView serchListData;
+    public DemoCustomeAdapter adapter;
     public Button rechedBtn;
     public SearchView serchTxt;
+    public EditText searchData;
     public Context context;
     public boolean flag = true;
     public GPSTracker gpsTracker;
@@ -113,14 +120,12 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public MarkerOptions options;
     public Button dayEndBtn , showListBtn;
     public ImageView menuItemImg;
-    private final int SPLASH_DISPLAY_LENGTH = 5000;
+    private final int SPLASH_DISPLAY_LENGTH = 2000;
     public ProgressDialog pDialog;
     public String loactionDstAdd = "";
+    double errordouble = 0;
     public String userDetailUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppddlCustomer";
     public String reachedPointAPIUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppEmployeeTravelExpenseInsUpdt";
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,7 +153,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 //Creating the instance of PopupMenu
                 PopupMenu popup = new PopupMenu(ShowMapsActivity.this,v);
                 //Inflating the Popup using xml file
-                popup.getMenuInflater().inflate(R.menu.homepage_menu, popup.getMenu());
+                popup.getMenuInflater().inflate(R.menu.showmapmenu, popup.getMenu());
 
                 //registering popup with OnMenuItemClickListener
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -162,6 +167,14 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                             Intent i = new Intent(getApplicationContext(),ChnagePasswordActivity.class);
                             startActivity(i);
                             overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                        }else if(id == R.id.show_logout)
+                        {
+                            Intent i = new Intent(getApplicationContext(),LoginActivity.class);
+                            startActivity(i);
+                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                            finish();
+                            UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(ShowMapsActivity.this,
+                                    "")));
                         }
                       return true;
                     }
@@ -270,6 +283,20 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
     private void callPopup() {
 
+
+        final double dstLat = gpsTracker.getLatitude();
+        final double dstLog = gpsTracker.getLongitude();
+
+
+       /*  final double dstLat = 27.1767+errordouble;
+         final double dstLog = 78.0081+errordouble;
+*/
+        sourceLat = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
+        sourceLog =  UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));
+
+        //Log.e("checking error lat---------------------------->>>>>>>>>>", errordouble + " null");
+        Log.e("checking error log", sourceLog + " null");
+
         LayoutInflater layoutInflater = (LayoutInflater) getBaseContext()
                 .getSystemService(LAYOUT_INFLATER_SERVICE);
 
@@ -317,17 +344,18 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
                     public void onClick(View arg0) {
 
+                        errordouble +=.0373;
 
                         rechedBtn.setText("Restart");
+
+                        // Required second Point
+                       /* lat = gpsTracker.getLatitude();
+                        log = gpsTracker.getLongitude();*/
                         flag = false;
 
 
-                        final double dstLat = gpsTracker.getLatitude();
-                        final double dstLog = gpsTracker.getLongitude();
 
 
-                        /* final double dstLat = 27.1767;
-                        final double dstLog = 78.0081;*/
 
                         // get address
                         LocationAddress locationAddress = new LocationAddress();
@@ -437,11 +465,14 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                                             public void run() {
                                                 toast.cancel();
                                             }
-                                        }, 2000);
+                                        }, 5000);
+
+                                        pDialog.dismiss();
                                     }else
                                     {
                                         build_retrofit_and_get_response("driving", String.valueOf(srcLat), String.valueOf(srcLog),
                                                 String.valueOf(dstLat), String.valueOf(dstLog), loactionDstAdd);
+                                        pDialog.dismiss();
                                     }
 
                                 }
@@ -462,16 +493,52 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 });
 
         serchTxt = (SearchView)popupView.findViewById(R.id.editserchview);
+         searchData = (EditText)popupView.findViewById(R.id.editTextsearching);
          recyelerCustomerList= (RecyclerView)popupView.findViewById(R.id.recyeler_customer_list);
+        serchListData = (ListView)popupView.findViewById(R.id.listview_customer_list);
 
         userDetailApi(userIdString,authCodeString);
 
-        adapter = new CustomerListAdapter(context,custNameList,ShowMapsActivity.this);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(ShowMapsActivity.this);
+        adapter = new DemoCustomeAdapter(context,custNameList,ShowMapsActivity.this);
+        serchListData.setAdapter(adapter);
+
+        serchListData.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                for (int i = 0; i < serchListData.getChildCount(); i++) {
+                    if (position == i) {
+                        serchListData.getChildAt(i).setBackgroundColor(Color.parseColor("#e0e0e0"));
+                    } else {
+                        serchListData.getChildAt(i).setBackgroundColor(Color.parseColor("#ffffff"));
+                    }
+                }
+            }
+        });
+       /* RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(ShowMapsActivity.this);
         recyelerCustomerList.setLayoutManager(mLayoutManager);
         recyelerCustomerList.setItemAnimator(new DefaultItemAnimator());
-        recyelerCustomerList.setAdapter(adapter);
+        recyelerCustomerList.setAdapter(adapter);*/
 
+
+
+        searchData.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                adapter.getFilter().filter(s.toString());
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
         serchTxt.setIconified(false);
         //The above line will expand it to fit the area as well as throw up the keyboard
 
@@ -818,7 +885,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
             public void onResponse(String response) {
 
                 try {
-                    Log.e("User Details---------------", response);
+                    Log.e("User Details", response);
                     JSONArray jsonArray = new JSONArray(response.substring(response.indexOf("["),response.lastIndexOf("]") +1 ));
 
                     if (custNameList.size()>0)
@@ -879,7 +946,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 VolleyLog.d("Login", "Error: " + error.getMessage());
                 // Log.e("checking now ",error.getMessage());
 
-                final Toast toast = Toast.makeText(ShowMapsActivity.this, "Server Error", Toast.LENGTH_LONG);
+                final Toast toast = Toast.makeText(ShowMapsActivity.this, error.getMessage(), Toast.LENGTH_LONG);
                 View view = toast.getView();
                 view.setBackgroundResource(R.drawable.button_rounded_shape);
                 TextView text = (TextView) view.findViewById(android.R.id.message);
@@ -979,7 +1046,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 VolleyLog.d("Login", "Error: " + error.getMessage());
                 // Log.e("checking now ",error.getMessage());
 
-                final Toast toast = Toast.makeText(ShowMapsActivity.this, "Server Error", Toast.LENGTH_LONG);
+                final Toast toast = Toast.makeText(ShowMapsActivity.this, error.getMessage(), Toast.LENGTH_LONG);
                 View view = toast.getView();
                 view.setBackgroundResource(R.drawable.button_rounded_shape);
                 TextView text = (TextView) view.findViewById(android.R.id.message);
@@ -1038,12 +1105,30 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         //Toast.makeText(context, "Customer Name is "+ name, Toast.LENGTH_SHORT).show();
 
         destinationName = name;
+        final Toast toast = Toast.makeText(ShowMapsActivity.this, destinationName, Toast.LENGTH_LONG);
+        View view = toast.getView();
+        view.setBackgroundResource(R.drawable.button_rounded_shape);
+        TextView text = (TextView) view.findViewById(android.R.id.message);
+        text.setTextColor(Color.parseColor("#ffffff"));
+        text.setPadding(20, 20, 20, 20);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                toast.cancel();
+            }
+        }, 2000);
+
     }
 
     @Override
     public void getCustomerId(String cusId) {
 
         customerId = cusId;
+
+      //  Toast.makeText(context, customerId, Toast.LENGTH_SHORT).show();
     }
 
     // get address with the help of lat log

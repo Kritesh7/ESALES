@@ -78,7 +78,7 @@ public class HomeActivity extends AppCompatActivity {
     public String userIdString = "";
     public ArrayList<VehicleTypeModel> vehicleTypeList = new ArrayList<>();
     public ProgressDialog pDialog;
-    private final int SPLASH_DISPLAY_LENGTH = 5000;
+    private final int SPLASH_DISPLAY_LENGTH = 2000;
     public ConnectionDetector conn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {

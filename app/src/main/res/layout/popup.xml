@@ -6,6 +6,7 @@
     android:layout_height="wrap_content"
     android:background="@color/white">
     <LinearLayout
+        android:orientation="vertical"
         android:layout_margin="5dp"
         android:id="@+id/serchlay"
         android:layout_alignParentTop="true"
@@ -15,6 +16,7 @@
         >
 
         <android.support.v7.widget.SearchView
+            android:visibility="gone"
             android:clickable="true"
             android:touchscreenBlocksFocus="true"
             android:id="@+id/editserchview"
@@ -27,15 +29,39 @@
            >
         </android.support.v7.widget.SearchView>
 
+        <EditText
+            android:padding="10dp"
+            android:drawableLeft="@drawable/search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/editTextsearching"
+            android:background="@null"
+            android:hint="Search"
+            android:drawablePadding="10dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+
     </LinearLayout>
 
     <android.support.v7.widget.RecyclerView
+        android:visibility="gone"
         android:layout_below="@+id/serchlay"
         android:id="@+id/recyeler_customer_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/lay">
     </android.support.v7.widget.RecyclerView>
+
+    <ListView
+        android:id="@+id/listview_customer_list"
+        android:layout_below="@+id/serchlay"
+        android:layout_above="@+id/lay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </ListView>
 
 
     <LinearLayout

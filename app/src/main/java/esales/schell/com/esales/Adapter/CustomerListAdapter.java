@@ -23,8 +23,7 @@ import esales.schell.com.esales.R;
  * Created by Admin on 02-06-2017.
  */
 
-public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapter.ViewHolder>  implements Filterable
-{
+public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapter.ViewHolder>  implements Filterable {
 
     public Context context;
     public ArrayList<CustomerDetailsModel> list = new ArrayList<>();
@@ -32,8 +31,7 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
     public ArrayList<CustomerDetailsModel> filterlistlist = new ArrayList<>();
     public CustomerNameInterface anInterface;
 
-    public CustomerListAdapter(Context context , ArrayList<CustomerDetailsModel> list , CustomerNameInterface anInterface)
-    {
+    public CustomerListAdapter(Context context, ArrayList<CustomerDetailsModel> list, CustomerNameInterface anInterface) {
         this.context = context;
         this.list = list;
         this.filterlistlist = list;
@@ -43,7 +41,7 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext()).
-                inflate(R.layout.customizespinner,parent,false);
+                inflate(R.layout.customizespinner, parent, false);
         return new CustomerListAdapter.ViewHolder(itemView);
     }
 
@@ -71,29 +69,94 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
         return list.size();
     }
 
-    @Override
+   /* @Override
     public Filter getFilter() {
         if (valueFilter == null)
         {
             valueFilter = new ValueFilter();
         }
         return valueFilter;
-    }
+    }*/
 
     class ViewHolder extends RecyclerView.ViewHolder {
         public TextView custName;
+
         public ViewHolder(View itemView) {
             super(itemView);
 
-            custName = (TextView)itemView.findViewById(R.id.spiinertext);
-
-
+            custName = (TextView) itemView.findViewById(R.id.spiinertext);
 
 
         }
     }
 
-    private class ValueFilter extends Filter
+    //Returns a filter that can be used to constrain data with a filtering pattern.
+    @Override
+    public Filter getFilter() {
+
+        if (valueFilter == null) {
+
+            valueFilter = new ValueFilter();
+        }
+
+        return valueFilter;
+    }
+
+
+    private class ValueFilter extends Filter {
+
+
+        //Invoked in a worker thread to filter the data according to the constraint.
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+
+            FilterResults results = new FilterResults();
+
+            if (constraint != null && constraint.length() > 0) {
+
+                ArrayList<String> filterList = new ArrayList<String>();
+
+                for (int i = 0; i < filterlistlist.size(); i++) {
+
+                    if (filterlistlist.get(i).getCustomerName().contains(constraint)) {
+
+                        filterList.add(filterlistlist.get(i).getCustomerName());
+
+                    }
+                }
+
+
+                results.count = filterList.size();
+
+                results.values = filterList;
+
+            } else {
+
+                results.count = filterlistlist.size();
+
+                results.values = filterlistlist;
+
+            }
+
+            return results;
+        }
+
+
+        //Invoked in the UI thread to publish the filtering results in the user interface.
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void publishResults(CharSequence constraint,
+                                      FilterResults results) {
+
+            filterlistlist = (ArrayList<CustomerDetailsModel>) results.values;
+
+            notifyDataSetChanged();
+
+
+        }
+
+
+   /* private class ValueFilter extends Filter
     {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
@@ -133,6 +196,7 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
             list = (ArrayList<CustomerDetailsModel>)results.values;
             notifyDataSetChanged();
         }
-    }
+    }*/
 
+    }
 }

@@ -62,4 +62,14 @@ public class CustomerNameSpinnerAdapter extends BaseAdapter {
         ((TextView) convertView).setText(objects.get(position).getCustomerName());
         return convertView;
     }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
+
+    /* @Override
+    public String toString() {
+        return objects.;
+    }*/
 }

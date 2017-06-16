@@ -199,15 +199,17 @@
                     android:textColor="@color/red_800"
                     android:textSize="16dp" />
 
-                <Spinner
-                    android:layout_marginTop="5dp"
+                <com.toptoche.searchablespinnerlibrary.SearchableSpinner
+                    android:layout_marginLeft="10dp"
+                    app:hintText="Please Select Customer"
+                    android:layout_marginTop="10dp"
                     android:id="@+id/select_customer_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:drawSelectorOnTop="true"
                     >
 
-                </Spinner>
+                </com.toptoche.searchablespinnerlibrary.SearchableSpinner>
 
                 <android.support.design.widget.TextInputLayout
 

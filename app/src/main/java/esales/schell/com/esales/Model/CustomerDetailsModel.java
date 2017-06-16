@@ -21,4 +21,9 @@ public class CustomerDetailsModel
     public String getCustomerId() {
         return CustomerId;
     }
+
+    @Override
+    public String toString() {
+        return customerName;
+    }
 }

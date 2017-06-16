@@ -37,7 +37,7 @@ import esales.schell.com.esales.Sources.UtilsMethods;
 
 public class SplashScreen extends AppCompatActivity {
 
-    private final int SPLASH_DISPLAY_LENGTH = 5000;
+    private final int SPLASH_DISPLAY_LENGTH = 2000;
     public GPSTracker gps;
     public Context mContext;
     private Snackbar snackbar;

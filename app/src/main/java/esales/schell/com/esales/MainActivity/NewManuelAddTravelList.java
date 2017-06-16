@@ -22,6 +22,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -70,7 +71,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
 
     public Button subBtn;
     public RadioGroup travelRadioGruop;
-    public Spinner selectSpiner;
+    public com.toptoche.searchablespinnerlibrary.SearchableSpinner selectSpiner;
     public ArrayList<CustomerDetailsModel> custNameList = new ArrayList<>();
     public String userDetailUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppddlCustomer";
     public String authCodeString = "" , userIdString="";
@@ -133,7 +134,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
 
         subBtn = (Button)findViewById(R.id.btn_manuel_submit);
         travelRadioGruop = (RadioGroup) findViewById(R.id.travel_Type);
-        selectSpiner = (Spinner)findViewById(R.id.select_customer_name);
+        selectSpiner = (com.toptoche.searchablespinnerlibrary.SearchableSpinner)findViewById(R.id.select_customer_name);
         travelDateBtn = (ImageView)findViewById(R.id.travel_date_cal);
         startDateBtn = (ImageView)findViewById(R.id.start_dateView);
         reachedDateBtn = (ImageView)findViewById(R.id.reached_dateview);
@@ -159,14 +160,17 @@ public class NewManuelAddTravelList extends AppCompatActivity {
         }
 
         selectSpiner.getBackground().setColorFilter(getResources().getColor(R.color.red_800), PorterDuff.Mode.SRC_ATOP);
-        /*ArrayAdapter<CustomerDetailsModel> custNameAdapter = new ArrayAdapter<CustomerDetailsModel>(this,
-                R.layout.customizespinner,R.id.spiinertext,
-                custNameList);
-        custNameAdapter.setDropDownViewResource(R.layout.customizespinner);*/
-        adapter = new CustomerNameSpinnerAdapter(NewManuelAddTravelList.this, custNameList);
+        ArrayAdapter<CustomerDetailsModel> adapter =
+                new ArrayAdapter<CustomerDetailsModel>(getApplicationContext(), R.layout.spinnertextview, custNameList);
+        adapter.setDropDownViewResource(R.layout.spinnertextview);
+
         selectSpiner.setAdapter(adapter);
 
-        custNameList.add(new CustomerDetailsModel("Please Select Customer Name",""));
+
+        /*adapter = new CustomerNameSpinnerAdapter(NewManuelAddTravelList.this, custNameList);
+        selectSpiner.setAdapter(adapter);*/
+
+       /* custNameList.add(new CustomerDetailsModel("Please Select Customer Name",""));*/
 
         //cheaked the Internet Connection
         if (conn.getConnectivityStatus()>0)
@@ -190,7 +194,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                             // add data in list
                             custNameList.add(new CustomerDetailsModel(CustomerName,CustomerId));
 
-                            adapter.notifyDataSetChanged();
+                          //  adapter.notifyDataSetChanged();
 
                             // checked Data
                             Log.e("CustomerName",CustomerName);
@@ -201,6 +205,9 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                 }
             }
 
+
+        selectSpiner.setPositiveButton("OK");
+        selectSpiner.getBackground().setColorFilter(getResources().getColor(R.color.red_800),PorterDuff.Mode.SRC_ATOP);
 
         selectSpiner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -339,6 +346,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                             }
                         }, mHour, mMinute, false);
                 timePickerDialog.show();
+
             }
         });
 
@@ -413,6 +421,8 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                             }
                         }, mYear, mMonth, mDay);
                 datePickerDialog.show();
+
+                datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
             }
         });
 
@@ -525,6 +535,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
     {
         final ProgressDialog pDialog = new ProgressDialog(NewManuelAddTravelList.this);
         pDialog.setMessage("Loading...");
+        pDialog.setCancelable(false);
         pDialog.show();
 
         StringRequest historyInquiry = new StringRequest(
@@ -584,7 +595,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                         custNameList.add(new CustomerDetailsModel(CustomerName,CustomerID));
                     }
 
-                    adapter.notifyDataSetChanged();
+                   // adapter.notifyDataSetChanged();
                     pDialog.dismiss();
 
                 } catch (JSONException e) {
@@ -597,7 +608,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                 VolleyLog.d("Login", "Error: " + error.getMessage());
                 // Log.e("checking now ",error.getMessage());
 
-                final Toast toast = Toast.makeText(NewManuelAddTravelList.this, "Server Error", Toast.LENGTH_LONG);
+                final Toast toast = Toast.makeText(NewManuelAddTravelList.this, error.getMessage(), Toast.LENGTH_LONG);
                 View view = toast.getView();
                 view.setBackgroundResource(R.drawable.button_rounded_shape);
                 TextView text = (TextView) view.findViewById(android.R.id.message);
@@ -694,7 +705,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                 VolleyLog.d("Login", "Error: " + error.getMessage());
                 // Log.e("checking now ",error.getMessage());
 
-                final Toast toast = Toast.makeText(NewManuelAddTravelList.this, "Server Error", Toast.LENGTH_LONG);
+                final Toast toast = Toast.makeText(NewManuelAddTravelList.this, error.getMessage(), Toast.LENGTH_LONG);
                 View view = toast.getView();
                 view.setBackgroundResource(R.drawable.button_rounded_shape);
                 TextView text = (TextView) view.findViewById(android.R.id.message);

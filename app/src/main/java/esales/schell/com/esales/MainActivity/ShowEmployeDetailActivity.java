@@ -80,6 +80,7 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
     public Polyline line;
     public  SupportMapFragment mapFragment;
 
+    public CoordinatorLayout mainLay;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,6 +114,7 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
         totalAmountTxt = (TextView) findViewById(R.id.total_amout_txt);
         travelRemarkTxt = (TextView) findViewById(R.id.travel_remark_txt);
         feedSourceTxt = (TextView) findViewById(R.id.fedd_source_txt);
+        mainLay = (CoordinatorLayout)findViewById(R.id.main_content);
 
 
         authCodeString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getAuthCode(ShowEmployeDetailActivity.this)));
@@ -125,6 +127,19 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
         }
 
         MarkerPoints = new ArrayList<>();
+
+/*
+
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mainLay.getLayoutParams();
+        AppBarLayout.Behavior behavior = new AppBarLayout.Behavior();
+        behavior.setDragCallback(new AppBarLayout.Behavior.DragCallback() {
+            @Override
+            public boolean canDrag(AppBarLayout appBarLayout) {
+                return false;
+            }
+        });
+        params.setBehavior(behavior);
+*/
 
         // addDateTxt = (TextView)findViewById(R.id.add_date_txt);
 
@@ -501,7 +516,7 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
                 VolleyLog.d("Login", "Error: " + error.getMessage());
                 // Log.e("checking now ",error.getMessage());
 
-                final Toast toast = Toast.makeText(ShowEmployeDetailActivity.this, "Server Error", Toast.LENGTH_LONG);
+                final Toast toast = Toast.makeText(ShowEmployeDetailActivity.this, error.getMessage(), Toast.LENGTH_LONG);
                 View view = toast.getView();
                 view.setBackgroundResource(R.drawable.button_rounded_shape);
                 TextView text = (TextView) view.findViewById(android.R.id.message);
