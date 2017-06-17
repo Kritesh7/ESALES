@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -89,6 +90,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
     public   boolean visible;
     public ConnectionDetector conn;
     public String reachedPointAPIUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppEmployeeTravelExpenseInsUpdt";
+    public String checkNavigate = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,14 +110,13 @@ public class NewManuelAddTravelList extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
 
-
         // change toolbar back arrow color
         final Drawable upArrow = getResources().getDrawable(R.drawable.arrow);
         //  upArrow.setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_ATOP);
         getSupportActionBar().setHomeAsUpIndicator(upArrow);
 
         // enable back arrow
-        if (getSupportActionBar() != null){
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
@@ -129,33 +130,38 @@ public class NewManuelAddTravelList extends AppCompatActivity {
         });
 
 
+        final Intent checkInt = getIntent();
+        if (checkInt != null)
+        {
+            checkNavigate = checkInt.getStringExtra("checked");
+        }
+
         masterDataBase = new MasterDataBase(NewManuelAddTravelList.this);
         conn = new ConnectionDetector(NewManuelAddTravelList.this);
 
-        subBtn = (Button)findViewById(R.id.btn_manuel_submit);
+        subBtn = (Button) findViewById(R.id.btn_manuel_submit);
         travelRadioGruop = (RadioGroup) findViewById(R.id.travel_Type);
-        selectSpiner = (com.toptoche.searchablespinnerlibrary.SearchableSpinner)findViewById(R.id.select_customer_name);
-        travelDateBtn = (ImageView)findViewById(R.id.travel_date_cal);
-        startDateBtn = (ImageView)findViewById(R.id.start_dateView);
-        reachedDateBtn = (ImageView)findViewById(R.id.reached_dateview);
-        startEditTxt = (EditText)findViewById(R.id.start_date_text);
-        reachedEditTxt = (EditText)findViewById(R.id.reacheTimeTxt);
-        travelDateEditTxt = (EditText)findViewById(R.id.travelDateTxt);
-        amountLay = (LinearLayout)findViewById(R.id.amount_lay);
-        parentLay = (LinearLayout)findViewById(R.id.parentlay);
-        sourceNameTxt = (EditText)findViewById(R.id.input_sourceName);
-        destinationEditTxt = (EditText)findViewById(R.id.input_destinationName);
-        travelDistanceEditTxt = (EditText)findViewById(R.id.input_travelDistance);
-        amountEditTxt = (EditText)findViewById(R.id.amounttxt);
-        remarkTxt = (EditText)findViewById(R.id.remarkEditTxt);
+        selectSpiner = (com.toptoche.searchablespinnerlibrary.SearchableSpinner) findViewById(R.id.select_customer_name);
+        travelDateBtn = (ImageView) findViewById(R.id.travel_date_cal);
+        startDateBtn = (ImageView) findViewById(R.id.start_dateView);
+        reachedDateBtn = (ImageView) findViewById(R.id.reached_dateview);
+        startEditTxt = (EditText) findViewById(R.id.start_date_text);
+        reachedEditTxt = (EditText) findViewById(R.id.reacheTimeTxt);
+        travelDateEditTxt = (EditText) findViewById(R.id.travelDateTxt);
+        amountLay = (LinearLayout) findViewById(R.id.amount_lay);
+        parentLay = (LinearLayout) findViewById(R.id.parentlay);
+        sourceNameTxt = (EditText) findViewById(R.id.input_sourceName);
+        destinationEditTxt = (EditText) findViewById(R.id.input_destinationName);
+        travelDistanceEditTxt = (EditText) findViewById(R.id.input_travelDistance);
+        amountEditTxt = (EditText) findViewById(R.id.amounttxt);
+        remarkTxt = (EditText) findViewById(R.id.remarkEditTxt);
 
 
         authCodeString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getAuthCode(NewManuelAddTravelList.this)));
         userIdString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getUserId(NewManuelAddTravelList.this)));
 
         ////------------------ case Details-------------------------//
-        if (custNameList.size()>0)
-        {
+        if (custNameList.size() > 0) {
             custNameList.clear();
         }
 
@@ -172,327 +178,320 @@ public class NewManuelAddTravelList extends AppCompatActivity {
 
        /* custNameList.add(new CustomerDetailsModel("Please Select Customer Name",""));*/
 
-        //cheaked the Internet Connection
-        if (conn.getConnectivityStatus()>0)
-        {
-            userDetailApi(userIdString,authCodeString);
-        }
-        else
-            {
-                // get the data  to database (Customer Detail)
-                Cursor cursor = masterDataBase.getCustomerDetail(userIdString);
+        int cnt = masterDataBase.getCustomerDetailCunt(userIdString);
 
-                if (cursor !=null && cursor.getCount()>0)
-                {
-                    if (cursor.moveToFirst())
-                    {
-                        do
-                        {
-                            String CustomerName = cursor.getString(cursor.getColumnIndex(AppddlCustomer.CustomerName));
-                            String CustomerId = cursor.getString(cursor.getColumnIndex(AppddlCustomer.CustomerID));
+        // cheked data base record is available or not
+        if (cnt >= 0) {
+            // get the data  to database (Customer Detail)
+            Cursor cursor1 = masterDataBase.getCustomerDetail(userIdString);
 
-                            // add data in list
-                            custNameList.add(new CustomerDetailsModel(CustomerName,CustomerId));
+            if (cursor1 != null && cursor1.getCount() > 0) {
+                if (cursor1.moveToFirst()) {
+                    do {
+                        String CustomerName = cursor1.getString(cursor1.getColumnIndex(AppddlCustomer.CustomerName));
+                        String CustomerId = cursor1.getString(cursor1.getColumnIndex(AppddlCustomer.CustomerID));
 
-                          //  adapter.notifyDataSetChanged();
+                        // add data in list
+                        custNameList.add(new CustomerDetailsModel(CustomerName, CustomerId));
 
-                            // checked Data
-                            Log.e("CustomerName",CustomerName);
-                            Log.e("CustomerId",CustomerId);
+                        //  adapter.notifyDataSetChanged();
 
-                        }while (cursor.moveToNext());
+                        // checked Data
+                        Log.e("CustomerName", CustomerName);
+                        Log.e("CustomerId", CustomerId);
+
+                    } while (cursor1.moveToNext());
+                }
+            } else {
+                //checked Internet connectivity
+                if (conn.getConnectivityStatus() > 0) {
+                    userDetailApi(userIdString, authCodeString);
+                } else {
+
+                    conn.showNoInternetAlret();
+                }
+            }
+
+
+            selectSpiner.setPositiveButton("OK");
+            selectSpiner.getBackground().setColorFilter(getResources().getColor(R.color.red_800), PorterDuff.Mode.SRC_ATOP);
+
+            selectSpiner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                    custName = custNameList.get(position).getCustomerName();
+                    custId = custNameList.get(position).getCustomerId();
+
+                    Log.e("customer id is ", custNameList.get(position).getCustomerId() + " null");
+                    Log.e("customer Name is ", custNameList.get(position).getCustomerName() + " null");
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+
+
+            //Craete Radio Button Dynamicaly
+            // add list to public option
+            vehicleTypeList.add(new VehicleTypeModel("1", "", "Public Transport"));
+            // data is show to database
+            Cursor cursor = masterDataBase.getVecheleTypeData(userIdString);
+
+            if (cursor != null && cursor.getCount() > 0) {
+                if (cursor.moveToFirst()) {
+                    do {
+                        String vehcleTypeName = cursor.getString(cursor.getColumnIndex(VechileTypeTable.VechileTypeName));
+                        String vechleTypeRate = cursor.getString(cursor.getColumnIndex(VechileTypeTable.vechileRate));
+                        String vechleTypeId = cursor.getString(cursor.getColumnIndex(VechileTypeTable.vechileTypeId));
+
+                        // add data in list
+                        vehicleTypeList.add(new VehicleTypeModel(vechleTypeId, vechleTypeRate, vehcleTypeName));
+
+                        // checked Data
+                        Log.e("vehcleTypeName", vehcleTypeName);
+                        Log.e("vechleTypeRate", vechleTypeRate);
+                        Log.e("vechleTypeId", vechleTypeId);
+                        Log.e("vehicleTypeList size", vehicleTypeList.size() + "");
+
+                    } while (cursor.moveToNext());
+                }
+            }
+
+            Log.e("first Type", vechileType);
+
+            // dynamically  create radio button
+            RadioGroup.LayoutParams rprms;
+            RadioButton radioButton = null;
+            for (int i = 0; i < vehicleTypeList.size(); i++) {
+                radioButton = new RadioButton(this);
+                radioButton.setText(vehicleTypeList.get(i).getVehicleTypeName());
+                radioButton.setId(Integer.parseInt(vehicleTypeList.get(i).getVehicleTypeId()));
+                rprms = new RadioGroup.LayoutParams(RadioGroup.LayoutParams.WRAP_CONTENT, RadioGroup.LayoutParams.WRAP_CONTENT);
+                travelRadioGruop.addView(radioButton, rprms);
+            }
+
+            // set checked listner
+            ((RadioButton) travelRadioGruop.getChildAt(1)).setChecked(true);
+            vechileType = vehicleTypeList.get(1).getVehicleTypeId();
+
+            // checking vechele type to visibile gone to amount edit text
+            if (vechileType.equalsIgnoreCase("1")) {
+                TransitionManager.beginDelayedTransition(parentLay);
+                visible = !visible;
+                amountLay.setVisibility(View.VISIBLE);
+            }
+
+            Log.e("first Type---------", vechileType);
+            travelRadioGruop.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
+
+                    Log.e("checked id is ", checkedId + " null");
+
+                    if (checkedId == Integer.parseInt(vehicleTypeList.get(0).getVehicleTypeId())) {
+                        vechileType = vehicleTypeList.get(0).getVehicleTypeId();
+                        Log.e("first Type", vechileType);
+
+                        TransitionManager.beginDelayedTransition(parentLay);
+                        visible = !visible;
+                        amountLay.setVisibility(View.VISIBLE);
+                    } else if (checkedId == Integer.parseInt(vehicleTypeList.get(1).getVehicleTypeId())) {
+                        vechileType = vehicleTypeList.get(1).getVehicleTypeId();
+                        Log.e("first Type", vechileType);
+
+                        TransitionManager.beginDelayedTransition(parentLay);
+                        visible = !visible;
+                        amountLay.setVisibility(View.GONE);
+                    } else if (checkedId == Integer.parseInt(vehicleTypeList.get(2).getVehicleTypeId())) {
+                        vechileType = vehicleTypeList.get(2).getVehicleTypeId();
+                        Log.e("second Type", vechileType);
+
+                        TransitionManager.beginDelayedTransition(parentLay);
+                        visible = !visible;
+                        amountLay.setVisibility(View.GONE);
                     }
                 }
-            }
+            });
+
+            // click on date picker and set date
+            startDateBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Get Current Time
+                    final Calendar c = Calendar.getInstance();
+                    mHour = c.get(Calendar.HOUR_OF_DAY);
+                    mMinute = c.get(Calendar.MINUTE);
+
+                    // Launch Time Picker Dialog
+                    TimePickerDialog timePickerDialog = new TimePickerDialog(NewManuelAddTravelList.this,
+                            new TimePickerDialog.OnTimeSetListener() {
+
+                                @Override
+                                public void onTimeSet(TimePicker view, int hourOfDay,
+                                                      int minute) {
 
 
-        selectSpiner.setPositiveButton("OK");
-        selectSpiner.getBackground().setColorFilter(getResources().getColor(R.color.red_800),PorterDuff.Mode.SRC_ATOP);
-
-        selectSpiner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                custName = custNameList.get(position).getCustomerName();
-                custId = custNameList.get(position).getCustomerId();
-
-                Log.e("customer id is ", custNameList.get(position).getCustomerId() + " null");
-                Log.e("customer Name is ", custNameList.get(position).getCustomerName() + " null");
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+                                    hh = hourOfDay;
+                                    m = minute;
+                                    // ro = checking + hourOfDay  + minute;
 
 
+                                    startEditTxt.setText(hourOfDay + ":" + minute);
+                                }
+                            }, mHour, mMinute, false);
+                    timePickerDialog.show();
 
-        //Craete Radio Button Dynamicaly
-        // add list to public option
-        vehicleTypeList.add(new VehicleTypeModel("1","","Public Transport"));
-        // data is show to database
-        Cursor cursor = masterDataBase.getVecheleTypeData(userIdString);
-
-        if (cursor !=null && cursor.getCount()>0)
-        {
-            if (cursor.moveToFirst())
-            {
-                do
-                {
-                    String vehcleTypeName = cursor.getString(cursor.getColumnIndex(VechileTypeTable.VechileTypeName));
-                    String vechleTypeRate = cursor.getString(cursor.getColumnIndex(VechileTypeTable.vechileRate));
-                    String vechleTypeId = cursor.getString(cursor.getColumnIndex(VechileTypeTable.vechileTypeId));
-
-                    // add data in list
-                    vehicleTypeList.add(new VehicleTypeModel(vechleTypeId,vechleTypeRate,vehcleTypeName));
-
-                    // checked Data
-                    Log.e("vehcleTypeName",vehcleTypeName);
-                    Log.e("vechleTypeRate",vechleTypeRate);
-                    Log.e("vechleTypeId",vechleTypeId);
-                    Log.e("vehicleTypeList size",vehicleTypeList.size()+"");
-
-                }while (cursor.moveToNext());
-            }
-        }
-
-        Log.e("first Type",vechileType);
-
-        // dynamically  create radio button
-        RadioGroup.LayoutParams rprms;
-        RadioButton radioButton = null;
-        for (int i=0 ; i<vehicleTypeList.size(); i++)
-        {
-            radioButton = new RadioButton(this);
-            radioButton.setText(vehicleTypeList.get(i).getVehicleTypeName());
-            radioButton.setId(Integer.parseInt(vehicleTypeList.get(i).getVehicleTypeId()));
-            rprms= new RadioGroup.LayoutParams(RadioGroup.LayoutParams.WRAP_CONTENT, RadioGroup.LayoutParams.WRAP_CONTENT);
-            travelRadioGruop.addView(radioButton,rprms);
-        }
-
-        // set checked listner
-        ((RadioButton)travelRadioGruop.getChildAt(1)).setChecked(true);
-        vechileType = vehicleTypeList.get(1).getVehicleTypeId();
-
-        // checking vechele type to visibile gone to amount edit text
-        if (vechileType.equalsIgnoreCase("1"))
-        {
-            TransitionManager.beginDelayedTransition(parentLay);
-            visible = !visible;
-            amountLay.setVisibility(View.VISIBLE);
-        }
-
-        Log.e("first Type---------",vechileType);
-        travelRadioGruop.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
-
-                Log.e("checked id is ", checkedId+" null");
-
-                if (checkedId == Integer.parseInt(vehicleTypeList.get(0).getVehicleTypeId()))
-                {
-                    vechileType = vehicleTypeList.get(0).getVehicleTypeId();
-                    Log.e("first Type",vechileType);
-
-                    TransitionManager.beginDelayedTransition(parentLay);
-                    visible = !visible;
-                    amountLay.setVisibility(View.VISIBLE);
                 }
-                else if (checkedId == Integer.parseInt(vehicleTypeList.get(1).getVehicleTypeId()))
-                {
-                    vechileType = vehicleTypeList.get(1).getVehicleTypeId();
-                    Log.e("first Type",vechileType);
+            });
 
-                    TransitionManager.beginDelayedTransition(parentLay);
-                    visible = !visible;
-                    amountLay.setVisibility(View.GONE);
-                }else if (checkedId == Integer.parseInt(vehicleTypeList.get(2).getVehicleTypeId()))
-                {
-                    vechileType = vehicleTypeList.get(2).getVehicleTypeId();
-                    Log.e("second Type",vechileType);
+            reachedDateBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
-                    TransitionManager.beginDelayedTransition(parentLay);
-                    visible = !visible;
-                    amountLay.setVisibility(View.GONE);
+                    // Get Current Time
+                    final Calendar c = Calendar.getInstance();
+                    mHour = c.get(Calendar.HOUR_OF_DAY);
+                    mMinute = c.get(Calendar.MINUTE);
+
+                    // Launch Time Picker Dialog
+                    TimePickerDialog timePickerDialog = new TimePickerDialog(NewManuelAddTravelList.this,
+                            new TimePickerDialog.OnTimeSetListener() {
+
+                                @Override
+                                public void onTimeSet(TimePicker view, int hourOfDay,
+                                                      int minute) {
+
+
+                                    hh = hourOfDay;
+                                    m = minute;
+                                    // ro = checking + hourOfDay  + minute;
+
+
+                                    reachedEditTxt.setText(hourOfDay + ":" + minute);
+                                }
+                            }, mHour, mMinute, false);
+                    timePickerDialog.show();
                 }
-            }
-        });
+            });
 
-        // click on date picker and set date
-        startDateBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Get Current Time
-                final Calendar c = Calendar.getInstance();
-                mHour = c.get(Calendar.HOUR_OF_DAY);
-                mMinute = c.get(Calendar.MINUTE);
+            travelDateBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    InputMethodManager inputManager = (InputMethodManager)
+                            getSystemService(Context.INPUT_METHOD_SERVICE);
 
-                // Launch Time Picker Dialog
-                TimePickerDialog timePickerDialog = new TimePickerDialog(NewManuelAddTravelList.this,
-                        new TimePickerDialog.OnTimeSetListener() {
-
-                            @Override
-                            public void onTimeSet(TimePicker view, int hourOfDay,
-                                                  int minute) {
+                    inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                            InputMethodManager.HIDE_NOT_ALWAYS);
+                    // Get Current Date
+                    final Calendar c = Calendar.getInstance();
+                    mYear = c.get(Calendar.YEAR);
+                    mMonth = c.get(Calendar.MONTH);
+                    mDay = c.get(Calendar.DAY_OF_MONTH);
 
 
-                                hh = hourOfDay;
-                                m = minute;
-                               // ro = checking + hourOfDay  + minute;
+                    DatePickerDialog datePickerDialog = new DatePickerDialog(NewManuelAddTravelList.this,
+                            new DatePickerDialog.OnDateSetListener() {
+
+                                @Override
+                                public void onDateSet(DatePicker view, int year,
+                                                      int monthOfYear, int dayOfMonth) {
+
+                                    yy = year;
+                                    mm = monthOfYear;
+                                    dd = dayOfMonth;
+
+                                    Calendar calendar = Calendar.getInstance();
+                                    calendar.set(Calendar.MONTH, monthOfYear);
+                                    String sdf = new SimpleDateFormat("LLL", Locale.getDefault()).format(calendar.getTime());
+                                    sdf = new DateFormatSymbols().getShortMonths()[monthOfYear];
+
+                                    Log.e("checking,............", sdf + " null");
+                                    travelDateEditTxt.setText(dayOfMonth + "-" + sdf + "-" + year);
+
+                                }
+                            }, mYear, mMonth, mDay);
+                    datePickerDialog.show();
+
+                    datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
+                }
+            });
+
+            subBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
 
-                                startEditTxt.setText(hourOfDay + ":" + minute);
-                            }
-                        }, mHour, mMinute, false);
-                timePickerDialog.show();
+                    if (travelDateEditTxt.getText().toString().equalsIgnoreCase("")) {
+                        travelDateEditTxt.setError("Please Select Valid Date");
+                    } else if (vechileType.equalsIgnoreCase("")) {
+                        Toast.makeText(NewManuelAddTravelList.this, "Please Select Vehicle Type", Toast.LENGTH_SHORT).show();
 
-            }
-        });
+                    } else if (startEditTxt.getText().toString().equalsIgnoreCase("")) {
+                        startEditTxt.setError("Please Select Starting Time");
 
-        reachedDateBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                    } else if (sourceNameTxt.getText().toString().equalsIgnoreCase("")) {
+                        sourceNameTxt.setError("Please Enter Valid Source Name");
 
-                // Get Current Time
-                final Calendar c = Calendar.getInstance();
-                mHour = c.get(Calendar.HOUR_OF_DAY);
-                mMinute = c.get(Calendar.MINUTE);
+                    } else if (reachedEditTxt.getText().toString().equalsIgnoreCase("")) {
+                        reachedEditTxt.setError("Please Select Reached Time");
 
-                // Launch Time Picker Dialog
-                TimePickerDialog timePickerDialog = new TimePickerDialog(NewManuelAddTravelList.this,
-                        new TimePickerDialog.OnTimeSetListener() {
+                    } else if (custId.equalsIgnoreCase("")) {
+                        Toast.makeText(NewManuelAddTravelList.this, "Please Select Customer Name", Toast.LENGTH_SHORT).show();
 
-                            @Override
-                            public void onTimeSet(TimePicker view, int hourOfDay,
-                                                  int minute) {
+                    } else if (destinationEditTxt.getText().toString().equalsIgnoreCase("")) {
 
+                        destinationEditTxt.setError("Please Enter valid destination Name");
+                    } else if (travelDistanceEditTxt.getText().toString().equalsIgnoreCase("")) {
+                        travelDistanceEditTxt.setError("Please Enter Travel Expense");
 
-                                hh = hourOfDay;
-                                m = minute;
-                                // ro = checking + hourOfDay  + minute;
-
-
-                                reachedEditTxt.setText(hourOfDay + ":" + minute);
-                            }
-                        }, mHour, mMinute, false);
-                timePickerDialog.show();
-            }
-        });
-
-        travelDateBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                InputMethodManager inputManager = (InputMethodManager)
-                        getSystemService(Context.INPUT_METHOD_SERVICE);
-
-                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
-                        InputMethodManager.HIDE_NOT_ALWAYS);
-                // Get Current Date
-                final Calendar c = Calendar.getInstance();
-                mYear = c.get(Calendar.YEAR);
-                mMonth = c.get(Calendar.MONTH);
-                mDay = c.get(Calendar.DAY_OF_MONTH);
-
-
-                DatePickerDialog datePickerDialog = new DatePickerDialog(NewManuelAddTravelList.this,
-                        new DatePickerDialog.OnDateSetListener() {
-
-                            @Override
-                            public void onDateSet(DatePicker view, int year,
-                                                  int monthOfYear, int dayOfMonth) {
-
-                                yy = year;
-                                mm = monthOfYear;
-                                dd = dayOfMonth;
-
-                                Calendar calendar = Calendar.getInstance();
-                                calendar.set(Calendar.MONTH, monthOfYear);
-                                String  sdf  = new SimpleDateFormat("LLL", Locale.getDefault()).format(calendar.getTime());
-                                sdf = new DateFormatSymbols().getShortMonths()[monthOfYear];
-
-                                Log.e("checking,............",sdf + " null");
-
-                                /* checking = dayOfMonth  + (monthOfYear + 1)  + year;
-                                Log.e("checking,............",getDate(checking,"dd/MM/yyyy") + " null");*/
-
-                                travelDateEditTxt.setText(dayOfMonth + "-" + sdf + "-" + year);
-
-                            }
-                        }, mYear, mMonth, mDay);
-                datePickerDialog.show();
-
-                datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
-            }
-        });
-
-        subBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-
-                if (travelDateEditTxt.getText().toString().equalsIgnoreCase(""))
-                {
-                    travelDateEditTxt.setError("Please Select Valid Date");
-                }else if (vechileType.equalsIgnoreCase(""))
-                {
-                    Toast.makeText(NewManuelAddTravelList.this, "Please Select Vehicle Type", Toast.LENGTH_SHORT).show();
-
-                }else if (startEditTxt.getText().toString().equalsIgnoreCase(""))
-                {
-                    startEditTxt.setError("Please Select Starting Time");
-
-                }else if (sourceNameTxt.getText().toString().equalsIgnoreCase(""))
-                {
-                    sourceNameTxt.setError("Please Enter Valid Source Name");
-
-                }else if (reachedEditTxt.getText().toString().equalsIgnoreCase(""))
-                {
-                    reachedEditTxt.setError("Please Select Reached Time");
-
-                }else if (custId.equalsIgnoreCase(""))
-                {
-                    Toast.makeText(NewManuelAddTravelList.this, "Please Select Customer Name", Toast.LENGTH_SHORT).show();
-
-                }else if (destinationEditTxt.getText().toString().equalsIgnoreCase(""))
-                {
-
-                    destinationEditTxt.setError("Please Enter valid destination Name");
-                }else if (travelDistanceEditTxt.getText().toString().equalsIgnoreCase(""))
-                {
-                    travelDistanceEditTxt.setError("Please Enter Travel Expense");
-
-                }else {
-                    if (vechileType.equalsIgnoreCase("1"))
-                    {
-                        String amount = amountEditTxt.getText().toString();
-                        if(amount.equalsIgnoreCase(""))
-                        {
+                    } else {
+                        if (vechileType.equalsIgnoreCase("1")) {
+                            String amount = amountEditTxt.getText().toString();
+                            if (amount.equalsIgnoreCase("")) {
                                 amountEditTxt.setError("Please fill the Amount");
-                        }else {
-
-                            if (conn.getConnectivityStatus() > 0) {
-                                submitDetails("", userIdString, vechileType,
-                                        travelDateEditTxt.getText().toString() + " " + startEditTxt.getText().toString(),
-                                        sourceNameTxt.getText().toString(),
-                                        travelDateEditTxt.getText().toString() + " " + reachedEditTxt.getText().toString(),
-                                        custName + "," + destinationEditTxt.getText().toString(), custId, "0.0", "0.0", "0.0", "0.0",
-                                        travelDistanceEditTxt.getText().toString(), remarkTxt.getText().toString(), authCodeString,
-                                        amount);
                             } else {
-                                masterDataBase.setInsertTravelRecords("", userIdString, vechileType,
-                                        travelDateEditTxt.getText().toString() + " " + startEditTxt.getText().toString(),
-                                        sourceNameTxt.getText().toString(),
-                                        travelDateEditTxt.getText().toString() + " " + reachedEditTxt.getText().toString(),
-                                        custName + "," + destinationEditTxt.getText().toString(), custId, "0.0", "0.0", "0.0", "0.0",
-                                        travelDistanceEditTxt.getText().toString(), remarkTxt.getText().toString(), authCodeString,
-                                        amount);
+
+                                if (conn.getConnectivityStatus() > 0) {
+                                    submitDetails("", userIdString, vechileType,
+                                            travelDateEditTxt.getText().toString() + " " + startEditTxt.getText().toString(),
+                                            sourceNameTxt.getText().toString(),
+                                            travelDateEditTxt.getText().toString() + " " + reachedEditTxt.getText().toString(),
+                                            custName + "," + destinationEditTxt.getText().toString(), custId, "0.0", "0.0", "0.0", "0.0",
+                                            travelDistanceEditTxt.getText().toString(), remarkTxt.getText().toString(), authCodeString,
+                                            amount);
+                                } else {
+                                    masterDataBase.setInsertTravelRecords("", userIdString, vechileType,
+                                            travelDateEditTxt.getText().toString() + " " + startEditTxt.getText().toString(),
+                                            sourceNameTxt.getText().toString(),
+                                            travelDateEditTxt.getText().toString() + " " + reachedEditTxt.getText().toString(),
+                                            custName + "," + destinationEditTxt.getText().toString(), custId, "0.0", "0.0", "0.0", "0.0",
+                                            travelDistanceEditTxt.getText().toString(), remarkTxt.getText().toString(), authCodeString,
+                                            amount);
+
+                                    // offline navigate
+                                   /* if (checkNavigate.equalsIgnoreCase("home"))
+                                    {
+                                        Intent intent= new Intent(getApplicationContext(),HomeActivity.class);
+                                        startActivity(intent);
+                                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                        finish();
+                                    }else
+                                        {
+                                            Intent intent= new Intent(getApplicationContext(),ShowListActivity.class);
+                                            startActivity(intent);
+                                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                            finish();
+                                        }*/
+                                   onBackPressed();
+
+                                }
+
                             }
 
-                        }
-
-                    }else
-                        {
+                        } else {
                             if (conn.getConnectivityStatus() > 0) {
                                 submitDetails("", userIdString, vechileType,
                                         travelDateEditTxt.getText().toString() + " " + startEditTxt.getText().toString(),
@@ -508,26 +507,43 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                                         travelDateEditTxt.getText().toString() + " " + reachedEditTxt.getText().toString(),
                                         destinationEditTxt.getText().toString(), custId, "0.0", "0.0", "0.0", "0.0",
                                         travelDistanceEditTxt.getText().toString(), remarkTxt.getText().toString(), authCodeString, "0");
+
+
+                                // offline navigate
+                                /*if (checkNavigate.equalsIgnoreCase("home"))
+                                {
+                                    Intent intent= new Intent(getApplicationContext(),HomeActivity.class);
+                                    startActivity(intent);
+                                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                    finish();
+                                }else
+                                {
+                                    Intent intent= new Intent(getApplicationContext(),ShowListActivity.class);
+                                    startActivity(intent);
+                                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                    finish();
+                                }*/
+
+                                onBackPressed();
+
                             }
 
                         }
+                    }
                 }
+            });
+
+
+            // CHECKED PERMISSION
+            if (Build.VERSION.SDK_INT == 16 || Build.VERSION.SDK_INT == 17 ||
+                    Build.VERSION.SDK_INT == 18 || Build.VERSION.SDK_INT == 19) {
+
+                subBtn.setBackgroundColor(getResources().getColor(R.color.red_700));
+            } else {
+                subBtn.setBackgroundResource(R.drawable.rippileefact);
             }
-        });
 
-
-        // CHECKED PERMISSION
-        if (Build.VERSION.SDK_INT == 16 || Build.VERSION.SDK_INT == 17 ||
-                Build.VERSION.SDK_INT == 18 || Build.VERSION.SDK_INT == 19)
-        {
-
-            subBtn.setBackgroundColor(getResources().getColor(R.color.red_700));
         }
-        else
-        {
-            subBtn.setBackgroundResource(R.drawable.rippileefact);
-        }
-
     }
 
     //Api Work ------------------------------ customer Name  List Api
@@ -548,8 +564,8 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                     JSONArray jsonArray = new JSONArray(response.substring(response.indexOf("["),response.lastIndexOf("]") +1 ));
 
 
-                    // delet all record to save in customerDetail Table
-                    masterDataBase.deleteCustomerDetailRecord();
+                   /* // delet all record to save in customerDetail Table
+                    masterDataBase.deleteCustomerDetailRecord();*/
 
                     for (int i=0 ; i<jsonArray.length();i++)
                     {
@@ -690,6 +706,26 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                                     toast.cancel();
                                 }
                             }, 6000);
+                        }
+                        String  status = jsonObject.getString("status");
+                        if (status.equalsIgnoreCase("success"))
+                        {
+                            /*// online navigate
+                            if (checkNavigate.equalsIgnoreCase("home"))
+                            {
+                                Intent intent= new Intent(getApplicationContext(),HomeActivity.class);
+                                startActivity(intent);
+                                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                finish();
+                            }else
+                            {
+                                Intent intent= new Intent(getApplicationContext(),ShowListActivity.class);
+                                startActivity(intent);
+                                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                finish();
+                            }*/
+
+                            onBackPressed();
                         }
                     }
 

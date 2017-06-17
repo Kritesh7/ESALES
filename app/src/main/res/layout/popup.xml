@@ -14,21 +14,6 @@
         android:layout_height="wrap_content"
         android:background="@drawable/login_edittext"
         >
-
-        <android.support.v7.widget.SearchView
-            android:visibility="gone"
-            android:clickable="true"
-            android:touchscreenBlocksFocus="true"
-            android:id="@+id/editserchview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Search"
-            android:textColor="@color/red_800"
-            android:textColorHint="@color/red_800"
-            app:searchIcon="@drawable/search"
-           >
-        </android.support.v7.widget.SearchView>
-
         <EditText
             android:padding="10dp"
             android:drawableLeft="@drawable/search"
@@ -44,16 +29,6 @@
 
 
     </LinearLayout>
-
-    <android.support.v7.widget.RecyclerView
-        android:visibility="gone"
-        android:layout_below="@+id/serchlay"
-        android:id="@+id/recyeler_customer_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/lay">
-    </android.support.v7.widget.RecyclerView>
-
     <ListView
         android:id="@+id/listview_customer_list"
         android:layout_below="@+id/serchlay"

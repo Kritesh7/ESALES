@@ -173,6 +173,16 @@ public class MasterDataBase
         return cursor;
 
     }
+    public int getCustomerDetailCunt(String userid)
+    {
+
+        String countQuery = "SELECT  * FROM " + appddlCustomer.tableName + " WHERE " + appddlCustomer.userId + "=" + userid;
+        SQLiteDatabase db = dataBaseHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        int cnt = cursor.getCount();
+        cursor.close();
+        return cnt;
+    }
   /*  public int getCustomerDetailCunt(String userid)
     {
 

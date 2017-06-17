@@ -22,7 +22,7 @@
             android:id="@+id/rechecdbtn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight=".3"
+            android:layout_weight=".5"
             android:text="Reached"
             android:textColor="@color/white" />
 
@@ -31,18 +31,18 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
-            android:layout_weight=".3"
+            android:layout_weight=".5"
             android:text="Show List"
             android:textColor="@color/white" />
 
-        <Button
+       <!-- <Button
             android:id="@+id/day_endBtn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
             android:layout_weight=".3"
             android:text="Day End"
-            android:textColor="@color/white" />
+            android:textColor="@color/white" />-->
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>
 

@@ -119,6 +119,7 @@ public class ShowListActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(getApplicationContext(),NewManuelAddTravelList.class);
+                i.putExtra("checked","addNew");
                 startActivity(i);
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
 

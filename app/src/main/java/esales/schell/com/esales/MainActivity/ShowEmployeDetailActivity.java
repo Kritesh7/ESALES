@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,7 +62,6 @@ import retrofit.Callback;
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
 
-import static esales.schell.com.esales.R.id.appbar;
 
 public class ShowEmployeDetailActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -79,8 +79,9 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
     public MarkerOptions options;
     public Polyline line;
     public  SupportMapFragment mapFragment;
+    public LinearLayout travellRemarkLay;
 
-    public CoordinatorLayout mainLay;
+    public android.support.design.widget.AppBarLayout mainLay;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,6 +105,7 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
             }
         });
 
+        travellRemarkLay = (LinearLayout)findViewById(R.id.travel_remark_layout);
         vehicleTypeTxt = (TextView) findViewById(R.id.vehicle_tpe_txt);
         startAtTimeTxt = (TextView) findViewById(R.id.start_time_txt);
         sourceNameTxt = (TextView) findViewById(R.id.source_name_txt);
@@ -114,7 +116,7 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
         totalAmountTxt = (TextView) findViewById(R.id.total_amout_txt);
         travelRemarkTxt = (TextView) findViewById(R.id.travel_remark_txt);
         feedSourceTxt = (TextView) findViewById(R.id.fedd_source_txt);
-        mainLay = (CoordinatorLayout)findViewById(R.id.main_content);
+        mainLay = (android.support.design.widget.AppBarLayout)findViewById(R.id.main_content);
 
 
         authCodeString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getAuthCode(ShowEmployeDetailActivity.this)));
@@ -165,6 +167,17 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
         CollapsingToolbarLayout collapsingToolbar =
                 (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         collapsingToolbar.setTitle("First");
+
+
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mainLay.getLayoutParams();
+        AppBarLayout.Behavior behavior = new AppBarLayout.Behavior();
+        behavior.setDragCallback(new AppBarLayout.Behavior.DragCallback() {
+            @Override
+            public boolean canDrag(AppBarLayout appBarLayout) {
+                return false;
+            }
+        });
+        params.setBehavior(behavior);
 
 
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -419,6 +432,12 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
                             StartLongitude = jsonObject.getString("StartLongitude");
                             EndLattitude = jsonObject.getString("EndLattitude");
                             EndLongitude = jsonObject.getString("EndLongitude");
+
+
+                            if (TravelRemark.equalsIgnoreCase(""))
+                            {
+                                travellRemarkLay.setVisibility(View.GONE);
+                            }
 
                             vehicleTypeTxt.setText(VehicleTypeName);
                             startAtTimeTxt.setText(StartAtTime);

@@ -83,7 +83,7 @@ public class SplashScreen extends AppCompatActivity {
         {
             LocationManager   lm = (LocationManager)SplashScreen.this.getSystemService(SplashScreen.this.LOCATION_SERVICE);
 
-            if (conn.getConnectivityStatus() > 0) {
+
                 if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                     gps.showSettingsAlert();
                 } else {
@@ -117,10 +117,7 @@ public class SplashScreen extends AppCompatActivity {
                         }
                     }, SPLASH_DISPLAY_LENGTH);
                 }
-            }else
-            {
-                conn.showNoInternetAlret();
-            }
+
 
             /*if (conn.getConnectivityStatus() > 0) {
                 if (gps.canGetLocation()) {
@@ -175,7 +172,7 @@ public class SplashScreen extends AppCompatActivity {
 
             } else {
                 // Toast.makeText(mContext, "You need have granted permission", Toast.LENGTH_SHORT).show();
-                if (conn.getConnectivityStatus() > 0) {
+
                     if (gps.canGetLocation()) {
                         new Handler().postDelayed(new Runnable() {
                             @Override
@@ -216,10 +213,7 @@ public class SplashScreen extends AppCompatActivity {
                         gps.showSettingsAlert();
 
                     }
-                }else
-                {
-                    conn.showNoInternetAlret();
-                }
+
         }
 
 

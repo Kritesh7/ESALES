@@ -3,6 +3,7 @@ package esales.schell.com.esales.MainActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Build;
@@ -68,15 +69,20 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import esales.schell.com.esales.Adapter.CustomerListAdapter;
 import esales.schell.com.esales.Adapter.DemoCustomeAdapter;
+import esales.schell.com.esales.DataBase.AppddlCustomer;
+import esales.schell.com.esales.DataBase.MasterDataBase;
 import esales.schell.com.esales.Interface.CustomerNameInterface;
 import esales.schell.com.esales.Interface.RetrofitMaps;
 import esales.schell.com.esales.Model.CustomerDetailsModel;
 import esales.schell.com.esales.Model.MapRouteModel.Example;
 import esales.schell.com.esales.R;
 import esales.schell.com.esales.Sources.AppController;
+import esales.schell.com.esales.Sources.ConnectionDetector;
 import esales.schell.com.esales.Sources.GPSTracker;
 import esales.schell.com.esales.Sources.LocationAddress;
 import esales.schell.com.esales.Sources.RecyclerItemClickListener;
@@ -92,18 +98,14 @@ import retrofit.Retrofit;
 public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCallback,CustomerNameInterface {
 
     private GoogleMap mMap;
-    public double lat,log , mysynclat,mysynclog;
+    public double lat,log;
     public String vechileType="",startTime = "", sourceName = "";
-    public Spinner custSpiiner;
     public LinearLayout custome_Toolbar;
-    public ImageView backBtn;
     public ArrayList<CustomerDetailsModel> custNameList = new ArrayList<>();
     public PopupWindow popupWindow;
-    public RecyclerView recyelerCustomerList;
     public ListView serchListData;
     public DemoCustomeAdapter adapter;
     public Button rechedBtn;
-    public SearchView serchTxt;
     public EditText searchData;
     public Context context;
     public boolean flag = true;
@@ -123,6 +125,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     private final int SPLASH_DISPLAY_LENGTH = 2000;
     public ProgressDialog pDialog;
     public String loactionDstAdd = "";
+    public ConnectionDetector conn;
+    public MasterDataBase masterDataBase;
     double errordouble = 0;
     public String userDetailUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppddlCustomer";
     public String reachedPointAPIUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppEmployeeTravelExpenseInsUpdt";
@@ -137,12 +141,14 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         mapFragment.getMapAsync(this);
 
         context = ShowMapsActivity.this;
+        conn =new ConnectionDetector(context);
+        masterDataBase = new MasterDataBase(context);
         MarkerPoints = new ArrayList<>();
         gpsTracker = new GPSTracker(context,ShowMapsActivity.this);
         custome_Toolbar = (LinearLayout)findViewById(R.id.custome_bar);
         menuItemImg = (ImageView)custome_Toolbar.findViewById(R.id.menu_item);
         rechedBtn = (Button)findViewById(R.id.rechecdbtn);
-        dayEndBtn = (Button)findViewById(R.id.day_endBtn);
+      //  dayEndBtn = (Button)findViewById(R.id.day_endBtn);
         showListBtn = (Button)findViewById(R.id.showListBtn);
 
 
@@ -190,13 +196,13 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 Build.VERSION.SDK_INT == 18 || Build.VERSION.SDK_INT == 19)
         {
 
-            dayEndBtn.setBackgroundColor(getResources().getColor(R.color.red_700));
+          //  dayEndBtn.setBackgroundColor(getResources().getColor(R.color.red_700));
             showListBtn.setBackgroundColor(getResources().getColor(R.color.red_700));
             rechedBtn.setBackgroundColor(getResources().getColor(R.color.red_700));
         }
         else
         {
-            dayEndBtn.setBackgroundResource(R.drawable.rippileefact);
+//            dayEndBtn.setBackgroundResource(R.drawable.rippileefact);
             showListBtn.setBackgroundResource(R.drawable.rippileefact);
             rechedBtn.setBackgroundResource(R.drawable.rippileefact);
 
@@ -222,7 +228,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
             }
         });
 
-        dayEndBtn.setOnClickListener(new View.OnClickListener() {
+       /* dayEndBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -235,7 +241,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                         "1")));
             }
         });
-
+*/
         sourceLat = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
         sourceLog =  UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));
 
@@ -283,175 +289,194 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
     private void callPopup() {
 
-
         final double dstLat = gpsTracker.getLatitude();
         final double dstLog = gpsTracker.getLongitude();
 
 
-       /*  final double dstLat = 27.1767+errordouble;
-         final double dstLog = 78.0081+errordouble;
-*/
+        /* final double dstLat = 	28.5244;
+         final double dstLog =  77.1855;*/
+
+
         sourceLat = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
-        sourceLog =  UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));
+        sourceLog = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));
 
         //Log.e("checking error lat---------------------------->>>>>>>>>>", errordouble + " null");
         Log.e("checking error log", sourceLog + " null");
 
         LayoutInflater layoutInflater = (LayoutInflater) getBaseContext()
                 .getSystemService(LAYOUT_INFLATER_SERVICE);
-
         View popupView = layoutInflater.inflate(R.layout.popup, null);
-
-        Button cancel , save;
-
+        Button cancel, save;
         popupWindow = new PopupWindow(popupView,
-                RelativeLayout.LayoutParams.MATCH_PARENT,    RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT,
                 true);
-
-
         popupWindow.setTouchable(true);
         popupWindow.setFocusable(true);
-
         popupWindow.setAnimationStyle(R.style.animationName);
-
         popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);
-
-
-
-
-        save = (Button)popupView.findViewById(R.id.saveBtn);
-        cancel = (Button)popupView.findViewById(R.id.cancelbtutton);
+        save = (Button) popupView.findViewById(R.id.saveBtn);
+        cancel = (Button) popupView.findViewById(R.id.cancelbtutton);
 
         // checked permission
-
         if (Build.VERSION.SDK_INT == 16 || Build.VERSION.SDK_INT == 17 ||
-                Build.VERSION.SDK_INT == 18 || Build.VERSION.SDK_INT == 19)
-        {
+                Build.VERSION.SDK_INT == 18 || Build.VERSION.SDK_INT == 19) {
 
             save.setBackgroundColor(getResources().getColor(R.color.red_700));
             cancel.setBackgroundColor(getResources().getColor(R.color.red_700));
-        }
-        else
-        {
+        } else {
             save.setBackgroundResource(R.drawable.rippileefact);
             cancel.setBackgroundResource(R.drawable.rippileefact);
 
 
         }
 
-        /*((Button) popupView.findViewById(R.id.saveBtn))*/
-        save .setOnClickListener(new View.OnClickListener() {
+        save.setOnClickListener(new View.OnClickListener() {
 
-                    public void onClick(View arg0) {
+            public void onClick(View arg0) {
 
-                        errordouble +=.0373;
+                errordouble += .0373;
 
-                        rechedBtn.setText("Restart");
+                rechedBtn.setText("Restart");
+                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(ShowMapsActivity.this,
+                        "1")));
 
-                        // Required second Point
+                // Required second Point
                        /* lat = gpsTracker.getLatitude();
                         log = gpsTracker.getLongitude();*/
-                        flag = false;
+                flag = false;
 
 
+                // get address
+                if (conn.getConnectivityStatus()>0)
+                {
+                    LocationAddress locationAddress = new LocationAddress();
+                    locationAddress.getAddressFromLocation(dstLat, dstLog, getApplicationContext(),
+                            new GeocoderHandler());
+                }
+
+                final double srcLat = Double.parseDouble(sourceLat);
+                final double srcLog = Double.parseDouble(sourceLog);
+
+                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLat(ShowMapsActivity.this, String.valueOf(dstLat))));
+                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLog(ShowMapsActivity.this, String.valueOf(dstLog))));
+
+                Log.e("checking srclat is :", srcLat + " null");
+                Log.e("checking srcLog is :", srcLog + " null");
+                Log.e("checking dstLat is :", dstLat + " null");
+                Log.e("checking dstLog is :", dstLog + " null");
 
 
+                origin = new LatLng(srcLat, srcLog);
+                dest = new LatLng(dstLat, dstLog);
 
-                        // get address
-                        LocationAddress locationAddress = new LocationAddress();
-                        locationAddress.getAddressFromLocation(dstLat,dstLog,getApplicationContext(),
-                                new GeocoderHandler());
-
-
-
-
-                        final double srcLat = Double.parseDouble(sourceLat);
-                        final double srcLog = Double.parseDouble(sourceLog);
-
-                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLat(ShowMapsActivity.this, String.valueOf(dstLat))));
-                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLog(ShowMapsActivity.this, String.valueOf(dstLog))));
-
-                        Log.e("checking srclat is :", srcLat + " null");
-                        Log.e("checking srcLog is :", srcLog + " null");
-                        Log.e("checking dstLat is :", dstLat + " null");
-                        Log.e("checking dstLog is :", dstLog + " null");
+                point = new LatLng(dstLat, dstLog);
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, 17.0f);
+                mMap.animateCamera(cameraUpdate);
 
 
-                        origin = new LatLng(srcLat, srcLog);
-                        dest = new LatLng(dstLat, dstLog);
-
-                        point = new LatLng(dstLat, dstLog);
-                        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, 17.0f);
-                        mMap.animateCamera(cameraUpdate);
+                // working to shown root and calculate the distance
 
 
-                        // working to shown root and calculate the distance
+                // check condition ,condition is true then clear all points and String
+                if (MarkerPoints.size() > 1) {
+                    mMap.clear();
+                    MarkerPoints.clear();
+                    MarkerPoints = new ArrayList<>();
+                    ShowDistanceDuration = "";
+                }
 
 
-                        // check condition ,condition is true then clear all points and String
-                        if (MarkerPoints.size() > 1) {
-                            mMap.clear();
-                            MarkerPoints.clear();
-                            MarkerPoints = new ArrayList<>();
-                            ShowDistanceDuration = "";
+                mMap.addMarker(options.position(dest).title("Customer Place"));
+                /**
+                 * For the start location, the color of marker is GREEN and
+                 * for the end location, the color of marker is RED.
+                 */
+                if (MarkerPoints.size() == 1) {
+                    options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                } else if (MarkerPoints.size() == 2) {
+                    options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                }
+
+                // add marker
+
+                mMap.addMarker(options);
+
+                // Checks, whether start and end locations are captured
+                if (MarkerPoints.size() >= 2) {
+                    origin = MarkerPoints.get(0);
+                    dest = MarkerPoints.get(1);
+                }
+
+
+                // wait until to get lat log
+                if (destinationName.equalsIgnoreCase("")) {
+                    final Toast toast = Toast.makeText(ShowMapsActivity.this, "Please Select Customer", Toast.LENGTH_LONG);
+                    View view = toast.getView();
+                    view.setBackgroundResource(R.drawable.button_rounded_shape);
+                    TextView text = (TextView) view.findViewById(android.R.id.message);
+                    text.setTextColor(Color.parseColor("#ffffff"));
+                    text.setPadding(20, 20, 20, 20);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            toast.cancel();
                         }
+                    }, 2000);
+
+                } else {
+                    pDialog = new ProgressDialog(ShowMapsActivity.this);
+                    pDialog.setMessage("Loading...");
+                    pDialog.setCancelable(false);
+                    pDialog.show();
+
+                    // checked lat log is get or not
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            if (dstLat == 0.0) {
 
 
-                        mMap.addMarker(options.position(dest).title("Customer Place"));
-                        /**
-                         * For the start location, the color of marker is GREEN and
-                         * for the end location, the color of marker is RED.
-                         */
-                        if (MarkerPoints.size() == 1) {
-                            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                        } else if (MarkerPoints.size() == 2) {
-                            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                        }
+                                if (gpsTracker.canGetLocation()) {
 
-                        // add marker
+                                    final Toast toast = Toast.makeText(ShowMapsActivity.this, "Please Try Again lat log is not get", Toast.LENGTH_LONG);
+                                    View view = toast.getView();
+                                    view.setBackgroundResource(R.drawable.button_rounded_shape);
+                                    TextView text = (TextView) view.findViewById(android.R.id.message);
+                                    text.setTextColor(Color.parseColor("#ffffff"));
+                                    text.setPadding(20, 20, 20, 20);
+                                    toast.setGravity(Gravity.CENTER, 0, 0);
+                                    toast.show();
+                                    Handler handler = new Handler();
+                                    handler.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            toast.cancel();
+                                        }
+                                    }, 5000);
 
-                        mMap.addMarker(options);
+                                    pDialog.dismiss();
 
-                        // Checks, whether start and end locations are captured
-                        if (MarkerPoints.size() >= 2) {
-                            origin = MarkerPoints.get(0);
-                            dest = MarkerPoints.get(1);
-                        }
-
-
-
-                        // wait until to get lat log
-                        if (destinationName.equalsIgnoreCase("")) {
-                            final Toast toast = Toast.makeText(ShowMapsActivity.this, "Please Select Customer", Toast.LENGTH_LONG);
-                            View view = toast.getView();
-                            view.setBackgroundResource(R.drawable.button_rounded_shape);
-                            TextView text = (TextView) view.findViewById(android.R.id.message);
-                            text.setTextColor(Color.parseColor("#ffffff"));
-                            text.setPadding(20, 20, 20, 20);
-                            toast.setGravity(Gravity.CENTER, 0, 0);
-                            toast.show();
-                            Handler handler = new Handler();
-                            handler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    toast.cancel();
+                                }else
+                                {
+                                    gpsTracker.showSettingsAlert();
                                 }
-                            }, 2000);
 
-                        } else {
-                            pDialog = new ProgressDialog(ShowMapsActivity.this);
-                            pDialog.setMessage("Loading...");
-                            pDialog.setCancelable(false);
-                            pDialog.show();
+                            } else {
 
-                            // checked lat log is get or not
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
+                                if (conn.getConnectivityStatus()>0) {
+                                    build_retrofit_and_get_response("driving", String.valueOf(srcLat), String.valueOf(srcLog),
+                                            String.valueOf(dstLat), String.valueOf(dstLog), loactionDstAdd);
+                                }else {
 
-                                    if (dstLat == 0.0)
+                                     pDialog.dismiss();
+                                    String reachedTime = getCurrentTime();
+                                    if (destinationName.equalsIgnoreCase(""))
                                     {
-                                        final Toast toast = Toast.makeText(ShowMapsActivity.this, "Please Try Again lat log is not get", Toast.LENGTH_LONG);
+                                        final Toast toast = Toast.makeText(ShowMapsActivity.this, "Please Select Customer", Toast.LENGTH_LONG);
                                         View view = toast.getView();
                                         view.setBackgroundResource(R.drawable.button_rounded_shape);
                                         TextView text = (TextView) view.findViewById(android.R.id.message);
@@ -465,106 +490,118 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                                             public void run() {
                                                 toast.cancel();
                                             }
-                                        }, 5000);
-
-                                        pDialog.dismiss();
+                                        }, 2000);
                                     }else
                                     {
-                                        build_retrofit_and_get_response("driving", String.valueOf(srcLat), String.valueOf(srcLog),
-                                                String.valueOf(dstLat), String.valueOf(dstLog), loactionDstAdd);
-                                        pDialog.dismiss();
-                                    }
 
-                                }
-                            }, SPLASH_DISPLAY_LENGTH);
+                                        //insert data in local database
+                                        masterDataBase.setInsertTravelRecords("", userIdString, vechileType, startTime, sourceName, reachedTime, destinationName,
+                                                customerId, sourceLat, sourceLog,
+                                                String.valueOf(dstLat), String.valueOf(dstLog), "0", "", authCodeString,"0");
+
+                                        //pDialog.dismiss();
+                                        popupWindow.dismiss();
+
+                                    }
+                                   }
+                            }
 
                         }
-                    }
+                    }, SPLASH_DISPLAY_LENGTH);
 
-                });
+                }
+            }
+
+        });
 
 
         cancel.setOnClickListener(new View.OnClickListener() {
 
-                    public void onClick(View arg0) {
+            public void onClick(View arg0) {
 
-                        popupWindow.dismiss();
-                    }
-                });
+                popupWindow.dismiss();
+            }
+        });
 
-        serchTxt = (SearchView)popupView.findViewById(R.id.editserchview);
-         searchData = (EditText)popupView.findViewById(R.id.editTextsearching);
-         recyelerCustomerList= (RecyclerView)popupView.findViewById(R.id.recyeler_customer_list);
-        serchListData = (ListView)popupView.findViewById(R.id.listview_customer_list);
+        searchData = (EditText) popupView.findViewById(R.id.editTextsearching);
+        serchListData = (ListView) popupView.findViewById(R.id.listview_customer_list);
 
-        userDetailApi(userIdString,authCodeString);
 
-        adapter = new DemoCustomeAdapter(context,custNameList,ShowMapsActivity.this);
+        adapter = new DemoCustomeAdapter(context, custNameList, ShowMapsActivity.this);
         serchListData.setAdapter(adapter);
 
-        serchListData.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                for (int i = 0; i < serchListData.getChildCount(); i++) {
-                    if (position == i) {
-                        serchListData.getChildAt(i).setBackgroundColor(Color.parseColor("#e0e0e0"));
+       int cnt = masterDataBase.getCustomerDetailCunt(userIdString);
+
+        // cheked data base record is available or not
+        if (cnt>=0)
+        {
+            // get the data  to database (Customer Detail)
+            Cursor cursor = masterDataBase.getCustomerDetail(userIdString);
+
+            if (cursor != null && cursor.getCount() > 0) {
+                if (cursor.moveToFirst()) {
+                    do {
+                        String CustomerName = cursor.getString(cursor.getColumnIndex(AppddlCustomer.CustomerName));
+                        String CustomerId = cursor.getString(cursor.getColumnIndex(AppddlCustomer.CustomerID));
+
+                        // add data in list
+                        custNameList.add(new CustomerDetailsModel(CustomerName, CustomerId));
+
+                        //  adapter.notifyDataSetChanged();
+
+                        // checked Data
+                        Log.e("CustomerName", CustomerName);
+                        Log.e("CustomerId", CustomerId);
+
+                    } while (cursor.moveToNext());
+
+                }
+        }
+        else
+            {
+                  //checked Internet connectivity
+                   if (conn.getConnectivityStatus() > 0) {
+                        userDetailApi(userIdString, authCodeString);
                     } else {
-                        serchListData.getChildAt(i).setBackgroundColor(Color.parseColor("#ffffff"));
+
+                        conn.showNoInternetAlret();
+                    }
+            }
+
+
+            serchListData.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                    for (int i = 0; i < serchListData.getChildCount(); i++) {
+                        if (position == i) {
+                            serchListData.getChildAt(i).setBackgroundColor(Color.parseColor("#e0e0e0"));
+                        } else {
+                            serchListData.getChildAt(i).setBackgroundColor(Color.parseColor("#ffffff"));
+                        }
                     }
                 }
-            }
-        });
-       /* RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(ShowMapsActivity.this);
-        recyelerCustomerList.setLayoutManager(mLayoutManager);
-        recyelerCustomerList.setItemAnimator(new DefaultItemAnimator());
-        recyelerCustomerList.setAdapter(adapter);*/
+            });
 
+            searchData.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
+                    adapter.getFilter().filter(s.toString());
+                }
 
-        searchData.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    adapter.getFilter().filter(s);
+                }
 
-                adapter.getFilter().filter(s.toString());
-            }
+                @Override
+                public void afterTextChanged(Editable s) {
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.getFilter().filter(s);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-        serchTxt.setIconified(false);
-        //The above line will expand it to fit the area as well as throw up the keyboard
-
-        //To remove the keyboard, but make sure you keep the expanded version:
-        serchTxt.clearFocus();
-
-        SearchView.OnQueryTextListener onQueryTextListener = new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-
-                Log.e("query",query + "-----------");
-                adapter.getFilter().filter(query);
-
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-
-                Log.e("Text",newText);
-                adapter.getFilter().filter(newText);
-                return true;
-            }
-        };
-
-        serchTxt.setOnQueryTextListener(onQueryTextListener);
+                }
+            });
+        }
     }
 
     //get current time
@@ -596,9 +633,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-
-       /* double converLat = Double.parseDouble(lat);
-        double convertLog = Double.parseDouble(log);*/
         LatLng sydney = new LatLng(lat, log);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
@@ -647,7 +681,17 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 else {
 
 
-                    flag = true;
+                    Intent i = new Intent(getApplicationContext(),HomeActivity.class);
+                    startActivity(i);
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                    finish();
+
+                    UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(ShowMapsActivity.this,
+                            "1")));
+
+
+
+                   /* flag = true;
                     rechedBtn.setText("Reached");
 
                     // again
@@ -677,62 +721,11 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                     options = new MarkerOptions();
                     mMap.addMarker(options.position(point).title("Customer Place"));
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, 17.0f);
-                    mMap.animateCamera(cameraUpdate);
+                    mMap.animateCamera(cameraUpdate);*/
                 }
             }
         });
     }
-
-    /*private void build_retrofit_and_get_response(String type) {
-
-        String url = "https://maps.googleapis.com/maps/";
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(url)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        RetrofitMaps service = retrofit.create(RetrofitMaps.class);
-
-        Call<Example> call = service.getDistanceDuration("metric", origin.latitude + "," + origin.longitude,dest.latitude + "," + dest.longitude, type);
-
-        call.enqueue(new Callback<Example>() {
-            @Override
-            public void onResponse(Response<Example> response, Retrofit retrofit) {
-
-                try {
-                    //Remove previous line from map
-                    if (line != null) {
-                        line.remove();
-                    }
-                    // This loop will go through all the results and add marker on each location.
-                    for (int i = 0; i < response.body().getRoutes().size(); i++) {
-                        String distance = response.body().getRoutes().get(i).getLegs().get(i).getDistance().getText();
-                        String time = response.body().getRoutes().get(i).getLegs().get(i).getDuration().getText();
-                        Toast.makeText(getApplicationContext(), "My Calculate Distance is  -" + distance + "Time - " + time , Toast.LENGTH_LONG).show();
-                        String encodedString = response.body().getRoutes().get(0).getOverviewPolyline().getPoints();
-                        List<LatLng> list = decodePoly(encodedString);
-                        line = mMap.addPolyline(new PolylineOptions()
-                                .addAll(list)
-                                .width(20)
-                                .color(Color.RED)
-                                .geodesic(true)
-                        );
-                    }
-                } catch (Exception e) {
-                    Log.d("onResponse", "There is an error");
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.d("onFailure", t.toString());
-            }
-        });
-
-    }
-*/
 
     private void build_retrofit_and_get_response(String type, final String innersrclat, final String innersrclog,
                                                  final String innerdstlat, final String innerdstlog, final String locationdstAdd) {
@@ -765,8 +758,11 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
                         // distance.replaceAll("\\D+","")
 
+                        Log.e("Travel Distance>>>>>>>", distance + " null");
+                        String MyString = distance.replaceAll("[^a-z,]","");
+
                         //checked distance is m and KM
-                        if (distance.equalsIgnoreCase("1 m"))
+                        if (MyString.equalsIgnoreCase("m"))
                         {
                             int distanceConvInteger = Integer.parseInt(distance.replaceAll("\\D+",""));
                             double distanceInKm = distanceConvInteger/1000;
@@ -775,8 +771,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                         }
                         else
                             {
-                                travelDistance = distance.replaceAll("\\D+","");
-                                Log.e("Travel Distance in KM", travelDistance + " null");
+                                travelDistance = distance.replaceAll("[^0-9\\.]+", "");
+                                Log.e("Travel Distance in KM>>", travelDistance + " null");
                             }
 
                         if (rechedBtn.getText().toString().equalsIgnoreCase("Restart"))
@@ -820,6 +816,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
             @Override
             public void onFailure(Throwable t) {
+
                 Log.d("onFailure", t.toString());
             }
         });
@@ -893,6 +890,9 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                         custNameList.clear();
                     }
 
+                   /* // delet all record to save in customerDetail Table
+                    masterDataBase.deleteCustomerDetailRecord();*/
+
                     for (int i=0 ; i<jsonArray.length();i++)
                     {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -930,6 +930,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                             Log.e("checking CustomerName", CustomerName);
                         }
 
+                        // insert record in CustomerDetail Table
+                        masterDataBase.setCustomerDetail(CustomerID,CustomerName,userId);
                         custNameList.add(new CustomerDetailsModel(CustomerName,CustomerID));
                     }
 
@@ -994,10 +996,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                               final String EndLattitude, final String EndLongitude, final String TravelledDistance,
                               final String TravelRemark, final String AuthCode)
     {
-        /*final ProgressDialog pDialog = new ProgressDialog(ShowMapsActivity.this);
-        pDialog.setMessage("Loading...");
-        pDialog.show();*/
-
         StringRequest historyInquiry = new StringRequest(
                 Request.Method.POST, reachedPointAPIUrl, new com.android.volley.Response.Listener<String>() {
             @Override
@@ -1087,7 +1085,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 params.put("ExpAmount","0");
 
 
-                // Log.e(TAG, "auth_key");
+                 Log.e("Show Maps Lat>>>>>", params.toString());
                 return params;
             }
 
@@ -1147,5 +1145,13 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
             loactionDstAdd = locationAddress;
         }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Intent i =new Intent(getApplicationContext(),ShowMapsActivity.class);
+        startActivity(i);
+        finish();
     }
 }

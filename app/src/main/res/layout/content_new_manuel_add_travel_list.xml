@@ -52,6 +52,7 @@
                             android:textColorHint="#800200">
 
                             <EditText
+                                android:focusable="false"
                                 android:id="@+id/travelDateTxt"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -118,6 +119,7 @@
                             android:textColorHint="#800200">
 
                             <EditText
+                                android:focusable="false"
                                 android:id="@+id/start_date_text"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -172,6 +174,7 @@
                             android:textColorHint="#800200">
 
                             <EditText
+                                android:focusable="false"
                                 android:id="@+id/reacheTimeTxt"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"

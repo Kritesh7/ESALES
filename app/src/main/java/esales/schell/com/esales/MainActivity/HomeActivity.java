@@ -1,10 +1,13 @@
 package esales.schell.com.esales.MainActivity;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Build;
@@ -12,7 +15,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.IdRes;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.transition.TransitionManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -63,6 +69,8 @@ import esales.schell.com.esales.Sources.MyAsyncTask;
 import esales.schell.com.esales.Sources.SharedPrefs;
 import esales.schell.com.esales.Sources.UtilsMethods;
 
+import static esales.schell.com.esales.MainActivity.SplashScreen.getConnectivityStatusString;
+
 public class HomeActivity extends AppCompatActivity {
 
     public Button startBtn ,trailListbtn;
@@ -80,6 +88,9 @@ public class HomeActivity extends AppCompatActivity {
     public ProgressDialog pDialog;
     private final int SPLASH_DISPLAY_LENGTH = 2000;
     public ConnectionDetector conn;
+    private Snackbar snackbar;
+    private boolean internetConnected=true;
+    public CoordinatorLayout coordinatorLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +111,7 @@ public class HomeActivity extends AppCompatActivity {
         conn = new ConnectionDetector(context);
 
 
+        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.home_cordinator);
         logoutBtn = (ImageView)findViewById(R.id.logoutBtn);
         trailListbtn = (Button)findViewById(R.id.trail_listbtn);
         settingBtn = (ImageView)findViewById(R.id.setting);
@@ -155,6 +167,7 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getApplicationContext(),NewManuelAddTravelList.class);
+                i.putExtra("checked","home");
                 startActivity(i);
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             }
@@ -177,14 +190,25 @@ public class HomeActivity extends AppCompatActivity {
                 // cheked Innternet connection
                 if (conn.getConnectivityStatus()>0)
                 {
-                    // get address
-                    LocationAddress locationAddress = new LocationAddress();
-                    locationAddress.getAddressFromLocation(lat,log,getApplicationContext(),
-                            new GeocoderHandler());
+
+                    if (gps.canGetLocation()) {
+                        // get address
+                        LocationAddress locationAddress = new LocationAddress();
+                        locationAddress.getAddressFromLocation(lat, log, getApplicationContext(),
+                                new GeocoderHandler());
+                    }else
+                        {
+                            gps.showSettingsAlert();
+                        }
                 }
                 else
                     {
-                        callPopup("");
+                        if (gps.canGetLocation()) {
+                            callPopup("");
+                        }else
+                            {
+                                gps.showSettingsAlert();
+                            }
                     }
 
 
@@ -215,6 +239,14 @@ public class HomeActivity extends AppCompatActivity {
             startBtn.setBackgroundResource(R.drawable.buttonshape);
             trailListbtn.setBackgroundResource(R.drawable.buttonshape);
         }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Intent i =new Intent(getApplicationContext(),HomeActivity.class);
+        startActivity(i);
+        finish();
     }
 
 
@@ -465,7 +497,8 @@ public class HomeActivity extends AppCompatActivity {
                                     public void run() {
                                         toast.cancel();
                                     }
-                                }, 2000);
+                                }, 4000);
+                                pDialog.dismiss();
                             }else
                             {
                                 pDialog.dismiss();
@@ -511,6 +544,9 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
+
+
+
     //get current time
     public static String getCurrentTime() {
         //date output format
@@ -538,8 +574,73 @@ public class HomeActivity extends AppCompatActivity {
 
             // call Popup window
             callPopup(locationAddress);
+        }
+    }
 
-           // Toast.makeText(getApplicationContext(), locationAddress+"", Toast.LENGTH_SHORT).show();
+    //snackbar show internet not allowed
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(broadcastReceiver);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerInternetCheckReceiver();
+    }
+
+    private void registerInternetCheckReceiver() {
+        IntentFilter internetFilter = new IntentFilter();
+        internetFilter.addAction("android.net.wifi.STATE_CHANGE");
+        internetFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(broadcastReceiver, internetFilter);
+    }
+    public BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String status = getConnectivityStatusString(context);
+            setSnackbarMessage(status,false);
+        }
+    };
+
+    private void setSnackbarMessage(String status,boolean showBar) {
+        String internetStatus="";
+        if(status.equalsIgnoreCase("Wifi enabled")||status.equalsIgnoreCase("Mobile data enabled")){
+            internetStatus="Internet Connected";
+        }else {
+            internetStatus="Lost Internet Connection";
+        }
+        snackbar = Snackbar
+                .make(coordinatorLayout, internetStatus, Snackbar.LENGTH_LONG)
+                .setAction("X", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        snackbar.dismiss();
+                    }
+                });
+        // Changing message text color
+        snackbar.setActionTextColor(getResources().getColor(R.color.red_900));
+        snackbar.setDuration(5000);
+        // Changing action button text color
+        View sbView = snackbar.getView();
+        sbView.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.white));
+        TextView textView = (TextView) sbView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextColor(getResources().getColor(R.color.red_900));
+        textView.setTypeface(null, Typeface.BOLD);
+        if(internetStatus.equalsIgnoreCase("Lost Internet Connection")){
+            if(internetConnected){
+                snackbar.show();
+                internetConnected=false;
+
+            }
+        }else{
+            if(!internetConnected){
+                internetConnected=true;
+                snackbar.show();
+
+            }
         }
     }
 
