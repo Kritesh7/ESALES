@@ -1147,11 +1147,11 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         }
     }
 
-    @Override
+   /* @Override
     protected void onRestart() {
         super.onRestart();
         Intent i =new Intent(getApplicationContext(),ShowMapsActivity.class);
         startActivity(i);
         finish();
-    }
+    }*/
 }
