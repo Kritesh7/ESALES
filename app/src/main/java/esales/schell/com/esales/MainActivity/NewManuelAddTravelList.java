@@ -3,17 +3,23 @@ package esales.schell.com.esales.MainActivity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.IdRes;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.transition.TransitionManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -21,6 +27,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -68,6 +75,8 @@ import esales.schell.com.esales.Sources.SettingConstant;
 import esales.schell.com.esales.Sources.SharedPrefs;
 import esales.schell.com.esales.Sources.UtilsMethods;
 
+import static esales.schell.com.esales.MainActivity.SplashScreen.getConnectivityStatusString;
+
 public class NewManuelAddTravelList extends AppCompatActivity {
 
     public Button subBtn;
@@ -91,6 +100,9 @@ public class NewManuelAddTravelList extends AppCompatActivity {
     public ConnectionDetector conn;
     public String reachedPointAPIUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppEmployeeTravelExpenseInsUpdt";
     public String checkNavigate = "";
+    private Snackbar snackbar;
+    private boolean internetConnected=true;
+    public CoordinatorLayout coordinatorLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,6 +151,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
         masterDataBase = new MasterDataBase(NewManuelAddTravelList.this);
         conn = new ConnectionDetector(NewManuelAddTravelList.this);
 
+        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.newmanuellay);
         subBtn = (Button) findViewById(R.id.btn_manuel_submit);
         travelRadioGruop = (RadioGroup) findViewById(R.id.travel_Type);
         selectSpiner = (com.toptoche.searchablespinnerlibrary.SearchableSpinner) findViewById(R.id.select_customer_name);
@@ -425,21 +438,94 @@ public class NewManuelAddTravelList extends AppCompatActivity {
 
 
                     if (travelDateEditTxt.getText().toString().equalsIgnoreCase("")) {
-                        travelDateEditTxt.setError("Please Select Valid Date");
+
+                        final Toast toast = Toast.makeText(NewManuelAddTravelList.this, "Please Select Valid Date", Toast.LENGTH_LONG);
+                        View view = toast.getView();
+                        view.setBackgroundResource(R.drawable.button_rounded_shape);
+                        TextView text = (TextView) view.findViewById(android.R.id.message);
+                        text.setTextColor(Color.parseColor("#ffffff"));
+                        text.setPadding(20, 20, 20, 20);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                toast.cancel();
+                            }
+                        }, 3000);
+
                     } else if (vechileType.equalsIgnoreCase("")) {
-                        Toast.makeText(NewManuelAddTravelList.this, "Please Select Vehicle Type", Toast.LENGTH_SHORT).show();
+
+                        final Toast toast = Toast.makeText(NewManuelAddTravelList.this, "Please Select Vehicle Type", Toast.LENGTH_LONG);
+                        View view = toast.getView();
+                        view.setBackgroundResource(R.drawable.button_rounded_shape);
+                        TextView text = (TextView) view.findViewById(android.R.id.message);
+                        text.setTextColor(Color.parseColor("#ffffff"));
+                        text.setPadding(20, 20, 20, 20);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                toast.cancel();
+                            }
+                        }, 3000);
 
                     } else if (startEditTxt.getText().toString().equalsIgnoreCase("")) {
-                        startEditTxt.setError("Please Select Starting Time");
+
+                        final Toast toast = Toast.makeText(NewManuelAddTravelList.this, "Please Select Starting Time", Toast.LENGTH_LONG);
+                        View view = toast.getView();
+                        view.setBackgroundResource(R.drawable.button_rounded_shape);
+                        TextView text = (TextView) view.findViewById(android.R.id.message);
+                        text.setTextColor(Color.parseColor("#ffffff"));
+                        text.setPadding(20, 20, 20, 20);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                toast.cancel();
+                            }
+                        }, 3000);
+
 
                     } else if (sourceNameTxt.getText().toString().equalsIgnoreCase("")) {
                         sourceNameTxt.setError("Please Enter Valid Source Name");
 
                     } else if (reachedEditTxt.getText().toString().equalsIgnoreCase("")) {
-                        reachedEditTxt.setError("Please Select Reached Time");
+
+                        final Toast toast = Toast.makeText(NewManuelAddTravelList.this, "Please Select Reached Time", Toast.LENGTH_LONG);
+                        View view = toast.getView();
+                        view.setBackgroundResource(R.drawable.button_rounded_shape);
+                        TextView text = (TextView) view.findViewById(android.R.id.message);
+                        text.setTextColor(Color.parseColor("#ffffff"));
+                        text.setPadding(20, 20, 20, 20);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                toast.cancel();
+                            }
+                        }, 3000);
 
                     } else if (custId.equalsIgnoreCase("")) {
-                        Toast.makeText(NewManuelAddTravelList.this, "Please Select Customer Name", Toast.LENGTH_SHORT).show();
+
+                        final Toast toast = Toast.makeText(NewManuelAddTravelList.this, "Please Select Customer Name", Toast.LENGTH_LONG);
+                        View view = toast.getView();
+                        view.setBackgroundResource(R.drawable.button_rounded_shape);
+                        TextView text = (TextView) view.findViewById(android.R.id.message);
+                        text.setTextColor(Color.parseColor("#ffffff"));
+                        text.setPadding(20, 20, 20, 20);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                toast.cancel();
+                            }
+                        }, 3000);
+
 
                     } else if (destinationEditTxt.getText().toString().equalsIgnoreCase("")) {
 
@@ -471,20 +557,6 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                                             travelDistanceEditTxt.getText().toString(), remarkTxt.getText().toString(), authCodeString,
                                             amount);
 
-                                    // offline navigate
-                                   /* if (checkNavigate.equalsIgnoreCase("home"))
-                                    {
-                                        Intent intent= new Intent(getApplicationContext(),HomeActivity.class);
-                                        startActivity(intent);
-                                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                                        finish();
-                                    }else
-                                        {
-                                            Intent intent= new Intent(getApplicationContext(),ShowListActivity.class);
-                                            startActivity(intent);
-                                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                                            finish();
-                                        }*/
                                    onBackPressed();
 
                                 }
@@ -507,22 +579,6 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                                         travelDateEditTxt.getText().toString() + " " + reachedEditTxt.getText().toString(),
                                         destinationEditTxt.getText().toString(), custId, "0.0", "0.0", "0.0", "0.0",
                                         travelDistanceEditTxt.getText().toString(), remarkTxt.getText().toString(), authCodeString, "0");
-
-
-                                // offline navigate
-                                /*if (checkNavigate.equalsIgnoreCase("home"))
-                                {
-                                    Intent intent= new Intent(getApplicationContext(),HomeActivity.class);
-                                    startActivity(intent);
-                                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                                    finish();
-                                }else
-                                {
-                                    Intent intent= new Intent(getApplicationContext(),ShowListActivity.class);
-                                    startActivity(intent);
-                                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                                    finish();
-                                }*/
 
                                 onBackPressed();
 
@@ -795,4 +851,67 @@ public class NewManuelAddTravelList extends AppCompatActivity {
     }
 
 
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(broadcastReceiver);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerInternetCheckReceiver();
+    }
+
+    private void registerInternetCheckReceiver() {
+        IntentFilter internetFilter = new IntentFilter();
+        internetFilter.addAction("android.net.wifi.STATE_CHANGE");
+        internetFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(broadcastReceiver, internetFilter);
+    }
+    public BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String status = getConnectivityStatusString(context);
+            setSnackbarMessage(status,false);
+        }
+    };
+
+    private void setSnackbarMessage(String status,boolean showBar) {
+        String internetStatus="";
+        if(status.equalsIgnoreCase("Wifi enabled")||status.equalsIgnoreCase("Mobile data enabled")){
+            internetStatus="Internet Connected";
+        }else {
+            internetStatus="Lost Internet Connection";
+        }
+        snackbar = Snackbar
+                .make(coordinatorLayout, internetStatus, Snackbar.LENGTH_LONG)
+                .setAction("X", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        snackbar.dismiss();
+                    }
+                });
+        // Changing message text color
+        snackbar.setActionTextColor(getResources().getColor(R.color.red_900));
+        snackbar.setDuration(5000);
+        // Changing action button text color
+        View sbView = snackbar.getView();
+        sbView.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.white));
+        TextView textView = (TextView) sbView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextColor(getResources().getColor(R.color.red_900));
+        textView.setTypeface(null, Typeface.BOLD);
+        if(internetStatus.equalsIgnoreCase("Lost Internet Connection")){
+            if(internetConnected){
+                snackbar.show();
+                internetConnected=false;
+            }
+        }else{
+            if(!internetConnected){
+                internetConnected=true;
+                snackbar.show();
+            }
+        }
+    }
 }

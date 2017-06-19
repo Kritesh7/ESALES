@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout
+    android:id="@+id/maps_cordinate"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,6 +12,21 @@
         android:id="@+id/custome_bar"/>
 
     <include layout="@layout/content_show_map_activity"/>
+
+    <ImageView
+        android:layout_gravity="right|top"
+        android:padding="20dp"
+        android:layout_marginTop="45dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/navigate"/>
+    <ImageView
+        android:visibility="gone"
+        android:id="@+id/net_off"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/backimg"
+        android:scaleType="fitXY"/>
 
     <LinearLayout
         android:layout_width="match_parent"

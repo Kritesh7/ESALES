@@ -233,7 +233,7 @@ public class LoginActivity extends AppCompatActivity {
                 VolleyLog.d("Login", "Error: " + error.getMessage());
                 // Log.e("checking now ",error.getMessage());
 
-                final Toast toast = Toast.makeText(LoginActivity.this, "Server Error", Toast.LENGTH_LONG);
+                final Toast toast = Toast.makeText(LoginActivity.this, error.getMessage(), Toast.LENGTH_LONG);
                 View view = toast.getView();
                 view.setBackgroundResource(R.drawable.button_rounded_shape);
                 TextView text = (TextView) view.findViewById(android.R.id.message);

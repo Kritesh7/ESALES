@@ -1,16 +1,22 @@
 package esales.schell.com.esales.MainActivity;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -95,6 +101,8 @@ import retrofit.GsonConverterFactory;
 import retrofit.Response;
 import retrofit.Retrofit;
 
+import static esales.schell.com.esales.MainActivity.SplashScreen.getConnectivityStatusString;
+
 public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCallback,CustomerNameInterface {
 
     private GoogleMap mMap;
@@ -109,6 +117,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public EditText searchData;
     public Context context;
     public boolean flag = true;
+    private Snackbar snackbar;
+    private boolean internetConnected=true;
     public GPSTracker gpsTracker;
     public String sourceLat="";
     public String sourceLog="", destinationName="", customerId = "", travelDistance = "";
@@ -128,6 +138,9 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public ConnectionDetector conn;
     public MasterDataBase masterDataBase;
     double errordouble = 0;
+    public CoordinatorLayout coordinatorLayout;
+    public ImageView img ;
+    public  SupportMapFragment mapFragment;
     public String userDetailUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppddlCustomer";
     public String reachedPointAPIUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppEmployeeTravelExpenseInsUpdt";
 
@@ -136,7 +149,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager()
+        mapFragment = (SupportMapFragment)getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
@@ -150,6 +163,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         rechedBtn = (Button)findViewById(R.id.rechecdbtn);
       //  dayEndBtn = (Button)findViewById(R.id.day_endBtn);
         showListBtn = (Button)findViewById(R.id.showListBtn);
+        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.maps_cordinate);
+        img = (ImageView)findViewById(R.id.net_off);
 
 
         // menu item popup
@@ -292,10 +307,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         final double dstLat = gpsTracker.getLatitude();
         final double dstLog = gpsTracker.getLongitude();
 
-
-        /* final double dstLat = 	28.5244;
-         final double dstLog =  77.1855;*/
-
+         /*final double dstLat = 	28.9845;
+         final double dstLog =  77.7064;*/
 
         sourceLat = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
         sourceLog = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));
@@ -429,7 +442,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 } else {
                     pDialog = new ProgressDialog(ShowMapsActivity.this);
                     pDialog.setMessage("Loading...");
-                    pDialog.setCancelable(false);
                     pDialog.show();
 
                     // checked lat log is get or not
@@ -619,6 +631,77 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         finish();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(broadcastReceiver);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerInternetCheckReceiver();
+    }
+
+    private void registerInternetCheckReceiver() {
+        IntentFilter internetFilter = new IntentFilter();
+        internetFilter.addAction("android.net.wifi.STATE_CHANGE");
+        internetFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(broadcastReceiver, internetFilter);
+    }
+    public BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String status = getConnectivityStatusString(context);
+            setSnackbarMessage(status,false);
+        }
+    };
+
+    private void setSnackbarMessage(String status,boolean showBar) {
+        String internetStatus="";
+        if(status.equalsIgnoreCase("Wifi enabled")||status.equalsIgnoreCase("Mobile data enabled")){
+            internetStatus="Internet Connected";
+        }else {
+            internetStatus="Lost Internet Connection";
+        }
+        snackbar = Snackbar
+                .make(coordinatorLayout, internetStatus, Snackbar.LENGTH_LONG)
+                .setAction("X", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        snackbar.dismiss();
+                    }
+                });
+        // Changing message text color
+        snackbar.setActionTextColor(getResources().getColor(R.color.red_900));
+        snackbar.setDuration(5000);
+        // Changing action button text color
+        View sbView = snackbar.getView();
+        sbView.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.white));
+        TextView textView = (TextView) sbView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextColor(getResources().getColor(R.color.red_900));
+        textView.setTypeface(null, Typeface.BOLD);
+        if(internetStatus.equalsIgnoreCase("Lost Internet Connection")){
+            if(internetConnected){
+                snackbar.show();
+                internetConnected=false;
+
+                img.setVisibility(View.VISIBLE);
+                mapFragment.getView().setVisibility(View.GONE);
+            }
+        }else{
+            if(!internetConnected){
+                internetConnected=true;
+                snackbar.show();
+
+
+                img.setVisibility(View.GONE);
+                mapFragment.getView().setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -750,6 +833,9 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                     if (line != null) {
                         line.remove();
                     }
+
+                    //Log.e("checking clicking btn--------------------------", response.body().getRoutes().size()+ " null");
+
                     // This loop will go through all the results and add marker on each location.
                     for (int i = 0; i < response.body().getRoutes().size(); i++) {
                         String distance = response.body().getRoutes().get(i).getLegs().get(i).getDistance().getText();
@@ -774,6 +860,9 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                                 travelDistance = distance.replaceAll("[^0-9\\.]+", "");
                                 Log.e("Travel Distance in KM>>", travelDistance + " null");
                             }
+
+
+
 
                         if (rechedBtn.getText().toString().equalsIgnoreCase("Restart"))
                         {
@@ -809,7 +898,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                         );
                     }
                 } catch (Exception e) {
-                    Log.d("onResponse", "There is an error");
+                    Log.e("onResponse",e.getMessage());
                     e.printStackTrace();
                 }
             }
