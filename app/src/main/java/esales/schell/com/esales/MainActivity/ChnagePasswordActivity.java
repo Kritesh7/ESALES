@@ -1,15 +1,21 @@
 package esales.schell.com.esales.MainActivity;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -43,6 +49,8 @@ import esales.schell.com.esales.Sources.SettingConstant;
 import esales.schell.com.esales.Sources.SharedPrefs;
 import esales.schell.com.esales.Sources.UtilsMethods;
 
+import static esales.schell.com.esales.MainActivity.SplashScreen.getConnectivityStatusString;
+
 public class ChnagePasswordActivity extends AppCompatActivity {
 
     public Button submit;
@@ -50,6 +58,9 @@ public class ChnagePasswordActivity extends AppCompatActivity {
     public String changepasswordUrl = SettingConstant.BASEURL + "LoginSchellService.asmx/AppUserChangePassword";
     public String authCode = "", userId = "";
     public ConnectionDetector conn;
+    private Snackbar snackbar;
+    private boolean internetConnected=true;
+    public CoordinatorLayout coordinatorLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +103,7 @@ public class ChnagePasswordActivity extends AppCompatActivity {
         userId = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getUserId(ChnagePasswordActivity.this)));
         authCode = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getAuthCode(ChnagePasswordActivity.this)));
 
+        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.change_password_cordinator);
         submit = (Button)findViewById(R.id.btn_submit);
         currentPassTxt = (EditText)findViewById(R.id.current_password);
         newPassTxt = (EditText)findViewById(R.id.new_pass);
@@ -239,6 +251,70 @@ public class ChnagePasswordActivity extends AppCompatActivity {
         AppController.getInstance().addToRequestQueue(historyInquiry, "Chnage Password");
 
 
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(broadcastReceiver);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerInternetCheckReceiver();
+    }
+
+    private void registerInternetCheckReceiver() {
+        IntentFilter internetFilter = new IntentFilter();
+        internetFilter.addAction("android.net.wifi.STATE_CHANGE");
+        internetFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(broadcastReceiver, internetFilter);
+    }
+    public BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String status = getConnectivityStatusString(context);
+            setSnackbarMessage(status,false);
+        }
+    };
+
+    private void setSnackbarMessage(String status,boolean showBar) {
+        String internetStatus="";
+        if(status.equalsIgnoreCase("Wifi enabled")||status.equalsIgnoreCase("Mobile data enabled")){
+            internetStatus="Internet Connected";
+        }else {
+            internetStatus="Lost Internet Connection";
+        }
+        snackbar = Snackbar
+                .make(coordinatorLayout, internetStatus, Snackbar.LENGTH_LONG)
+                .setAction("X", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        snackbar.dismiss();
+                    }
+                });
+        // Changing message text color
+        snackbar.setActionTextColor(getResources().getColor(R.color.red_900));
+        snackbar.setDuration(5000);
+        // Changing action button text color
+        View sbView = snackbar.getView();
+        sbView.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.white));
+        TextView textView = (TextView) sbView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextColor(getResources().getColor(R.color.red_900));
+        textView.setTypeface(null, Typeface.BOLD);
+        if(internetStatus.equalsIgnoreCase("Lost Internet Connection")){
+            if(internetConnected){
+                snackbar.show();
+                internetConnected=false;
+            }
+        }else{
+            if(!internetConnected){
+                internetConnected=true;
+                snackbar.show();
+            }
+        }
     }
 
 }

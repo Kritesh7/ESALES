@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/change_password_cordinator"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="esales.schell.com.esales.MainActivity.ChnagePasswordActivity">
+    tools:context="esales.schell.com.esales.MainActivity.MyProfileActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -14,13 +13,13 @@
 
         <include
             layout="@layout/maintolbar"
-            android:id="@+id/change_pass_tollbar"/>
+            android:id="@+id/my_profile_tollbar"/>
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_chnage_password" />
+    <include layout="@layout/content_my_profile" />
 
-    <!--<android.support.design.widget.FloatingActionButton
+   <!-- <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -78,7 +78,13 @@
             android:windowSoftInputMode="stateHidden|adjustPan" />
         <activity
             android:name=".MainActivity.ShowEmployeDetailActivity"
-            android:label="@string/title_activity_show_employe_detail"></activity>
+            android:label="@string/title_activity_show_employe_detail"
+            android:screenOrientation="portrait" />
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".MainActivity.MyProfileActivity"
+            android:label="@string/title_activity_my_profile"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

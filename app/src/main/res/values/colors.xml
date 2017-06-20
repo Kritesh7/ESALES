@@ -15,4 +15,6 @@
 
     <color name="white">#ffffff</color>
 
+    <color name="floating_color">#e9e8e9</color>
+
 </resources>

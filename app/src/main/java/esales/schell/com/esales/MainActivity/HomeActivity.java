@@ -91,6 +91,7 @@ public class HomeActivity extends AppCompatActivity {
     private Snackbar snackbar;
     private boolean internetConnected=true;
     public CoordinatorLayout coordinatorLayout;
+    public ProgressDialog progressDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,6 +107,7 @@ public class HomeActivity extends AppCompatActivity {
 
         context = HomeActivity.this;
 
+        progressDialog = new ProgressDialog(context);
         masterDataBase = new MasterDataBase(context);
         gps = new GPSTracker(context,HomeActivity.this);
         conn = new ConnectionDetector(context);
@@ -139,6 +141,11 @@ public class HomeActivity extends AppCompatActivity {
                             startActivity(i);
                             overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                            // Toast.makeText(getApplicationContext(),"You Clicked : " + item.getTitle(),Toast.LENGTH_SHORT).show();
+                        }else if (id == R.id.my_profile_menu)
+                        {
+                            Intent i = new Intent(getApplicationContext(),MyProfileActivity.class);
+                            startActivity(i);
+                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                         }
                         return true;
                     }
@@ -193,6 +200,11 @@ public class HomeActivity extends AppCompatActivity {
 
                     if (gps.canGetLocation()) {
                         // get address
+
+                        progressDialog.setMessage("Get Address....");
+                        progressDialog.setCancelable(false);
+                        progressDialog.show();
+
                         LocationAddress locationAddress = new LocationAddress();
                         locationAddress.getAddressFromLocation(lat, log, getApplicationContext(),
                                 new GeocoderHandler());
@@ -573,6 +585,7 @@ public class HomeActivity extends AppCompatActivity {
             }
 
             // call Popup window
+            progressDialog.dismiss();
             callPopup(locationAddress);
         }
     }

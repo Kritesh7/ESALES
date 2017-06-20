@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -36,6 +37,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -126,6 +128,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public LatLng origin;
     public LatLng dest;
     public LatLng point;
+    public LatLng navigatePoint;
     public ArrayList<LatLng> MarkerPoints;
     public Polyline line;
     public String ShowDistanceDuration = "";
@@ -137,10 +140,12 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public String loactionDstAdd = "";
     public ConnectionDetector conn;
     public MasterDataBase masterDataBase;
-    double errordouble = 0;
+    //double errordouble = 0;
     public CoordinatorLayout coordinatorLayout;
-    public ImageView img ;
+    public FloatingActionButton navigateImg ;
+    public FrameLayout img;
     public  SupportMapFragment mapFragment;
+    double dstLat ,dstLog ;
     public String userDetailUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppddlCustomer";
     public String reachedPointAPIUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppEmployeeTravelExpenseInsUpdt";
 
@@ -161,10 +166,11 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         custome_Toolbar = (LinearLayout)findViewById(R.id.custome_bar);
         menuItemImg = (ImageView)custome_Toolbar.findViewById(R.id.menu_item);
         rechedBtn = (Button)findViewById(R.id.rechecdbtn);
+        navigateImg = (FloatingActionButton)findViewById(R.id.navigate_icon);
       //  dayEndBtn = (Button)findViewById(R.id.day_endBtn);
         showListBtn = (Button)findViewById(R.id.showListBtn);
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.maps_cordinate);
-        img = (ImageView)findViewById(R.id.net_off);
+        img = (FrameLayout)findViewById(R.id.net_off);
 
 
         // menu item popup
@@ -188,7 +194,13 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                             Intent i = new Intent(getApplicationContext(),ChnagePasswordActivity.class);
                             startActivity(i);
                             overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                        }else if(id == R.id.show_logout)
+                        }else if (id == R.id.my_profile_menu)
+                        {
+                            Intent i = new Intent(getApplicationContext(),MyProfileActivity.class);
+                            startActivity(i);
+                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                        }
+                        else if(id == R.id.show_logout)
                         {
                             Intent i = new Intent(getApplicationContext(),LoginActivity.class);
                             startActivity(i);
@@ -304,11 +316,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
     private void callPopup() {
 
-        final double dstLat = gpsTracker.getLatitude();
-        final double dstLog = gpsTracker.getLongitude();
 
-         /*final double dstLat = 	28.9845;
-         final double dstLog =  77.7064;*/
 
         sourceLat = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
         sourceLog = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));
@@ -347,7 +355,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
             public void onClick(View arg0) {
 
-                errordouble += .0373;
 
                 rechedBtn.setText("Restart");
                 UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(ShowMapsActivity.this,
@@ -722,12 +729,34 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
         Log.e("checking lat is :", sourceLat);
 
-        double sourceInnerLat = Double.parseDouble(sourceLat);
-        double sourceInnerLog = Double.parseDouble(sourceLog);
+        final double sourceInnerLat = Double.parseDouble(sourceLat);
+        final double sourceInnerLog = Double.parseDouble(sourceLog);
         point = new LatLng(sourceInnerLat,sourceInnerLog);
 
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, 17.0f);
         mMap.animateCamera(cameraUpdate);
+
+
+        // imageview click to move source postion
+        navigateImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (dstLat == 0.0)
+                {
+                    navigatePoint = new LatLng(sourceInnerLat,sourceInnerLog);
+
+                }else
+                    {
+                        navigatePoint = new LatLng(dstLat,dstLog);
+                    }
+
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(navigatePoint, 17.0f);
+                mMap.animateCamera(cameraUpdate);
+
+                Log.e("checking desting", dstLat  +" null");
+            }
+        });
 
 
         //add point in a array list
@@ -745,6 +774,12 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 sourceLat = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
                 sourceLog =  UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));
 
+                  dstLat = gpsTracker.getLatitude();
+                  dstLog = gpsTracker.getLongitude();
+
+               /* dstLat = 	28.4985;
+                dstLog =   77.4029;
+*/
                 if (flag)
                 {
 

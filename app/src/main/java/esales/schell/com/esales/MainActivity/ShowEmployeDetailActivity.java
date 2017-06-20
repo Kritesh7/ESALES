@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -80,6 +81,7 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
     public Polyline line;
     public  SupportMapFragment mapFragment;
     public LinearLayout travellRemarkLay;
+    public FloatingActionButton floatingActionButton;
 
     public android.support.design.widget.AppBarLayout mainLay;
     @Override
@@ -116,6 +118,7 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
         totalAmountTxt = (TextView) findViewById(R.id.total_amout_txt);
         travelRemarkTxt = (TextView) findViewById(R.id.travel_remark_txt);
         feedSourceTxt = (TextView) findViewById(R.id.fedd_source_txt);
+        floatingActionButton = (FloatingActionButton)findViewById(R.id.collapsefloatingbutton);
         mainLay = (android.support.design.widget.AppBarLayout)findViewById(R.id.main_content);
 
 
@@ -129,6 +132,9 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
         }
 
         MarkerPoints = new ArrayList<>();
+
+
+
 
 /*
 
@@ -220,8 +226,19 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
         double sourceInnerLog = Double.parseDouble(sourceLog);
         point = new LatLng(sourceInnerLat,sourceInnerLog);
 
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, 0.0f);
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, 17.0f);
         mMap.animateCamera(cameraUpdate);
+
+
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, 17.0f);
+                mMap.animateCamera(cameraUpdate);
+
+            }
+        });
 
 
         //add point in a array list
@@ -247,7 +264,7 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
 
 
         point = new LatLng(dstlat, dstlog);
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, 15.0f);
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, 17.0f);
         mMap.animateCamera(cameraUpdate);
 
 
