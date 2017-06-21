@@ -1,18 +1,31 @@
 package esales.schell.com.esales.MainActivity;
 
+import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
+import esales.schell.com.esales.DataBase.MasterDataBase;
+import esales.schell.com.esales.DataBase.MyProfileTable;
+import esales.schell.com.esales.DataBase.VechileTypeTable;
+import esales.schell.com.esales.Model.VehicleTypeModel;
 import esales.schell.com.esales.R;
+import esales.schell.com.esales.Sources.SharedPrefs;
+import esales.schell.com.esales.Sources.UtilsMethods;
 
 public class MyProfileActivity extends AppCompatActivity {
+
+    public MasterDataBase masterDataBase;
+    public String userIdString = "";
+    public TextView nameTxt,emaiIdTxt,phoneTxt,tyepTxt,zoneTxt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +63,48 @@ public class MyProfileActivity extends AppCompatActivity {
             }
         });
 
+        masterDataBase = new MasterDataBase(MyProfileActivity.this);
+        userIdString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getUserId(MyProfileActivity.this)));
+
+        nameTxt = (TextView)findViewById(R.id.profile_name);
+        emaiIdTxt = (TextView)findViewById(R.id.profile_email);
+        phoneTxt = (TextView)findViewById(R.id.profile_phone);
+        zoneTxt = (TextView)findViewById(R.id.profile_zone);
+        tyepTxt = (TextView)findViewById(R.id.profile_type);
+
+        // data is show to database
+        Cursor cursor = masterDataBase.getMyProfileDetail(userIdString);
+        if (cursor !=null && cursor.getCount()>0)
+        {
+            if (cursor.moveToFirst())
+            {
+                do
+                {
+                    String name = cursor.getString(cursor.getColumnIndex(MyProfileTable.name));
+                    String email = cursor.getString(cursor.getColumnIndex(MyProfileTable.emailId));
+                    String phoneNo = cursor.getString(cursor.getColumnIndex(MyProfileTable.phoneNo));
+                    String zone = cursor.getString(cursor.getColumnIndex(MyProfileTable.zone));
+                    String type = cursor.getString(cursor.getColumnIndex(MyProfileTable.type));
+
+
+
+                    // checked Data
+                    Log.e("name",name);
+                    Log.e("email",email);
+                    Log.e("phoneNo",phoneNo);
+                    Log.e("zone",zone);
+                    Log.e("type",type);
+
+                    nameTxt .setText(name);
+                    emaiIdTxt.setText(email);
+                    phoneTxt.setText(phoneNo);
+                    zoneTxt.setText(zone);
+                    tyepTxt.setText(type);
+
+
+                }while (cursor.moveToNext());
+            }
+        }
        /* FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override

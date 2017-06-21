@@ -287,8 +287,14 @@ public class NewManuelAddTravelList extends AppCompatActivity {
             }
 
             // set checked listner
-            ((RadioButton) travelRadioGruop.getChildAt(1)).setChecked(true);
-            vechileType = vehicleTypeList.get(1).getVehicleTypeId();
+            if (vehicleTypeList.size() == 1)
+            {
+                ((RadioButton) travelRadioGruop.getChildAt(0)).setChecked(true);
+                vechileType = vehicleTypeList.get(0).getVehicleTypeId();
+            }else {
+                ((RadioButton) travelRadioGruop.getChildAt(1)).setChecked(true);
+                vechileType = vehicleTypeList.get(1).getVehicleTypeId();
+            }
 
             // checking vechele type to visibile gone to amount edit text
             if (vechileType.equalsIgnoreCase("1")) {

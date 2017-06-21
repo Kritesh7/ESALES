@@ -451,6 +451,8 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
                             EndLongitude = jsonObject.getString("EndLongitude");
 
 
+
+                            Log.e("checking total Amount",TotalAmount + " null");
                             if (TravelRemark.equalsIgnoreCase(""))
                             {
                                 travellRemarkLay.setVisibility(View.GONE);

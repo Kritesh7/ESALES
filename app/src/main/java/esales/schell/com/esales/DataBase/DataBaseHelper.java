@@ -14,6 +14,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     public VechileTypeTable vechileTypeTable = new VechileTypeTable();
     public AppEmployeeTravelExpenseInsUpdt appEmployeeTravelExpenseInsUpdt = new AppEmployeeTravelExpenseInsUpdt();
     public AppddlCustomer appddlCustomer = new AppddlCustomer();
+    public MyProfileTable myProfileTable = new MyProfileTable();
 
     public  DataBaseHelper(Context context, String databaseName , SQLiteDatabase.CursorFactory factory , int databaseVersion)
     {
@@ -26,6 +27,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         db.execSQL(vechileTypeTable.vechileTypeTableData);
         db.execSQL(appEmployeeTravelExpenseInsUpdt.appEmployeeTravelExpenseInsUpdtTableData);
         db.execSQL(appddlCustomer.AppddlCustomerTableData);
+        db.execSQL(myProfileTable.MyProfileTableData);
     }
 
     @Override
@@ -35,5 +37,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + vechileTypeTable.tableName);
         db.execSQL("DROP TABLE IF EXISTS " + appEmployeeTravelExpenseInsUpdt.tableName);
         db.execSQL("DROP TABLE IF EXISTS " + appddlCustomer.tableName);
+        db.execSQL("DROP TABLE IF EXISTS " + myProfileTable.tableName);
     }
 }

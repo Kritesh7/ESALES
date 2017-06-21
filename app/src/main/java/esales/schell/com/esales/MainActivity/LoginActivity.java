@@ -142,8 +142,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
     public void Login_Api(final String emailinner  , final String passinner, final String authcode ,
-                          final String brandName , final String clientVersion)
-    {
+                          final String brandName , final String clientVersion) {
         final ProgressDialog pDialog = new ProgressDialog(LoginActivity.this);
         pDialog.setMessage("Loading...");
         pDialog.show();
@@ -159,6 +158,8 @@ public class LoginActivity extends AppCompatActivity {
 
                     //delete record in database
                     masterDataBase.deleteRecord();
+                    masterDataBase.deleteRecordMyProfileDetail();
+
                     for (int i=0 ; i<jsonArray.length();i++)
                     {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -185,6 +186,15 @@ public class LoginActivity extends AppCompatActivity {
 
                             String userId = jsonObject.getString("UserID");
                             String authCodeinner = jsonObject.getString("AuthCode");
+                            String Name = jsonObject.getString("Name");
+                            String Type = jsonObject.getString("RoleName");
+                            String EmailID = jsonObject.getString("EmailID");
+                            String MobileNo = jsonObject.getString("MobileNo");
+                            String ZoneName = jsonObject.getString("ZoneName");
+
+                            //add profile detail in local database
+                            masterDataBase.setMyprofileDetail(Name,EmailID,MobileNo,ZoneName,Type,userId);
+
                             JSONArray vecheleType = jsonObject.getJSONArray("VehicleType");
                             for (int j = 0 ; j<vecheleType.length(); j++)
                             {

@@ -45,27 +45,41 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import esales.schell.com.esales.Adapter.CustomerListAdapter;
 import esales.schell.com.esales.DataBase.MasterDataBase;
 import esales.schell.com.esales.DataBase.VechileTypeTable;
 import esales.schell.com.esales.Model.VehicleTypeModel;
 import esales.schell.com.esales.R;
+import esales.schell.com.esales.Sources.AppController;
 import esales.schell.com.esales.Sources.ConnectionDetector;
 import esales.schell.com.esales.Sources.GPSTracker;
 import esales.schell.com.esales.Sources.LocationAddress;
 import esales.schell.com.esales.Sources.MyAsyncTask;
+import esales.schell.com.esales.Sources.SettingConstant;
 import esales.schell.com.esales.Sources.SharedPrefs;
 import esales.schell.com.esales.Sources.UtilsMethods;
 
@@ -83,7 +97,7 @@ public class HomeActivity extends AppCompatActivity {
     public  double lat,log;
     public String startTime="";
     public MasterDataBase masterDataBase;
-    public String userIdString = "";
+    public String userIdString = "", authcodeString = "";
     public ArrayList<VehicleTypeModel> vehicleTypeList = new ArrayList<>();
     public ProgressDialog pDialog;
     private final int SPLASH_DISPLAY_LENGTH = 2000;
@@ -92,6 +106,8 @@ public class HomeActivity extends AppCompatActivity {
     private boolean internetConnected=true;
     public CoordinatorLayout coordinatorLayout;
     public ProgressDialog progressDialog;
+    public String LoginCount = "";
+    public String checkLoginValidateUrl = SettingConstant.BASEURL + "LoginSchellService.asmx/AppLoginStatusCheck";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,6 +135,7 @@ public class HomeActivity extends AppCompatActivity {
         settingBtn = (ImageView)findViewById(R.id.setting);
         addBtn = (ImageView)findViewById(R.id.add_manuely);
         userIdString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getUserId(HomeActivity.this)));
+        authcodeString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getAuthCode(HomeActivity.this)));
         settingBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -179,6 +196,33 @@ public class HomeActivity extends AppCompatActivity {
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             }
         });
+
+        // data is show to database
+        Cursor cursor = masterDataBase.getVecheleTypeData(userIdString);
+
+        if (cursor !=null && cursor.getCount()>0)
+        {
+            if (cursor.moveToFirst())
+            {
+                do
+                {
+                    String vehcleTypeName = cursor.getString(cursor.getColumnIndex(VechileTypeTable.VechileTypeName));
+                    String vechleTypeRate = cursor.getString(cursor.getColumnIndex(VechileTypeTable.vechileRate));
+                    String vechleTypeId = cursor.getString(cursor.getColumnIndex(VechileTypeTable.vechileTypeId));
+
+                    // add data in list
+                    vehicleTypeList.add(new VehicleTypeModel(vechleTypeId,vechleTypeRate,vehcleTypeName));
+
+                    // checked Data
+                    Log.e("vehcleTypeName",vehcleTypeName);
+                    Log.e("vechleTypeRate",vechleTypeRate);
+                    Log.e("vechleTypeId",vechleTypeId);
+                    Log.e("vehicleTypeList size",vehicleTypeList.size()+"");
+
+                }while (cursor.moveToNext());
+            }
+        }
+
         startBtn = (Button)findViewById(R.id.startbtn);
         startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -189,41 +233,42 @@ public class HomeActivity extends AppCompatActivity {
 
                 //get current Time
 
-                if (vehicleTypeList.size()>0)
+                if (vehicleTypeList.size() == 0)
                 {
-                    vehicleTypeList.clear();
-                }
-
-                // cheked Innternet connection
-                if (conn.getConnectivityStatus()>0)
-                {
-
-                    if (gps.canGetLocation()) {
-                        // get address
-
-                        progressDialog.setMessage("Get Address....");
-                        progressDialog.setCancelable(false);
-                        progressDialog.show();
-
-                        LocationAddress locationAddress = new LocationAddress();
-                        locationAddress.getAddressFromLocation(lat, log, getApplicationContext(),
-                                new GeocoderHandler());
-                    }else
-                        {
-                            gps.showSettingsAlert();
+                    final Toast toast = Toast.makeText(HomeActivity.this, "Your Vehicle Detail not Configure!", Toast.LENGTH_LONG);
+                    View view = toast.getView();
+                    view.setBackgroundResource(R.drawable.button_rounded_shape);
+                    TextView text = (TextView) view.findViewById(android.R.id.message);
+                    text.setTextColor(Color.parseColor("#ffffff"));
+                    text.setPadding(20, 20, 20, 20);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            toast.cancel();
                         }
+                    }, 4000);
                 }
                 else
-                    {
-                        if (gps.canGetLocation()) {
-                            callPopup("");
-                        }else
-                            {
-                                gps.showSettingsAlert();
-                            }
+                {
+                    if (vehicleTypeList.size() > 0) {
+                        vehicleTypeList.clear();
                     }
 
+                    // cheked Innternet connection
+                    if (conn.getConnectivityStatus() > 0) {
+                        getLoginInvalidate(userIdString, authcodeString);
+                    } else {
+                        if (gps.canGetLocation()) {
+                            callPopup("");
+                        } else {
+                            gps.showSettingsAlert();
+                        }
+                    }
 
+                }
 
             }
         });
@@ -260,6 +305,7 @@ public class HomeActivity extends AppCompatActivity {
         startActivity(i);
         finish();
     }
+
 
 
     // call popup button
@@ -569,6 +615,127 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
+    //checked login invalid or not
+    public void getLoginInvalidate(final String userId  , final String authcode) {
+
+        progressDialog.setMessage("Get Address....");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        StringRequest historyInquiry = new StringRequest(
+                Request.Method.POST, checkLoginValidateUrl, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                try {
+                    Log.e("Login", response);
+                    JSONArray jsonArray = new JSONArray(response.substring(response.indexOf("["),response.lastIndexOf("]") +1 ));
+
+                    for (int i=0 ; i<jsonArray.length();i++)
+                    {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        if (jsonObject.has("LoginCount"))
+                        {
+
+                            LoginCount = jsonObject.getString("LoginCount");
+
+                            if (LoginCount.equalsIgnoreCase("1"))
+                            {
+                                if (gps.canGetLocation()) {
+
+                                    // get address
+                                    LocationAddress locationAddress = new LocationAddress();
+                                    locationAddress.getAddressFromLocation(lat, log, getApplicationContext(),
+                                            new GeocoderHandler());
+                                }else
+                                {
+                                    gps.showSettingsAlert();
+                                }
+                            }else
+                                {
+                                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                                    startActivity(intent);
+                                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                    finish();
+
+                                    UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(HomeActivity.this,
+                                            "")));
+
+
+                                    final Toast toast = Toast.makeText(HomeActivity.this, "Login Expired...", Toast.LENGTH_LONG);
+                                    View view = toast.getView();
+                                    view.setBackgroundResource(R.drawable.button_rounded_shape);
+                                    TextView text = (TextView) view.findViewById(android.R.id.message);
+                                    text.setTextColor(Color.parseColor("#ffffff"));
+                                    text.setPadding(20, 20, 20, 20);
+                                    toast.setGravity(Gravity.CENTER, 0, 0);
+                                    toast.show();Handler handler = new Handler();
+                                    handler.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            toast.cancel();
+                                        }
+                                    }, 3000);
+                                }
+
+                        }
+
+
+                        }
+
+
+                   // pDialog.dismiss();
+
+                } catch (JSONException e) {
+                    Log.e("checking json excption" , e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d("Login", "Error: " + error.getMessage());
+                // Log.e("checking now ",error.getMessage());
+
+                final Toast toast = Toast.makeText(HomeActivity.this, error.getMessage(), Toast.LENGTH_LONG);
+                View view = toast.getView();
+                view.setBackgroundResource(R.drawable.button_rounded_shape);
+                TextView text = (TextView) view.findViewById(android.R.id.message);
+                text.setTextColor(Color.parseColor("#ffffff"));
+                text.setPadding(20, 20, 20, 20);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        toast.cancel();
+                    }
+                }, 2000);
+
+                progressDialog.dismiss();
+
+
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("UserID", userId);
+                params.put("AuthCode",authcode);
+                Log.e("Parms", params.toString());
+                return params;
+            }
+
+        };
+        historyInquiry.setRetryPolicy(new DefaultRetryPolicy(SettingConstant.Retry_Time,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        AppController.getInstance().addToRequestQueue(historyInquiry, "LoginValidate");
+
+
+    }
+
+
     // get address with the help of lat log
     private class GeocoderHandler extends Handler {
         @Override
@@ -596,12 +763,16 @@ public class HomeActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         unregisterReceiver(broadcastReceiver);
+
+        Log.e("chcking now is", " checking method is");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         registerInternetCheckReceiver();
+
+        Log.e("chcking now is resume", " checking method is");
     }
 
     private void registerInternetCheckReceiver() {

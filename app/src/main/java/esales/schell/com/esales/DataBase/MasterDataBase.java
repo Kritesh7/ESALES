@@ -30,6 +30,7 @@ public class MasterDataBase
     public VechileTypeTable vechileTypeTable = new VechileTypeTable();
     public AppEmployeeTravelExpenseInsUpdt appEmployeeTravelExpenseInsUpdt = new AppEmployeeTravelExpenseInsUpdt();
     public AppddlCustomer appddlCustomer = new AppddlCustomer();
+    public MyProfileTable myProfileTable = new MyProfileTable();
 
     public MasterDataBase(Context context)
     {
@@ -97,6 +98,41 @@ public class MasterDataBase
     {
         sqLiteDatabase=dataBaseHelper.getReadableDatabase();
         sqLiteDatabase.delete(vechileTypeTable.tableName,null,null);
+    }
+
+    //--------------------------------//-----------------------------
+
+    //My Profile Database get ,set and delete method-----------------
+
+    public void setMyprofileDetail(String name, String emailId, String phone, String zone , String type , String userId)
+    {
+        sqLiteDatabase = dataBaseHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(myProfileTable.name,name);
+        values.put(myProfileTable.emailId,emailId);
+        values.put(myProfileTable.phoneNo,phone);
+        values.put(myProfileTable.zone,zone);
+        values.put(myProfileTable.type,type);
+        values.put(myProfileTable.userId,userId);
+
+        sqLiteDatabase.insert(myProfileTable.tableName,null,values);
+    }
+    public Cursor getMyProfileDetail(String userid)
+    {
+        sqLiteDatabase=dataBaseHelper.getReadableDatabase();
+        Cursor cursor=null;
+        cursor = sqLiteDatabase.rawQuery("SELECT " + myProfileTable.name + ", " + myProfileTable.emailId + ", " +
+                myProfileTable.phoneNo + ", " + myProfileTable.zone + ", " + myProfileTable.type +
+                " FROM " + myProfileTable.tableName + " WHERE " + myProfileTable.userId + "=?", new String[]
+                {userid});
+        return cursor;
+
+    }
+    public void deleteRecordMyProfileDetail()
+    {
+        sqLiteDatabase=dataBaseHelper.getReadableDatabase();
+        sqLiteDatabase.delete(myProfileTable.tableName,null,null);
     }
 
     //-----------------------------//---------------------------------

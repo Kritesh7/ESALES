@@ -79,6 +79,7 @@
                             android:textColor="@color/gray_700"
                             android:textSize="16dp"/>
                         <TextView
+                            android:id="@+id/profile_name"
                             android:textColor="@color/gray_500"
                             android:layout_marginLeft="10dp"
                             android:layout_width="wrap_content"
@@ -94,6 +95,7 @@
                             android:text="Zone"
                             android:textSize="16dp"/>
                         <TextView
+                            android:id="@+id/profile_zone"
                             android:textColor="@color/gray_500"
                             android:layout_marginLeft="10dp"
                             android:layout_width="wrap_content"
@@ -109,6 +111,7 @@
                             android:text="Mobile"
                             android:textSize="16dp"/>
                         <TextView
+                            android:id="@+id/profile_phone"
                             android:textColor="@color/gray_500"
                             android:layout_marginLeft="10dp"
                             android:layout_width="wrap_content"
@@ -124,6 +127,7 @@
                             android:text="EmailId"
                             android:textSize="16dp"/>
                         <TextView
+                            android:id="@+id/profile_email"
                             android:textColor="@color/gray_500"
                             android:layout_marginLeft="10dp"
                             android:layout_width="wrap_content"
@@ -139,6 +143,7 @@
                             android:text="Type"
                             android:textSize="16dp"/>
                         <TextView
+                            android:id="@+id/profile_type"
                             android:textColor="@color/gray_500"
                             android:layout_marginLeft="10dp"
                             android:layout_width="wrap_content"

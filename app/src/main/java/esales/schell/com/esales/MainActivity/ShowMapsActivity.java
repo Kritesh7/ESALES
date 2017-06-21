@@ -1,8 +1,10 @@
 package esales.schell.com.esales.MainActivity;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -19,6 +21,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
@@ -103,13 +106,14 @@ import retrofit.GsonConverterFactory;
 import retrofit.Response;
 import retrofit.Retrofit;
 
+import static android.R.attr.button;
 import static esales.schell.com.esales.MainActivity.SplashScreen.getConnectivityStatusString;
 
 public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCallback,CustomerNameInterface {
 
     private GoogleMap mMap;
     public double lat,log;
-    public String vechileType="",startTime = "", sourceName = "";
+    public String vechileType="",startTime = "", sourceName = "",reachedTime = "";
     public LinearLayout custome_Toolbar;
     public ArrayList<CustomerDetailsModel> custNameList = new ArrayList<>();
     public PopupWindow popupWindow;
@@ -145,9 +149,10 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public FloatingActionButton navigateImg ;
     public FrameLayout img;
     public  SupportMapFragment mapFragment;
-    double dstLat ,dstLog ;
+    public double dstLat ,dstLog ,srcLat,srcLog;
     public String userDetailUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppddlCustomer";
     public String reachedPointAPIUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppEmployeeTravelExpenseInsUpdt";
+    public String checkLoginValidateUrl = SettingConstant.BASEURL + "LoginSchellService.asmx/AppLoginStatusCheck";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -314,6 +319,9 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     }
 
 
+
+
+    //call popup
     private void callPopup() {
 
 
@@ -356,7 +364,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
             public void onClick(View arg0) {
 
 
-                rechedBtn.setText("Restart");
+                rechedBtn.setText("Home");
                 UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(ShowMapsActivity.this,
                         "1")));
 
@@ -374,8 +382,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                             new GeocoderHandler());
                 }
 
-                final double srcLat = Double.parseDouble(sourceLat);
-                final double srcLog = Double.parseDouble(sourceLog);
+                srcLat = Double.parseDouble(sourceLat);
+                srcLog = Double.parseDouble(sourceLog);
 
                 UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLat(ShowMapsActivity.this, String.valueOf(dstLat))));
                 UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLog(ShowMapsActivity.this, String.valueOf(dstLog))));
@@ -487,12 +495,13 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                             } else {
 
                                 if (conn.getConnectivityStatus()>0) {
-                                    build_retrofit_and_get_response("driving", String.valueOf(srcLat), String.valueOf(srcLog),
-                                            String.valueOf(dstLat), String.valueOf(dstLog), loactionDstAdd);
+
+                                    getLoginInvalidate(userIdString,authCodeString);
+
                                 }else {
 
                                      pDialog.dismiss();
-                                    String reachedTime = getCurrentTime();
+                                    reachedTime = getCurrentTime();
                                     if (destinationName.equalsIgnoreCase(""))
                                     {
                                         final Toast toast = Toast.makeText(ShowMapsActivity.this, "Please Select Customer", Toast.LENGTH_LONG);
@@ -621,6 +630,140 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 }
             });
         }
+    }
+
+
+
+    //checked login invalid or not
+    public void getLoginInvalidate(final String userId  , final String authcode) {
+
+        StringRequest historyInquiry = new StringRequest(
+                Request.Method.POST, checkLoginValidateUrl, new com.android.volley.Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                try {
+                    Log.e("Login", response);
+                    JSONArray jsonArray = new JSONArray(response.substring(response.indexOf("["),response.lastIndexOf("]") +1 ));
+
+                    for (int i=0 ; i<jsonArray.length();i++)
+                    {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        if (jsonObject.has("LoginCount"))
+                        {
+
+                            String LoginCount = jsonObject.getString("LoginCount");
+
+                            if (LoginCount.equalsIgnoreCase("1"))
+                            {
+                                build_retrofit_and_get_response("driving", String.valueOf(srcLat), String.valueOf(srcLog),
+                                        String.valueOf(dstLat), String.valueOf(dstLog), loactionDstAdd);
+                            }else
+                            {
+
+                                seesionExpiredDiloge();
+
+
+                            }
+
+                        }
+
+
+                    }
+
+
+                    // pDialog.dismiss();
+
+                } catch (JSONException e) {
+                    Log.e("checking json excption" , e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        }, new com.android.volley.Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d("Login", "Error: " + error.getMessage());
+                // Log.e("checking now ",error.getMessage());
+
+                final Toast toast = Toast.makeText(ShowMapsActivity.this, error.getMessage(), Toast.LENGTH_LONG);
+                View view = toast.getView();
+                view.setBackgroundResource(R.drawable.button_rounded_shape);
+                TextView text = (TextView) view.findViewById(android.R.id.message);
+                text.setTextColor(Color.parseColor("#ffffff"));
+                text.setPadding(20, 20, 20, 20);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        toast.cancel();
+                    }
+                }, 2000);
+
+                pDialog.dismiss();
+
+
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("UserID", userId);
+                params.put("AuthCode",authcode);
+                Log.e("Parms", params.toString());
+                return params;
+            }
+
+        };
+        historyInquiry.setRetryPolicy(new DefaultRetryPolicy(SettingConstant.Retry_Time,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        AppController.getInstance().addToRequestQueue(historyInquiry, "LoginValidate");
+
+
+    }
+
+    // session Expired alert
+    public  void seesionExpiredDiloge()
+    {
+        // custom dialog
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.customedilogeboxlayout);
+        dialog.setCancelable(false);
+        dialog.setTitle("Title...");
+
+        // set the custom dialog components - text, image and button
+
+        Button dialogButton = (Button) dialog.findViewById(R.id.dialogButtonOK);
+
+        // CHECKED PERMISSION
+        if (Build.VERSION.SDK_INT == 16 || Build.VERSION.SDK_INT == 17 ||
+                Build.VERSION.SDK_INT == 18 || Build.VERSION.SDK_INT == 19)
+        {
+
+            dialogButton.setBackgroundColor(getResources().getColor(R.color.red_700));
+        }
+        else
+        {
+            dialogButton.setBackgroundResource(R.drawable.rippileefact);
+        }
+
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                //insert data in local database
+                masterDataBase.setInsertTravelRecords("", userIdString, vechileType, startTime, sourceName, reachedTime, destinationName,
+                        customerId, sourceLat, sourceLog,
+                        String.valueOf(dstLat), String.valueOf(dstLog), "0", "", authCodeString,"0");
+
+                pDialog.dismiss();
+                popupWindow.dismiss();
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
     }
 
     //get current time
@@ -778,11 +921,10 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                   dstLog = gpsTracker.getLongitude();
 
                /* dstLat = 	28.4985;
-                dstLog =   77.4029;
-*/
+                dstLog =   77.4029;*/
+
                 if (flag)
                 {
-
 
                     Log.e("checked buttn name",rechedBtn.getText().toString());
                     if (rechedBtn.getText().toString().equalsIgnoreCase("Reached")) {
@@ -899,10 +1041,10 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
 
 
-                        if (rechedBtn.getText().toString().equalsIgnoreCase("Restart"))
+                        if (rechedBtn.getText().toString().equalsIgnoreCase("Home"))
                         {
 
-                            Log.e("checking clicking btn", "Restart");
+                            Log.e("checking clicking btn", "Home");
 
                             String reachedTime = getCurrentTime();
 
