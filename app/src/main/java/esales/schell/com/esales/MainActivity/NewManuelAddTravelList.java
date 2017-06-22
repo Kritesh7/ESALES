@@ -555,7 +555,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                                             travelDistanceEditTxt.getText().toString(), remarkTxt.getText().toString(), authCodeString,
                                             amount);
                                 } else {
-                                    masterDataBase.setInsertTravelRecords("", userIdString, vechileType,
+                                    masterDataBase.setInsertTravelRecords("00000000-0000-0000-0000-000000000000", userIdString, vechileType,
                                             travelDateEditTxt.getText().toString() + " " + startEditTxt.getText().toString(),
                                             sourceNameTxt.getText().toString(),
                                             travelDateEditTxt.getText().toString() + " " + reachedEditTxt.getText().toString(),
@@ -579,7 +579,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                                         travelDistanceEditTxt.getText().toString(), remarkTxt.getText().toString(), authCodeString, "0");
 
                             } else {
-                                masterDataBase.setInsertTravelRecords("", userIdString, vechileType,
+                                masterDataBase.setInsertTravelRecords("00000000-0000-0000-0000-000000000000", userIdString, vechileType,
                                         travelDateEditTxt.getText().toString() + " " + startEditTxt.getText().toString(),
                                         sourceNameTxt.getText().toString(),
                                         travelDateEditTxt.getText().toString() + " " + reachedEditTxt.getText().toString(),

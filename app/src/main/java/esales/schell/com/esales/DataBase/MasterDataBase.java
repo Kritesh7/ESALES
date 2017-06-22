@@ -167,6 +167,8 @@ public class MasterDataBase
 
         sqLiteDatabase.insert(appEmployeeTravelExpenseInsUpdt.tableName,null,values);
 
+        //sqLiteDatabase.insertWithOnConflict(appEmployeeTravelExpenseInsUpdt.tableName,null,values,SQLiteDatabase.CONFLICT_IGNORE);
+
        // Toast.makeText(context, "Data Insert Successfully", Toast.LENGTH_SHORT).show();
 
         final Toast toast = Toast.makeText(context, "Data Insert Successfully", Toast.LENGTH_LONG);
@@ -183,6 +185,47 @@ public class MasterDataBase
                 toast.cancel();
             }
         }, 3000);
+    }
+
+    public Cursor getInsertTravelRecords(String userid)
+    {
+        sqLiteDatabase=dataBaseHelper.getReadableDatabase();
+        Cursor cursor=null;
+        cursor = sqLiteDatabase.rawQuery("SELECT " + appEmployeeTravelExpenseInsUpdt.TExpID + ", " +
+                appEmployeeTravelExpenseInsUpdt.VehicleTypeID  + ", " + appEmployeeTravelExpenseInsUpdt.StartAtTime +
+                ", " + appEmployeeTravelExpenseInsUpdt.SourceName + ", " + appEmployeeTravelExpenseInsUpdt.ReachedAtTime +
+                ", " + appEmployeeTravelExpenseInsUpdt.DestinationName + ", " + appEmployeeTravelExpenseInsUpdt.DestinationCustID +
+                ", " + appEmployeeTravelExpenseInsUpdt.StartLattitude + ", " + appEmployeeTravelExpenseInsUpdt.StartLongitude +
+                ", " + appEmployeeTravelExpenseInsUpdt.EndLattitude + ", " + appEmployeeTravelExpenseInsUpdt.EndLongitude +
+                ", " + appEmployeeTravelExpenseInsUpdt.TravelledDistance + ", " + appEmployeeTravelExpenseInsUpdt.TravelRemark +
+                ", " + appEmployeeTravelExpenseInsUpdt.AuthCode + ", " + appEmployeeTravelExpenseInsUpdt.Amount +
+                " FROM " + appEmployeeTravelExpenseInsUpdt.tableName + " WHERE " + appEmployeeTravelExpenseInsUpdt.UserID + "=?", new String[]
+                {userid});
+        return cursor;
+
+    }
+
+    public int getInsertTravelRecordsCunt(String userid)
+    {
+
+        String countQuery = "SELECT  * FROM " + appEmployeeTravelExpenseInsUpdt.tableName + " WHERE " +
+                appEmployeeTravelExpenseInsUpdt.UserID + "=" + userid;
+        SQLiteDatabase db = dataBaseHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        int cnt = cursor.getCount();
+        cursor.close();
+        return cnt;
+    }
+
+    public void deleteInsertTravelRecords()
+    {
+        sqLiteDatabase=dataBaseHelper.getReadableDatabase();
+        sqLiteDatabase.delete(appEmployeeTravelExpenseInsUpdt.tableName,null,null);
+    }
+    public void delete_byID(int id){
+        sqLiteDatabase.delete(appEmployeeTravelExpenseInsUpdt.tableName, appEmployeeTravelExpenseInsUpdt.KEY_ID+"="+id, null);
+
+        Toast.makeText(context, "Delete Records", Toast.LENGTH_SHORT).show();
     }
 //-------------------------------//----------------------------------------
 

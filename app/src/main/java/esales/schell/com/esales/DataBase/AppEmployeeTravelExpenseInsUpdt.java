@@ -7,6 +7,7 @@ package esales.schell.com.esales.DataBase;
 public class AppEmployeeTravelExpenseInsUpdt
 {
     public static final String tableName = "AppEmployeeTravelExpenseInsUpdt";
+    public static final String KEY_ID = "KEY_ID";
     public static final String TExpID = "TExpID";
     public static final String UserID = "UserID";
     public static final String VehicleTypeID = "VehicleTypeID";
@@ -27,6 +28,7 @@ public class AppEmployeeTravelExpenseInsUpdt
     public static final String appEmployeeTravelExpenseInsUpdtTableData =
             "create table " + tableName +
                     " (" +
+                    KEY_ID + " integer primary key autoincrement, " +
                     TExpID + " text, " +
                     UserID + " text, " +
                     VehicleTypeID + " text, " +

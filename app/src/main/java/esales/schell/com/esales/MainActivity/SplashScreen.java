@@ -1,8 +1,11 @@
 package esales.schell.com.esales.MainActivity;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.AppOpsManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -30,6 +33,7 @@ import android.widget.Toast;
 
 import esales.schell.com.esales.BuildConfig;
 import esales.schell.com.esales.R;
+import esales.schell.com.esales.Sources.BackEndProcessActivity;
 import esales.schell.com.esales.Sources.ConnectionDetector;
 import esales.schell.com.esales.Sources.GPSTracker;
 import esales.schell.com.esales.Sources.SharedPrefs;
@@ -50,6 +54,8 @@ public class SplashScreen extends AppCompatActivity {
     public ConnectionDetector conn;
     public String status = "";
     public static Location loc;
+    public PendingIntent pendingIntent;
+    public AlarmManager alarmManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +79,42 @@ public class SplashScreen extends AppCompatActivity {
 
 
         checkGPS();
+
+       /* //checking internet and start broadcasting back end services
+        if(conn.getConnectivityStatus()>0)
+        {
+
+            Intent broadCasting = new Intent(SplashScreen.this, BackEndProcessActivity.class);
+            pendingIntent = PendingIntent.getBroadcast(SplashScreen.this,0,broadCasting,0);
+
+            startBackendServices(pendingIntent);
+        }else
+            {
+               *//* ComponentName receiver = new ComponentName(this, BackEndProcessActivity.class);
+                PackageManager pm = this.getPackageManager();
+                pm.setComponentEnabledSetting(receiver,
+                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                        PackageManager.DONT_KILL_APP);
+                Toast.makeText(this, "Disabled broadcst receiver", Toast.LENGTH_SHORT).show();*//*
+            }*/
+
+
+        // starting backend services
+        Intent broadCasting = new Intent(SplashScreen.this, BackEndProcessActivity.class);
+        pendingIntent = PendingIntent.getBroadcast(SplashScreen.this,0,broadCasting,0);
+
+        startBackendServices(pendingIntent);
+    }
+
+    public void startBackendServices(PendingIntent intent)
+    {
+
+        alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        int interval = 1000;
+
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,System.currentTimeMillis(),interval,intent);
+        //Toast.makeText(SplashScreen.this, "Starting backend process", Toast.LENGTH_SHORT).show();
+
     }
 
     public void  checkGPS()

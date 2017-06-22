@@ -523,7 +523,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                                     {
 
                                         //insert data in local database
-                                        masterDataBase.setInsertTravelRecords("", userIdString, vechileType, startTime, sourceName, reachedTime, destinationName,
+                                        masterDataBase.setInsertTravelRecords("00000000-0000-0000-0000-000000000000", userIdString, vechileType, startTime, sourceName, reachedTime, destinationName,
                                                 customerId, sourceLat, sourceLog,
                                                 String.valueOf(dstLat), String.valueOf(dstLog), "0", "", authCodeString,"0");
 
@@ -754,7 +754,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
 
                 //insert data in local database
-                masterDataBase.setInsertTravelRecords("", userIdString, vechileType, startTime, sourceName, reachedTime, destinationName,
+                masterDataBase.setInsertTravelRecords("00000000-0000-0000-0000-000000000000", userIdString, vechileType, startTime, sourceName, reachedTime, destinationName,
                         customerId, sourceLat, sourceLog,
                         String.valueOf(dstLat), String.valueOf(dstLog), "0", "", authCodeString,"0");
 
@@ -1063,7 +1063,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                             Log.e("checking clicking btn", "Reached");
                         }
 
-                        Toast.makeText(getApplicationContext(), "My Calculate Distance is  -" + distance + "Time - " + time , Toast.LENGTH_LONG).show();
+                     //   Toast.makeText(getApplicationContext(), "My Calculate Distance is  -" + distance + "Time - " + time , Toast.LENGTH_LONG).show();
 
                         String encodedString = response.body().getRoutes().get(0).getOverviewPolyline().getPoints();
                         List<LatLng> list = decodePoly(encodedString);
