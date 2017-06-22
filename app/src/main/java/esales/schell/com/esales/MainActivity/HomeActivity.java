@@ -94,7 +94,7 @@ public class HomeActivity extends AppCompatActivity {
     public PopupWindow popupWindow;
     public String vechileType = "";
     public   boolean visible;
-    public  double lat,log;
+    public  double lat = 0.0,log = 0.0;
     public String startTime="";
     public MasterDataBase masterDataBase;
     public String userIdString = "", authcodeString = "";
@@ -277,9 +277,17 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                lat = gps.getLatitude();
+                log = gps.getLongitude();
+
                 Intent i = new Intent(getApplicationContext(), ShowListActivity.class);
                 startActivity(i);
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+
+                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLat(HomeActivity.this,
+                        String.valueOf(lat))));
+                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLog(HomeActivity.this,
+                        String.valueOf(log))));
             }
         });
 
