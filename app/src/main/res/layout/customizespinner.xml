@@ -2,6 +2,8 @@
 
 <LinearLayout android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:baselineAligned="false"
+    android:descendantFocusability="blocksDescendants"
     xmlns:android="http://schemas.android.com/apk/res/android" >
 
 <TextView
@@ -14,7 +16,6 @@
     android:gravity="top"
     android:text="hii"
     android:textSize="16dp"
-    android:singleLine="true"
    />
 </LinearLayout>
 

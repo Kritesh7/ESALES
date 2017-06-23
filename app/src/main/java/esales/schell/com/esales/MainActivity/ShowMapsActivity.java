@@ -36,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -557,6 +558,32 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
         adapter = new DemoCustomeAdapter(context, custNameList, ShowMapsActivity.this);
         serchListData.setAdapter(adapter);
+
+       /* serchListData.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+        serchListData.setSelector(android.R.color.holo_blue_light);
+*/
+        /*  serchListData.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                            @Override
+                                            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                                                for (int j = 0; j < adapterView.getChildCount(); j++)
+                                                    adapterView.getChildAt(j).setBackgroundColor(Color.TRANSPARENT);
+
+                                                // change the background color of the selected element
+                                                view.setBackgroundColor(Color.BLUE);
+                                            }});*/
+       /* serchListData.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+
+                Log.e("checking this working or not"," own result is this log");
+                serchListData.getChildAt(serchListData.getSelectedItemPosition()).setBackgroundColor(Color.RED);
+            }
+        });
+*/
+
+       // serchListData.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
 
 
        int cnt = masterDataBase.getCustomerDetailCunt(userIdString);
