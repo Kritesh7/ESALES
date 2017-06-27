@@ -80,10 +80,17 @@ public class SharedPrefs
 
 
     //status Refrence--------------------
-    public static String getStatusSecondHomePage(Context context)
+    public static String getEmployName(Context context)
     {
         SharedPreferences sp = getSetting(context);
-        return  sp.getString(SettingConstant.SecondHomePage, null);
+        return  sp.getString(SettingConstant.EmployeName, null);
+    }
+    public static boolean setEmployeName(Context context, String authKey)
+    {
+        SharedPreferences sp = getSetting(context);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(SettingConstant.EmployeName, authKey);
+        return editor.commit();
     }
 
     // Status First Home Page Shared Preference
@@ -99,16 +106,6 @@ public class SharedPrefs
         editor.putString(SettingConstant.FirstHomePage, authKey);
         return editor.commit();
     }
-
-    public static boolean setStatusSecondHomePage(Context context, String authKey)
-    {
-        SharedPreferences sp = getSetting(context);
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putString(SettingConstant.SecondHomePage, authKey);
-        return editor.commit();
-    }
-
-
     // Start Time Shard Preference
     public static String getStartTime(Context context)
     {

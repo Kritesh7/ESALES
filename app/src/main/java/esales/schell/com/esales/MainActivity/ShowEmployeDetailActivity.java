@@ -71,7 +71,7 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
     public TextView vehicleTypeTxt, startAtTimeTxt, sourceNameTxt, reachedAtTimeTxt, destinationNameTxt,
             travelDistanceTxt, alloweRateTxt, totalAmountTxt, travelRemarkTxt, feedSourceTxt, addDateTxt;
     public String textpIdString = "", authCodeString = "", StartLattitude = "", StartLongitude = "", EndLattitude = "",
-            EndLongitude = "", sourceLat = "", sourceLog = "";
+            EndLongitude = "", sourceLat = "", sourceLog = "" , empName = "";
     public String employDetailUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppEmployeeTravelExpenseDetail";
     public LatLng origin;
     public LatLng dest;
@@ -122,6 +122,7 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
         mainLay = (android.support.design.widget.AppBarLayout)findViewById(R.id.main_content);
 
 
+        empName = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getEmployName(ShowEmployeDetailActivity.this)));
         authCodeString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getAuthCode(ShowEmployeDetailActivity.this)));
         sourceLat = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowEmployeDetailActivity.this)));
         sourceLog = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowEmployeDetailActivity.this)));
@@ -132,43 +133,6 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
         }
 
         MarkerPoints = new ArrayList<>();
-
-
-
-
-/*
-
-        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mainLay.getLayoutParams();
-        AppBarLayout.Behavior behavior = new AppBarLayout.Behavior();
-        behavior.setDragCallback(new AppBarLayout.Behavior.DragCallback() {
-            @Override
-            public boolean canDrag(AppBarLayout appBarLayout) {
-                return false;
-            }
-        });
-        params.setBehavior(behavior);
-*/
-
-        // addDateTxt = (TextView)findViewById(R.id.add_date_txt);
-
-
-        // mapFragment.getView().setVisibility(View.GONE);
-
-
-      /*  Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar_maps);
-        *//*((AppCompatActivity)getApplicationContext()).setSupportActionBar(toolbar);
-        ((AppCompatActivity)getApplicationContext()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        ((AppCompatActivity)getApplicationContext()).getSupportActionBar().setDisplayShowHomeEnabled(true);*//*
-
-
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // onBackPressed();
-                onBackPressed();
-
-            }
-        });*/
 
         CollapsingToolbarLayout collapsingToolbar =
                 (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
@@ -208,15 +172,8 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
         // Add a marker in Sydney and move the camera
         double startLat = Double.parseDouble(sourceLat);
         double startlong = Double.parseDouble(sourceLog);
-        /*LatLng sydney = new LatLng(startLat, startlong);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
-       // point = new LatLng(startLat, startlong);
-
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(sydney, 17.0f);
-        mMap.animateCamera(cameraUpdate);
-*/        LatLng sydney = new LatLng(startLat, startlong);
+        LatLng sydney = new LatLng(startLat, startlong);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
@@ -246,17 +203,8 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
 
         //show marker points -----------
         options = new MarkerOptions();
-        mMap.addMarker(options.position(point).title("Customer Place"));
-
-
-
-
+        mMap.addMarker(options.position(point).title(empName));
         getEmployDetails(authCodeString, textpIdString);
-
-
-//        mMap.addMarker(options.position(sydney).title("Customer Place"));
-
-
     }
 
     private void build_retrofit_and_get_response(String type,double dstlat,double dstlog) {
@@ -399,6 +347,7 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
     {
         final ProgressDialog pDialog = new ProgressDialog(ShowEmployeDetailActivity.this);
         pDialog.setMessage("Loading...");
+        pDialog.setCancelable(false);
         pDialog.show();
 
         StringRequest historyInquiry = new StringRequest(
@@ -492,55 +441,9 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
                     dest = new LatLng(dstLat, dstLog);
 
 
-                    mMap.addMarker(options.position(origin).title("Customer Place"));
-
-
-
+                    mMap.addMarker(options.position(origin).title(empName));
 
                     build_retrofit_and_get_response("driving" ,dstLat ,dstLog);
-                   /* origin = new LatLng(srcLat, srcLog);
-                    dest = new LatLng(dstLat, dstLog);
-
-                    point = new LatLng(dstLat, dstLog);
-                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, 17.0f);
-                    mMap.animateCamera(cameraUpdate);
-
-
-                    // working to shown root and calculate the distance
-
-
-                    // check condition ,condition is true then clear all points and String
-                    if (MarkerPoints.size() > 1) {
-                        mMap.clear();
-                        MarkerPoints.clear();
-                        MarkerPoints = new ArrayList<>();
-                    }
-
-
-                    mMap.addMarker(options.position(dest).title("Customer Place"));
-                    *//**
-                     * For the start location, the color of marker is GREEN and
-                     * for the end location, the color of marker is RED.
-                     *//*
-                    if (MarkerPoints.size() == 1) {
-                        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                    } else if (MarkerPoints.size() == 2) {
-                        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                    }
-
-                    // add marker
-
-                    mMap.addMarker(options);
-
-                    // Checks, whether start and end locations are captured
-                    if (MarkerPoints.size() >= 2) {
-                        origin = MarkerPoints.get(0);
-                        dest = MarkerPoints.get(1);
-                    }*/
-
-
-
-
                     pDialog.dismiss();
 
                 } catch (JSONException e) {

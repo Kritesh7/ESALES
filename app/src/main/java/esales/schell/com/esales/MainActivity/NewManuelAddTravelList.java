@@ -575,7 +575,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                                         travelDateEditTxt.getText().toString() + " " + startEditTxt.getText().toString(),
                                         sourceNameTxt.getText().toString(),
                                         travelDateEditTxt.getText().toString() + " " + reachedEditTxt.getText().toString(),
-                                        destinationEditTxt.getText().toString(), custId, "0.0", "0.0", "0.0", "0.0",
+                                        custName + " ," + destinationEditTxt.getText().toString(), custId, "0.0", "0.0", "0.0", "0.0",
                                         travelDistanceEditTxt.getText().toString(), remarkTxt.getText().toString(), authCodeString, "0");
 
                             } else {
@@ -583,7 +583,7 @@ public class NewManuelAddTravelList extends AppCompatActivity {
                                         travelDateEditTxt.getText().toString() + " " + startEditTxt.getText().toString(),
                                         sourceNameTxt.getText().toString(),
                                         travelDateEditTxt.getText().toString() + " " + reachedEditTxt.getText().toString(),
-                                        destinationEditTxt.getText().toString(), custId, "0.0", "0.0", "0.0", "0.0",
+                                        custName + " ," +destinationEditTxt.getText().toString(), custId, "0.0", "0.0", "0.0", "0.0",
                                         travelDistanceEditTxt.getText().toString(), remarkTxt.getText().toString(), authCodeString, "0");
 
                                 onBackPressed();

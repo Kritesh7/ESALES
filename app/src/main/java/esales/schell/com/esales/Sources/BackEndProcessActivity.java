@@ -62,6 +62,7 @@ public class BackEndProcessActivity extends BroadcastReceiver {
         conn = new ConnectionDetector(context);
 
         userId =  UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getUserId(context)));
+        AuthCode = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getAuthCode(context)));
 
         int count = masterdabase.getInsertTravelRecordsCunt(userId);
         pos = count;
@@ -90,7 +91,7 @@ public class BackEndProcessActivity extends BroadcastReceiver {
                             EndLongitude = cursor.getString(cursor.getColumnIndex(AppEmployeeTravelExpenseInsUpdt.EndLongitude));
                             travelDistance = cursor.getString(cursor.getColumnIndex(AppEmployeeTravelExpenseInsUpdt.TravelledDistance));
                             TravelRemark = cursor.getString(cursor.getColumnIndex(AppEmployeeTravelExpenseInsUpdt.TravelRemark));
-                            AuthCode = cursor.getString(cursor.getColumnIndex(AppEmployeeTravelExpenseInsUpdt.AuthCode));
+                            //AuthCode = cursor.getString(cursor.getColumnIndex(AppEmployeeTravelExpenseInsUpdt.AuthCode));
                             Amount = cursor.getString(cursor.getColumnIndex(AppEmployeeTravelExpenseInsUpdt.Amount));
 
 

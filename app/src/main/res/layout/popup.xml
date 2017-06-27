@@ -30,6 +30,7 @@
 
     </LinearLayout>
     <ListView
+        android:background="?android:selectableItemBackground"
         android:id="@+id/listview_customer_list"
         android:layout_below="@+id/serchlay"
         android:layout_above="@+id/lay"

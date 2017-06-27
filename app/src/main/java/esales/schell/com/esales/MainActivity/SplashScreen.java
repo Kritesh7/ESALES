@@ -78,7 +78,7 @@ public class SplashScreen extends AppCompatActivity {
         gps = new GPSTracker(mContext, SplashScreen.this);
 
 
-        checkGPS();
+            checkGPS();
 
        /* //checking internet and start broadcasting back end services
         if(conn.getConnectivityStatus()>0)
@@ -99,11 +99,13 @@ public class SplashScreen extends AppCompatActivity {
             }*/
 
 
-        // starting backend services
-        Intent broadCasting = new Intent(SplashScreen.this, BackEndProcessActivity.class);
-        pendingIntent = PendingIntent.getBroadcast(SplashScreen.this,0,broadCasting,0);
+            // starting backend services
+            Intent broadCasting = new Intent(SplashScreen.this, BackEndProcessActivity.class);
+            pendingIntent = PendingIntent.getBroadcast(SplashScreen.this, 0, broadCasting, 0);
 
-        startBackendServices(pendingIntent);
+            startBackendServices(pendingIntent);
+
+
     }
 
     public void startBackendServices(PendingIntent intent)
@@ -126,6 +128,7 @@ public class SplashScreen extends AppCompatActivity {
             LocationManager   lm = (LocationManager)SplashScreen.this.getSystemService(SplashScreen.this.LOCATION_SERVICE);
 
 
+            if (conn.getConnectivityStatus()>0) {
                 if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                     gps.showSettingsAlert();
                 } else {
@@ -159,7 +162,10 @@ public class SplashScreen extends AppCompatActivity {
                         }
                     }, SPLASH_DISPLAY_LENGTH);
                 }
-
+            }else
+                {
+                    conn.showNoInternetAlret();
+                }
 
             /*if (conn.getConnectivityStatus() > 0) {
                 if (gps.canGetLocation()) {
@@ -215,6 +221,7 @@ public class SplashScreen extends AppCompatActivity {
             } else {
                 // Toast.makeText(mContext, "You need have granted permission", Toast.LENGTH_SHORT).show();
 
+                if (conn.getConnectivityStatus()>0) {
                     if (gps.canGetLocation()) {
                         new Handler().postDelayed(new Runnable() {
                             @Override
@@ -222,20 +229,17 @@ public class SplashScreen extends AppCompatActivity {
                                 // This method will be executed once the timer is over
                                 // Start your app main activity
 
-                                if (status .equalsIgnoreCase("1"))
-                                {
+                                if (status.equalsIgnoreCase("1")) {
                                     Intent i = new Intent(SplashScreen.this, HomeActivity.class);
                                     startActivity(i);
                                     overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                                     finish();
-                                }else if (status.equalsIgnoreCase("2"))
-                                {
+                                } else if (status.equalsIgnoreCase("2")) {
                                     Intent i = new Intent(SplashScreen.this, ShowMapsActivity.class);
                                     startActivity(i);
                                     overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                                     finish();
-                                }
-                                else {
+                                } else {
                                     Intent i = new Intent(SplashScreen.this, LoginActivity.class);
                                     startActivity(i);
                                     overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
@@ -254,6 +258,10 @@ public class SplashScreen extends AppCompatActivity {
                         // Ask user to enable GPS/network in settings.
                         gps.showSettingsAlert();
 
+                    }
+                }else
+                    {
+                        conn.showNoInternetAlret();
                     }
 
         }
@@ -438,35 +446,6 @@ public class SplashScreen extends AppCompatActivity {
         finish();
     }
 
-
-   /* public static boolean isMockLocationOn(Context context) {
-        if (Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ALLOW_MOCK_LOCATION).equals("0"))
-            return false;
-        else
-            return true;
-    }
-
-
-
-    public static boolean isDeviceRooted() {
-        // Get the build tags info - See note below to know more about it
-        String buildTags = android.os.Build.TAGS;
-        if (buildTags != null && buildTags.contains("test-keys")) {
-            return true;
-        }
-        // Check if Superuser.apk is present
-        try {
-            File file = new File("/system/app/Superuser.apk");
-            if (file.exists()) {
-                return true;
-            }
-        } catch (Exception e1) {
-            // ignore
-        }
-        // try executing commands as a superUser
-        return canExecuteCommand("/system/xbin/which su") || canExecuteCommand("/system/bin/which su") || canExecuteCommand("which su");
-    }
-*/
     // Executes the specified string command in a separate process
     private static boolean canExecuteCommand(String command) {
         boolean executedSuccesfully;

@@ -231,44 +231,48 @@ public class HomeActivity extends AppCompatActivity {
                lat = gps.getLatitude();
                log = gps.getLongitude();
 
+            //    Toast.makeText(context, "Source Lat" + lat + " Source Log" + log, Toast.LENGTH_SHORT).show();
+
                 //get current Time
 
-                if (vehicleTypeList.size() == 0)
-                {
-                    final Toast toast = Toast.makeText(HomeActivity.this, "Your Vehicle Detail not Configure!", Toast.LENGTH_LONG);
-                    View view = toast.getView();
-                    view.setBackgroundResource(R.drawable.button_rounded_shape);
-                    TextView text = (TextView) view.findViewById(android.R.id.message);
-                    text.setTextColor(Color.parseColor("#ffffff"));
-                    text.setPadding(20, 20, 20, 20);
-                    toast.setGravity(Gravity.CENTER, 0, 0);
-                    toast.show();
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            toast.cancel();
-                        }
-                    }, 4000);
-                }
-                else
-                {
-                    if (vehicleTypeList.size() > 0) {
-                        vehicleTypeList.clear();
-                    }
-
-                    // cheked Innternet connection
-                    if (conn.getConnectivityStatus() > 0) {
-                        getLoginInvalidate(userIdString, authcodeString);
+                if (conn.getConnectivityStatus()>0) {
+                    if (vehicleTypeList.size() == 0) {
+                        final Toast toast = Toast.makeText(HomeActivity.this, "Your Vehicle Detail not Configure!", Toast.LENGTH_LONG);
+                        View view = toast.getView();
+                        view.setBackgroundResource(R.drawable.button_rounded_shape);
+                        TextView text = (TextView) view.findViewById(android.R.id.message);
+                        text.setTextColor(Color.parseColor("#ffffff"));
+                        text.setPadding(20, 20, 20, 20);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
+                        Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                toast.cancel();
+                            }
+                        }, 4000);
                     } else {
-                        if (gps.canGetLocation()) {
-                            callPopup("");
-                        } else {
-                            gps.showSettingsAlert();
+                        if (vehicleTypeList.size() > 0) {
+                            vehicleTypeList.clear();
                         }
-                    }
 
-                }
+                        // cheked Innternet connection
+                        if (conn.getConnectivityStatus() > 0) {
+                            getLoginInvalidate(userIdString, authcodeString);
+                        } else {
+                            if (gps.canGetLocation()) {
+                                callPopup("");
+                            } else {
+                                gps.showSettingsAlert();
+                            }
+                        }
+
+                    }
+                }else
+                    {
+                        conn.showNoInternetAlret();
+                    }
 
             }
         });

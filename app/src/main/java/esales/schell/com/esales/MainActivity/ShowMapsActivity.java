@@ -14,6 +14,7 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.os.StrictMode;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -28,6 +29,8 @@ import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.telephony.TelephonyManager;
+import android.telephony.gsm.GsmCellLocation;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -70,11 +73,25 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -154,6 +171,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public String userDetailUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppddlCustomer";
     public String reachedPointAPIUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppEmployeeTravelExpenseInsUpdt";
     public String checkLoginValidateUrl = SettingConstant.BASEURL + "LoginSchellService.asmx/AppLoginStatusCheck";
+    public String empName = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,6 +195,15 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         showListBtn = (Button)findViewById(R.id.showListBtn);
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.maps_cordinate);
         img = (FrameLayout)findViewById(R.id.net_off);
+
+        empName = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getEmployName(ShowMapsActivity.this)));
+
+
+
+        if (android.os.Build.VERSION.SDK_INT > 9) {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+        }
 
 
         // menu item popup
@@ -364,6 +391,10 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
             public void onClick(View arg0) {
 
+                dstLat = gpsTracker.getLatitude();
+                dstLog = gpsTracker.getLongitude();
+
+              //  Toast.makeText(context, "Destination Lat" + dstLat + " Destination Log" + dstLog, Toast.LENGTH_SHORT).show();
 
                 rechedBtn.setText("Home");
                 UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(ShowMapsActivity.this,
@@ -396,6 +427,31 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
 
                 origin = new LatLng(srcLat, srcLog);
+
+                // check source and destination is same location
+               /* if (srcLat == dstLat && srcLog == dstLog)
+                {
+
+                    //find Cell id in android
+                    final TelephonyManager telephony = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                    if (telephony.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM) {
+                        final GsmCellLocation location = (GsmCellLocation) telephony.getCellLocation();
+                        if (location != null) {
+                            Toast.makeText(context, "LAC: " + location.getLac() + " CID: " + location.getCid(), Toast.LENGTH_SHORT).show();
+
+                            String cid = String.valueOf(location.getCid());
+                            RqsLocation(location.getCid(), location.getLac());
+
+                        }
+                    }
+
+
+                }
+                else
+                {
+                    dest = new LatLng(dstLat, dstLog);
+                }*/
+
                 dest = new LatLng(dstLat, dstLog);
 
                 point = new LatLng(dstLat, dstLog);
@@ -415,7 +471,10 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 }
 
 
-                mMap.addMarker(options.position(dest).title("Customer Place"));
+                mMap.addMarker(options.position(dest).title(empName));
+
+               /* Marker marker = mMap.addMarker(options.position(dest).title(empName));
+                marker.showInfoWindow();*/
                 /**
                  * For the start location, the color of marker is GREEN and
                  * for the end location, the color of marker is RED.
@@ -485,6 +544,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                                             toast.cancel();
                                         }
                                     }, 5000);
+
+                                   // getLoginInvalidate(userIdString,authCodeString);
 
                                     pDialog.dismiss();
 
@@ -558,6 +619,13 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
         adapter = new DemoCustomeAdapter(context, custNameList, ShowMapsActivity.this);
         serchListData.setAdapter(adapter);
+
+       /* serchListData.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                adapter.setSelection(position);
+            }
+        });*/
 
        /* serchListData.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         serchListData.setSelector(android.R.color.holo_blue_light);
@@ -659,6 +727,149 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         }
     }
 
+    //find destination lat log with the help of cid
+    private Boolean RqsLocation(int cid, int lac){
+
+        Boolean result = false;
+
+        String urlmmap = "http://www.google.com/glm/mmap";
+
+        try {
+            URL url = new URL(urlmmap);
+            URLConnection conn = url.openConnection();
+            HttpURLConnection httpConn = (HttpURLConnection) conn;
+            httpConn.setRequestMethod("POST");
+            httpConn.setDoOutput(true);
+            httpConn.setDoInput(true);
+            httpConn.connect();
+
+            OutputStream outputStream = httpConn.getOutputStream();
+            WriteData(outputStream, cid, lac);
+
+            InputStream inputStream = httpConn.getInputStream();
+            DataInputStream dataInputStream = new DataInputStream(inputStream);
+
+            dataInputStream.readShort();
+            dataInputStream.readByte();
+            int code = dataInputStream.readInt();
+            if (code == 0) {
+               double  myLatitude = dataInputStream.readInt();
+               double myLongitude = dataInputStream.readInt();
+
+                //convert double to string
+                String convertDoubleLat = String.valueOf(myLatitude);
+                String convertDoubleLog = String.valueOf(myLongitude);
+
+                //remove the alphabetic string
+                String latString = convertDoubleLat.replaceAll("[^0-9]", "");
+                String logString = convertDoubleLog.replaceAll("[^0-9]", "");
+
+
+                // add . after two digit
+                String latx = latString.substring(0, 2) + "." + latString.substring(2, latString.length());
+                String logY = logString.substring(0, 2) + "." + logString.substring(2, logString.length());
+
+                //convert string to double
+                double indstLat = Double.parseDouble(latx);
+                double indstLog = Double.parseDouble(logY);
+
+                dest = new LatLng(indstLat, indstLog);
+
+                build_retrofit_and_get_response("driving", String.valueOf(srcLat), String.valueOf(srcLog),
+                        String.valueOf(indstLat), String.valueOf(indstLog), loactionDstAdd);
+
+                Log.e("source lat long ", srcLat+ " null");
+                Log.e("found dst lat is",latx+ " dst log " + logY +  " null" );
+
+                result = true;
+
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return result;
+
+    }
+    private void WriteData(OutputStream out, int cid, int lac)
+            throws IOException
+    {
+        DataOutputStream dataOutputStream = new DataOutputStream(out);
+        dataOutputStream.writeShort(21);
+        dataOutputStream.writeLong(0);
+        dataOutputStream.writeUTF("en");
+        dataOutputStream.writeUTF("Android");
+        dataOutputStream.writeUTF("1.0");
+        dataOutputStream.writeUTF("Web");
+        dataOutputStream.writeByte(27);
+        dataOutputStream.writeInt(0);
+        dataOutputStream.writeInt(0);
+        dataOutputStream.writeInt(3);
+        dataOutputStream.writeUTF("");
+
+        dataOutputStream.writeInt(cid);
+        dataOutputStream.writeInt(lac);
+
+        dataOutputStream.writeInt(0);
+        dataOutputStream.writeInt(0);
+        dataOutputStream.writeInt(0);
+        dataOutputStream.writeInt(0);
+        dataOutputStream.flush();
+    }
+    public static LatLng getCidCoordinates(String cid)
+    {
+        final String URL_FORMAT = "http://maps.google.com/maps?cid=%s&q=a&output=json";
+        final String LATLNG_BEFORE = "viewport:{center:{";
+        final String LATLNG_AFTER = "}";
+        final String LATLNG_SEPARATOR = ",";
+        final String LAT_PREFIX = "lat:";
+        final String LNG_PREFIX = "lng:";
+
+        try
+        {
+            HttpClient client = new DefaultHttpClient();
+            HttpGet get = new HttpGet(String.format(URL_FORMAT, cid));
+            HttpResponse response = client.execute(get);
+
+            String text = EntityUtils.toString(response.getEntity(), "UTF-8");
+
+            int startIndex = text.indexOf(LATLNG_BEFORE);
+            if (startIndex == -1)
+                return null;
+
+            startIndex += LATLNG_BEFORE.length();
+            int endIndex = text.indexOf(LATLNG_AFTER, startIndex);
+
+            // Should be "lat:<number>,lng:<number>"
+            String[] parts = text.substring(startIndex, endIndex).split(LATLNG_SEPARATOR);
+            if (parts.length != 2)
+                return null;
+
+            if (parts[0].startsWith(LAT_PREFIX))
+                parts[0] = parts[0].substring(LAT_PREFIX.length());
+            else
+                return null;
+
+            if (parts[1].startsWith(LNG_PREFIX))
+                parts[1] = parts[1].substring(LNG_PREFIX.length());
+            else
+                return null;
+
+            return new LatLng(Double.parseDouble(parts[0]), Double.parseDouble(parts[1]));
+        }
+        catch (NumberFormatException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
 
     //checked login invalid or not
@@ -683,8 +894,50 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
                             if (LoginCount.equalsIgnoreCase("1"))
                             {
-                                build_retrofit_and_get_response("driving", String.valueOf(srcLat), String.valueOf(srcLog),
-                                        String.valueOf(dstLat), String.valueOf(dstLog), loactionDstAdd);
+                                if (dstLat == 0.0)
+                                {
+                                    final Toast toast = Toast.makeText(ShowMapsActivity.this, "Lat log is not get please Try again!", Toast.LENGTH_LONG);
+                                    View view = toast.getView();
+                                    view.setBackgroundResource(R.drawable.button_rounded_shape);
+                                    TextView text = (TextView) view.findViewById(android.R.id.message);
+                                    text.setTextColor(Color.parseColor("#ffffff"));
+                                    text.setPadding(20, 20, 20, 20);
+                                    toast.setGravity(Gravity.CENTER, 0, 0);
+                                    toast.show();
+                                    Handler handler = new Handler();
+                                    handler.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            toast.cancel();
+                                        }
+                                    }, 2000);
+                                }else {
+
+                                    /*// checked source and destination lat log is same or not
+                                    if (srcLat == dstLat && srcLog == dstLog)
+                                    {
+                                        //find Cell id in android
+                                        final TelephonyManager telephony = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                                        if (telephony.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM) {
+                                            final GsmCellLocation location = (GsmCellLocation) telephony.getCellLocation();
+                                            if (location != null) {
+                                                Toast.makeText(context, "LAC: " + location.getLac() + " CID: " + location.getCid(), Toast.LENGTH_SHORT).show();
+
+                                                String cid = String.valueOf(location.getCid());
+                                                RqsLocation(location.getCid(),location.getLac());
+
+                                            }
+                                        }
+                                    }else
+                                        {
+                                            build_retrofit_and_get_response("driving", String.valueOf(srcLat), String.valueOf(srcLog),
+                                                    String.valueOf(dstLat), String.valueOf(dstLog), loactionDstAdd);
+                                        }*/
+
+                                    build_retrofit_and_get_response("driving", String.valueOf(srcLat), String.valueOf(srcLog),
+                                            String.valueOf(dstLat), String.valueOf(dstLog), loactionDstAdd);
+
+                                }
                             }else
                             {
 
@@ -934,7 +1187,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
         //show marker points -----------
         options = new MarkerOptions();
-        mMap.addMarker(options.position(point).title("Customer Place"));
+        mMap.addMarker(options.position(point).title(empName));
+
 
 
         rechedBtn.setOnClickListener(new View.OnClickListener() {
@@ -1018,6 +1272,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                                                  final String innerdstlat, final String innerdstlog, final String locationdstAdd) {
 
         String url = "https://maps.googleapis.com/maps/";
+
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(url)

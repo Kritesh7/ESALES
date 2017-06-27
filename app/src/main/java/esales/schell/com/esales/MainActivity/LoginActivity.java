@@ -223,6 +223,8 @@ public class LoginActivity extends AppCompatActivity {
                                     userId)));
                             UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setAuthCode(LoginActivity.this, authCodeinner)));
 
+                            UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setEmployeName(LoginActivity.this,
+                                    emailTxt.getText().toString())));
 
 
                         }

@@ -15,7 +15,7 @@ public class SettingConstant {
     public static final int Retry_Time = 15000;
     protected static final String SP_NAME = "myPref";
     protected static final String FirstHomePage = "First_Home_Page";
-    protected static final String SecondHomePage = "Second_Home_Page";
+    protected static final String EmployeName = "EmployeName";
     protected static final String VechelType = "VechelType";
     protected static final String UserId = "UserId";
     protected static final String CustomerName = "CustomerName";

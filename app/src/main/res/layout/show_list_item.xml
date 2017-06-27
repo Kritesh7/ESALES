@@ -9,6 +9,8 @@
     >
 
     <LinearLayout
+        android:foreground="?android:attr/selectableItemBackground"
+        android:clickable="true"
         android:id="@+id/own_lay"
         android:padding="10dp"
         android:orientation="vertical"
