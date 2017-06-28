@@ -225,7 +225,7 @@ public class ShowListActivity extends AppCompatActivity {
                 VolleyLog.d("Travel List", "Error: " + error.getMessage());
                 // Log.e("checking now ",error.getMessage());
 
-                final Toast toast = Toast.makeText(ShowListActivity.this, error.getMessage(), Toast.LENGTH_LONG);
+                final Toast toast = Toast.makeText(ShowListActivity.this, "Connection Error", Toast.LENGTH_LONG);
                 View view = toast.getView();
                 view.setBackgroundResource(R.drawable.button_rounded_shape);
                 TextView text = (TextView) view.findViewById(android.R.id.message);

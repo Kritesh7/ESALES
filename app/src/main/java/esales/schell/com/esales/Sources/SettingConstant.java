@@ -10,7 +10,7 @@ public class SettingConstant {
       public static final String BASEURL = "http://45.249.111.131:94/WebApi/";
 
      // local
-    // public static final String BASEURL = "http://192.168.1.17:94/WebApi/";
+     //public static final String BASEURL = "http://192.168.1.17:94/WebApi/";
 
     public static final int Retry_Time = 15000;
     protected static final String SP_NAME = "myPref";

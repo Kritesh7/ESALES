@@ -517,6 +517,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 } else {
                     pDialog = new ProgressDialog(ShowMapsActivity.this);
                     pDialog.setMessage("Loading...");
+                    pDialog.setCancelable(false);
                     pDialog.show();
 
                     // checked lat log is get or not
@@ -965,7 +966,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 VolleyLog.d("Login", "Error: " + error.getMessage());
                 // Log.e("checking now ",error.getMessage());
 
-                final Toast toast = Toast.makeText(ShowMapsActivity.this, error.getMessage(), Toast.LENGTH_LONG);
+                final Toast toast = Toast.makeText(ShowMapsActivity.this,"Connection Error", Toast.LENGTH_LONG);
                 View view = toast.getView();
                 view.setBackgroundResource(R.drawable.button_rounded_shape);
                 TextView text = (TextView) view.findViewById(android.R.id.message);

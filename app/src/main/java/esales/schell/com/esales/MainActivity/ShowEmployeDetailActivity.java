@@ -203,7 +203,7 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
 
         //show marker points -----------
         options = new MarkerOptions();
-        mMap.addMarker(options.position(point).title(empName));
+       // mMap.addMarker(options.position(point).title(empName));
         getEmployDetails(authCodeString, textpIdString);
     }
 
@@ -442,6 +442,7 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
 
 
                     mMap.addMarker(options.position(origin).title(empName));
+                    mMap.addMarker(options.position(dest).title(empName));
 
                     build_retrofit_and_get_response("driving" ,dstLat ,dstLog);
                     pDialog.dismiss();
