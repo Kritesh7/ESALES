@@ -3,6 +3,7 @@ package esales.schell.com.esales.MainActivity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -19,6 +20,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.transition.TransitionManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -107,6 +109,7 @@ public class HomeActivity extends AppCompatActivity {
     public CoordinatorLayout coordinatorLayout;
     public ProgressDialog progressDialog;
     public String LoginCount = "";
+    public String postionRadio = "0";
     public String checkLoginValidateUrl = SettingConstant.BASEURL + "LoginSchellService.asmx/AppLoginStatusCheck";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,6 +195,8 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent i = new Intent(getApplicationContext(),NewManuelAddTravelList.class);
                 i.putExtra("checked","home");
+                i.putExtra("new","create");
+                i.putExtra("Radio_Postion","");
                 startActivity(i);
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             }
@@ -420,11 +425,13 @@ public class HomeActivity extends AppCompatActivity {
                 if (checkedId == Integer.parseInt(vehicleTypeList.get(0).getVehicleTypeId()))
                 {
                     vechileType = vehicleTypeList.get(0).getVehicleTypeId();
+                    postionRadio = "0";
                     Log.e("first Type",vechileType);
                 }else if (checkedId == Integer.parseInt(vehicleTypeList.get(1).getVehicleTypeId()))
                 {
                     vechileType = vehicleTypeList.get(1).getVehicleTypeId();
                     Log.e("second Type",vechileType);
+                    postionRadio = "1";
                 }
             }
         });
@@ -553,21 +560,7 @@ public class HomeActivity extends AppCompatActivity {
 
                             if (lat == 0.0)
                             {
-                                final Toast toast = Toast.makeText(HomeActivity.this, "Please Try Again lat log is not get", Toast.LENGTH_LONG);
-                                View view = toast.getView();
-                                view.setBackgroundResource(R.drawable.button_rounded_shape);
-                                TextView text = (TextView) view.findViewById(android.R.id.message);
-                                text.setTextColor(Color.parseColor("#ffffff"));
-                                text.setPadding(20, 20, 20, 20);
-                                toast.setGravity(Gravity.CENTER, 0, 0);
-                                toast.show();
-                                Handler handler = new Handler();
-                                handler.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        toast.cancel();
-                                    }
-                                }, 4000);
+                                getAlertBox();
                                 pDialog.dismiss();
                             }else
                             {
@@ -577,6 +570,7 @@ public class HomeActivity extends AppCompatActivity {
                                 Intent i = new Intent(getApplicationContext(), ShowMapsActivity.class);
                                 i.putExtra("lat", lat);
                                 i.putExtra("log", log);
+                                i.putExtra("radioPost",postionRadio);
                                 startActivity(i);
                                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                                 finish();
@@ -593,6 +587,10 @@ public class HomeActivity extends AppCompatActivity {
                                         String.valueOf(addTxt.getText().toString()))));
                                 UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(HomeActivity.this,
                                         "2")));
+                                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceAddress(HomeActivity.this,
+                                        addTxt.getText().toString())));
+                                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceTime(HomeActivity.this,
+                                        getOnlyTime())));
                                 popupWindow.dismiss();
                             }
 
@@ -614,6 +612,47 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
+    public void getAlertBox()
+    {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                context);
+
+        // set title
+        alertDialogBuilder.setTitle("Can Not Get Location");
+
+        // set dialog message
+        alertDialogBuilder
+                .setMessage("You need to try again or Can add travel expense detail manually")
+                .setCancelable(false)
+                .setPositiveButton("Add Manually",new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        // if this button is clicked, close
+                        // current activity
+
+                        Intent i= new Intent(getApplicationContext(),NewManuelAddTravelList.class);
+                        i.putExtra("checked","");
+                        i.putExtra("new","");
+                        i.putExtra("Radio_Postion","");
+                        startActivity(i);
+                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                        // ShowMapsActivity.this.finish();
+                    }
+                })
+                .setNegativeButton("Retry",new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        // if this button is clicked, just close
+                        // the dialog box and do nothing
+                        dialog.cancel();
+                    }
+                });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
+
+    }
 
 
 
@@ -624,6 +663,14 @@ public class HomeActivity extends AppCompatActivity {
         Calendar cal = Calendar.getInstance();
         return dateFormat.format(cal.getTime());
     }// en
+
+    public String getOnlyTime()
+    {
+        //date output format
+        DateFormat dateFormat = new SimpleDateFormat("kk:mm:ss");
+        Calendar cal = Calendar.getInstance();
+        return dateFormat.format(cal.getTime());
+    }
 
 
 

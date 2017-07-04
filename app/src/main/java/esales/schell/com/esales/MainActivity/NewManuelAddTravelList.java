@@ -99,10 +99,11 @@ public class NewManuelAddTravelList extends AppCompatActivity {
     public   boolean visible;
     public ConnectionDetector conn;
     public String reachedPointAPIUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppEmployeeTravelExpenseInsUpdt";
-    public String checkNavigate = "";
+    public String checkNavigate = "", sourceAddress = "", sourceTime = "" , checkingEditTxt = "", postionOfRadio = "" ;
     private Snackbar snackbar;
     private boolean internetConnected=true;
     public CoordinatorLayout coordinatorLayout;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,11 +147,14 @@ public class NewManuelAddTravelList extends AppCompatActivity {
         if (checkInt != null)
         {
             checkNavigate = checkInt.getStringExtra("checked");
+            checkingEditTxt = checkInt.getStringExtra("new");
+            postionOfRadio = checkInt.getStringExtra("Radio_Postion");
         }
 
         masterDataBase = new MasterDataBase(NewManuelAddTravelList.this);
         conn = new ConnectionDetector(NewManuelAddTravelList.this);
-
+        sourceAddress = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceAddress(NewManuelAddTravelList.this)));
+        sourceTime = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceTime(NewManuelAddTravelList.this)));
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.newmanuellay);
         subBtn = (Button) findViewById(R.id.btn_manuel_submit);
         travelRadioGruop = (RadioGroup) findViewById(R.id.travel_Type);
@@ -172,6 +176,17 @@ public class NewManuelAddTravelList extends AppCompatActivity {
 
         authCodeString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getAuthCode(NewManuelAddTravelList.this)));
         userIdString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getUserId(NewManuelAddTravelList.this)));
+
+
+        if (checkingEditTxt.equalsIgnoreCase("")) {
+
+            if (!sourceAddress.equalsIgnoreCase("null"))
+                sourceNameTxt.setText(sourceAddress);
+
+            if (!sourceTime.equalsIgnoreCase("null"))
+                startEditTxt.setText(sourceTime);
+        }
+
 
         ////------------------ case Details-------------------------//
         if (custNameList.size() > 0) {
@@ -287,14 +302,19 @@ public class NewManuelAddTravelList extends AppCompatActivity {
             }
 
             // set checked listner
-            if (vehicleTypeList.size() == 1)
-            {
-                ((RadioButton) travelRadioGruop.getChildAt(0)).setChecked(true);
-                vechileType = vehicleTypeList.get(0).getVehicleTypeId();
-            }else {
-                ((RadioButton) travelRadioGruop.getChildAt(1)).setChecked(true);
-                vechileType = vehicleTypeList.get(1).getVehicleTypeId();
-            }
+            //checked alert choose vechile type using home start button only
+            if (postionOfRadio.equalsIgnoreCase("")) {
+                if (vehicleTypeList.size() == 1) {
+                    ((RadioButton) travelRadioGruop.getChildAt(0)).setChecked(true);
+                    vechileType = vehicleTypeList.get(0).getVehicleTypeId();
+                } else {
+                    ((RadioButton) travelRadioGruop.getChildAt(1)).setChecked(true);
+                    vechileType = vehicleTypeList.get(1).getVehicleTypeId();
+                }
+            }else
+                {
+                    ((RadioButton) travelRadioGruop.getChildAt(Integer.parseInt(postionOfRadio)+1)).setChecked(true);
+                }
 
             // checking vechele type to visibile gone to amount edit text
             if (vechileType.equalsIgnoreCase("1")) {

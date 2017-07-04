@@ -18,11 +18,13 @@ public class SettingConstant {
     protected static final String EmployeName = "EmployeName";
     protected static final String VechelType = "VechelType";
     protected static final String UserId = "UserId";
-    protected static final String CustomerName = "CustomerName";
+    protected static final String SourceAddress = "SourceAddress";
     protected static final String AuthCode = "AuthCode";
     protected static final String StartTime = "StartTime";
     protected static final String SourceName = "SourceName";
     protected static final String Sourcelog = "Source_Lognitude";
     protected static final String SourceLat = "Source_Latitude";
+    protected static final String SourceTime = "SourceTime";
+
 
 }

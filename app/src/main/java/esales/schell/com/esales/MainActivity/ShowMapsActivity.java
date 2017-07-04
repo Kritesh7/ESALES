@@ -171,7 +171,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public String userDetailUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppddlCustomer";
     public String reachedPointAPIUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppEmployeeTravelExpenseInsUpdt";
     public String checkLoginValidateUrl = SettingConstant.BASEURL + "LoginSchellService.asmx/AppLoginStatusCheck";
-    public String empName = "";
+    public String empName = "" , postionRadio = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,6 +183,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         mapFragment.getMapAsync(this);
 
         context = ShowMapsActivity.this;
+        pDialog = new ProgressDialog(ShowMapsActivity.this);
         conn =new ConnectionDetector(context);
         masterDataBase = new MasterDataBase(context);
         MarkerPoints = new ArrayList<>();
@@ -328,6 +329,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         {
             lat = i.getDoubleExtra("lat",-34);
             log = i.getDoubleExtra("log",151);
+            postionRadio = i.getStringExtra("radioPost");
           /*  mysynclat = i.getDoubleExtra("calculated_Lat",-28.54545);
             mysynclog = i.getDoubleExtra("calculated_Lon", -77.4546);*/
            /* vechileType = i.getStringExtra("vechile_Type");
@@ -515,7 +517,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                     }, 2000);
 
                 } else {
-                    pDialog = new ProgressDialog(ShowMapsActivity.this);
+
                     pDialog.setMessage("Loading...");
                     pDialog.setCancelable(false);
                     pDialog.show();
@@ -525,29 +527,16 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                         @Override
                         public void run() {
 
+                         /*   dstLat = gpsTracker.getLatitude();
+                            dstLog = gpsTracker.getLongitude();*/
+
+
                             if (dstLat == 0.0) {
 
 
                                 if (gpsTracker.canGetLocation()) {
 
-                                    final Toast toast = Toast.makeText(ShowMapsActivity.this, "Please Try Again lat log is not get", Toast.LENGTH_LONG);
-                                    View view = toast.getView();
-                                    view.setBackgroundResource(R.drawable.button_rounded_shape);
-                                    TextView text = (TextView) view.findViewById(android.R.id.message);
-                                    text.setTextColor(Color.parseColor("#ffffff"));
-                                    text.setPadding(20, 20, 20, 20);
-                                    toast.setGravity(Gravity.CENTER, 0, 0);
-                                    toast.show();
-                                    Handler handler = new Handler();
-                                    handler.postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            toast.cancel();
-                                        }
-                                    }, 5000);
-
-                                   // getLoginInvalidate(userIdString,authCodeString);
-
+                                    getAlertBox();
                                     pDialog.dismiss();
 
                                 }else
@@ -726,6 +715,53 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 }
             });
         }
+    }
+
+    public void getAlertBox()
+    {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                context);
+
+        // set title
+        alertDialogBuilder.setTitle("Can Not Get Location");
+
+        // set dialog message
+        alertDialogBuilder
+                .setMessage("You need to try again or Can add travel expense detail manually")
+                .setCancelable(false)
+                .setPositiveButton("Add Manually",new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        // if this button is clicked, close
+                        // current activity
+                        flag = false;
+                        rechedBtn.setText("Home");
+                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(ShowMapsActivity.this,
+                                "1")));
+
+                        Intent i= new Intent(getApplicationContext(),NewManuelAddTravelList.class);
+                        i.putExtra("checked","");
+                        i.putExtra("new","");
+                        i.putExtra("Radio_Postion",postionRadio);
+                        startActivity(i);
+                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                       // ShowMapsActivity.this.finish();
+                    }
+                })
+                .setNegativeButton("Retry",new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        // if this button is clicked, just close
+                        // the dialog box and do nothing
+                       // callPopup();
+                        dialog.cancel();
+                    }
+                });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
+
     }
 
     //find destination lat log with the help of cid
@@ -1199,19 +1235,37 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 sourceLat = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
                 sourceLog =  UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));
 
-                  dstLat = gpsTracker.getLatitude();
-                  dstLog = gpsTracker.getLongitude();
+               /* dstLat = gpsTracker.getLatitude();
+                dstLog = gpsTracker.getLongitude();*/
 
                /* dstLat = 	28.4985;
                 dstLog =   77.4029;*/
 
                 if (flag)
                 {
+                    pDialog.setMessage("Please Waiting...");
+                    pDialog.show();
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            pDialog.dismiss();
+                            dstLat = gpsTracker.getLatitude();
+                            dstLog = gpsTracker.getLongitude();
 
                     Log.e("checked buttn name",rechedBtn.getText().toString());
                     if (rechedBtn.getText().toString().equalsIgnoreCase("Reached")) {
 
-                        callPopup();
+                        //checked source and destination lat log is same
+                        if (sourceInnerLat == dstLat && sourceInnerLog == dstLog)
+                        {
+                            getAlertBox();
+
+                        }else
+                        {
+                            callPopup();
+                        }
 
                     }else
                         {
@@ -1219,6 +1273,9 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                             MarkerPoints.clear();
                             MarkerPoints = new ArrayList<>();
                         }
+
+                        }
+                    },SPLASH_DISPLAY_LENGTH);
                 }
                 else {
 
@@ -1230,41 +1287,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
                     UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(ShowMapsActivity.this,
                             "1")));
-
-
-
-                   /* flag = true;
-                    rechedBtn.setText("Reached");
-
-                    // again
-
-                    mMap.clear();
-                    MarkerPoints.clear();
-                    MarkerPoints = new ArrayList<>();
-
-
-                    // again
-
-
-
-                    String innerSrc  = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
-                    String innersrclog =UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));
-
-
-                    double sourceInnerLat = Double.parseDouble(innerSrc);
-                    double sourceInnerLog = Double.parseDouble(innersrclog);
-                    point = new LatLng(sourceInnerLat,sourceInnerLog);
-
-
-                    //add point in a array list
-                    MarkerPoints.add(point);
-
-                    //show marker points -----------
-                    options = new MarkerOptions();
-                    mMap.addMarker(options.position(point).title("Customer Place"));
-                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(point, 17.0f);
-                    mMap.animateCamera(cameraUpdate);*/
                 }
+
             }
         });
     }

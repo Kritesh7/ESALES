@@ -33,18 +33,17 @@ public class SharedPrefs
 
 
 
-  /*  public static String getStatusFirstHomePage(Context context)
+    //Source Address
+    public static String getSourceAddress(Context context)
     {
         SharedPreferences sp = getSetting(context);
-        return  sp.getString(SettingConstant.CustomerName, null);
+        return  sp.getString(SettingConstant.SourceAddress, null);
     }
-*/
-
-    public static boolean setCustomerName(Context context, String authKey)
+    public static boolean setSourceAddress(Context context, String authKey)
     {
         SharedPreferences sp = getSetting(context);
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString(SettingConstant.CustomerName, authKey);
+        editor.putString(SettingConstant.SourceAddress, authKey);
         return editor.commit();
     }
 
@@ -163,5 +162,19 @@ public class SharedPrefs
         return editor.commit();
     }
 
+
+    //get Source Time
+    public static String getSourceTime(Context context)
+    {
+        SharedPreferences sp = getSetting(context);
+        return  sp.getString(SettingConstant.SourceTime, null);
+    }
+    public static boolean setSourceTime(Context context, String authKey)
+    {
+        SharedPreferences sp = getSetting(context);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(SettingConstant.SourceTime, authKey);
+        return editor.commit();
+    }
 
 }
