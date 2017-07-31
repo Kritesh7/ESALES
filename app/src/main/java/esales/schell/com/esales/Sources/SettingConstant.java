@@ -7,7 +7,7 @@ package esales.schell.com.esales.Sources;
 public class SettingConstant {
 
       //server
-      public static final String BASEURL = "http://45.249.111.131:94/WebApi/";
+      public static final String BASEURL = "http://45.114.142.71/crm/WebApi/";
 
      // local
      //public static final String BASEURL = "http://192.168.1.17:94/WebApi/";

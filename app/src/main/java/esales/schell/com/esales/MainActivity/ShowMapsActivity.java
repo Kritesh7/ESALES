@@ -146,7 +146,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public GPSTracker gpsTracker;
     public String sourceLat="";
     public String sourceLog="", destinationName="", customerId = "", travelDistance = "";
-    public  String authCodeString = "", userIdString = "";
+    public  String authCodeString = "", userIdString = "", sourceadd = "";
     public LatLng origin;
     public LatLng dest;
     public LatLng point;
@@ -171,7 +171,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
     public String userDetailUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppddlCustomer";
     public String reachedPointAPIUrl = SettingConstant.BASEURL + "ExpenseWebService.asmx/AppEmployeeTravelExpenseInsUpdt";
     public String checkLoginValidateUrl = SettingConstant.BASEURL + "LoginSchellService.asmx/AppLoginStatusCheck";
-    public String empName = "" , postionRadio = "";
+    public String empName = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -314,6 +314,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         sourceName = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceName(ShowMapsActivity.this)));
         authCodeString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getAuthCode(ShowMapsActivity.this)));
         userIdString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getUserId(ShowMapsActivity.this)));
+        sourceadd=UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceAddress(ShowMapsActivity.this)));
+
 
         // checkin data
 
@@ -329,21 +331,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         {
             lat = i.getDoubleExtra("lat",-34);
             log = i.getDoubleExtra("log",151);
-            postionRadio = i.getStringExtra("radioPost");
-          /*  mysynclat = i.getDoubleExtra("calculated_Lat",-28.54545);
-            mysynclog = i.getDoubleExtra("calculated_Lon", -77.4546);*/
-           /* vechileType = i.getStringExtra("vechile_Type");
-            startTime = i.getStringExtra("start_Time");
-            sourceName = i.getStringExtra("Source_Name");
-
-            Log.e("intent lat",lat + "null");
-            Log.e("intent log",log + "null");
-            Log.e("intent start Time",startTime + "null");
-            Log.e("intent Source Name",sourceName + "null");*/
-
-           /* Log.e("mysynclat",mysynclat + "null");
-            Log.e("mysynclog",mysynclog + "null");
-*/
         }
 
     }
@@ -739,9 +726,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                                 "1")));
 
                         Intent i= new Intent(getApplicationContext(),NewManuelAddTravelList.class);
-                        i.putExtra("checked","");
-                        i.putExtra("new","");
-                        i.putExtra("Radio_Postion",postionRadio);
                         startActivity(i);
                         overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                        // ShowMapsActivity.this.finish();

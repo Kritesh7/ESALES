@@ -195,10 +195,11 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent i = new Intent(getApplicationContext(),NewManuelAddTravelList.class);
                 i.putExtra("checked","home");
-                i.putExtra("new","create");
-                i.putExtra("Radio_Postion","");
                 startActivity(i);
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+
+                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceAddress(HomeActivity.this,"")));
+                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceTime(HomeActivity.this,"")));
             }
         });
 
@@ -297,6 +298,8 @@ public class HomeActivity extends AppCompatActivity {
                         String.valueOf(lat))));
                 UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceLog(HomeActivity.this,
                         String.valueOf(log))));
+                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceAddress(HomeActivity.this,"")));
+                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceTime(HomeActivity.this,"")));
             }
         });
 
@@ -570,7 +573,6 @@ public class HomeActivity extends AppCompatActivity {
                                 Intent i = new Intent(getApplicationContext(), ShowMapsActivity.class);
                                 i.putExtra("lat", lat);
                                 i.putExtra("log", log);
-                                i.putExtra("radioPost",postionRadio);
                                 startActivity(i);
                                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                                 finish();
@@ -631,10 +633,11 @@ public class HomeActivity extends AppCompatActivity {
 
                         Intent i= new Intent(getApplicationContext(),NewManuelAddTravelList.class);
                         i.putExtra("checked","");
-                        i.putExtra("new","");
-                        i.putExtra("Radio_Postion","");
                         startActivity(i);
                         overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+
+                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceAddress(HomeActivity.this,"")));
+                        UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setSourceTime(HomeActivity.this,"")));
                         // ShowMapsActivity.this.finish();
                     }
                 })

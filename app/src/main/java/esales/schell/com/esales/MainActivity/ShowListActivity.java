@@ -120,8 +120,6 @@ public class ShowListActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent i = new Intent(getApplicationContext(),NewManuelAddTravelList.class);
                 i.putExtra("checked","addNew");
-                i.putExtra("new","create");
-                i.putExtra("Radio_Postion","");
                 startActivity(i);
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
 
