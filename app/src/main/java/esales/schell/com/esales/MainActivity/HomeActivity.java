@@ -79,6 +79,7 @@ import esales.schell.com.esales.R;
 import esales.schell.com.esales.Sources.AppController;
 import esales.schell.com.esales.Sources.ConnectionDetector;
 import esales.schell.com.esales.Sources.GPSTracker;
+import esales.schell.com.esales.Sources.GetLoctionAddress;
 import esales.schell.com.esales.Sources.LocationAddress;
 import esales.schell.com.esales.Sources.MyAsyncTask;
 import esales.schell.com.esales.Sources.SettingConstant;
@@ -111,6 +112,11 @@ public class HomeActivity extends AppCompatActivity {
     public String LoginCount = "";
     public String postionRadio = "0";
     public String checkLoginValidateUrl = SettingConstant.BASEURL + "LoginSchellService.asmx/AppLoginStatusCheck";
+
+
+    ImageView imv_menu;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -132,6 +138,8 @@ public class HomeActivity extends AppCompatActivity {
         conn = new ConnectionDetector(context);
 
 
+        imv_menu = (ImageView) findViewById(R.id.imv_menu);
+
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.home_cordinator);
         logoutBtn = (ImageView)findViewById(R.id.logoutBtn);
         trailListbtn = (Button)findViewById(R.id.trail_listbtn);
@@ -139,6 +147,55 @@ public class HomeActivity extends AppCompatActivity {
         addBtn = (ImageView)findViewById(R.id.add_manuely);
         userIdString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getUserId(HomeActivity.this)));
         authcodeString = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getAuthCode(HomeActivity.this)));
+        imv_menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                //Creating the instance of PopupMenu
+                PopupMenu popup = new PopupMenu(HomeActivity.this,v);
+                //Inflating the Popup using xml file
+                popup.getMenuInflater().inflate(R.menu.homepage_menu, popup.getMenu());
+
+                //registering popup with OnMenuItemClickListener
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                      /*  Toast.makeText(MainActivity.this,"You Clicked : " + item.getTitle(),Toast.LENGTH_SHORT).show();
+                        return true;*/
+                        int id  = item.getItemId();
+
+                        if (id == R.id.action_menu_change_pass)
+                        {
+
+                            Intent i = new Intent(getApplicationContext(),ChnagePasswordActivity.class);
+                            startActivity(i);
+                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                            // Toast.makeText(getApplicationContext(),"You Clicked : " + item.getTitle(),Toast.LENGTH_SHORT).show();
+                        }else if (id == R.id.my_profile_menu)
+                        {
+                            Intent i = new Intent(getApplicationContext(),MyProfileActivity.class);
+                            startActivity(i);
+                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                        }else if (id == R.id.my_profile_logout)
+                        {
+                            Intent i = new Intent(getApplicationContext(),LoginActivity.class);
+                            startActivity(i);
+                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                            finish();
+                /*
+                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusSecondHomePage(HomeActivity.this,
+                        "")));*/
+                            UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(HomeActivity.this,
+                                    "")));
+
+                        }
+                        return true;
+                    }
+                });
+
+                popup.show();//showing popup menu
+
+            }
+        });
         settingBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -166,6 +223,19 @@ public class HomeActivity extends AppCompatActivity {
                             Intent i = new Intent(getApplicationContext(),MyProfileActivity.class);
                             startActivity(i);
                             overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+
+                        }else if (id == R.id.my_profile_logout)
+                        {
+                            Intent i = new Intent(getApplicationContext(),LoginActivity.class);
+                            startActivity(i);
+                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                            finish();
+                /*
+                UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusSecondHomePage(HomeActivity.this,
+                        "")));*/
+                            UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.setStatusFirstHomePage(HomeActivity.this,
+                                    "")));
+
                         }
                         return true;
                     }
@@ -332,10 +402,12 @@ public class HomeActivity extends AppCompatActivity {
 
     private void callPopup(String addString) {
 
-        LayoutInflater layoutInflater = (LayoutInflater) getBaseContext()
-                .getSystemService(LAYOUT_INFLATER_SERVICE);
+//        LayoutInflater layoutInflater = (LayoutInflater) getBaseContext()
+//                .getSystemService(LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = getLayoutInflater();
+        View popupView = (View) inflater.inflate(R.layout.startup_popupwindow, null);
 
-        View popupView = layoutInflater.inflate(R.layout.startup_popupwindow, null);
+    //    View popupView = layoutInflater.inflate(R.layout.startup_popupwindow, null);
 
         Button cancel , save;
         RadioGroup radioGroup;
@@ -706,9 +778,14 @@ public class HomeActivity extends AppCompatActivity {
                                 if (gps.canGetLocation()) {
 
                                     // get address
-                                    LocationAddress locationAddress = new LocationAddress();
-                                    locationAddress.getAddressFromLocation(lat, log, getApplicationContext(),
+                                    GetLoctionAddress locationAddress = new GetLoctionAddress();
+                                    locationAddress.getFromLocation(lat, log, getApplicationContext(),
                                             new GeocoderHandler());
+
+//                                    LocationAddress locationAddress = new LocationAddress();
+//                                    locationAddress.getAddressFromLocation(lat, log, getApplicationContext(),
+//                                            new GeocoderHandler());
+
                                 }else
                                 {
                                     gps.showSettingsAlert();
@@ -879,7 +956,6 @@ public class HomeActivity extends AppCompatActivity {
             if(internetConnected){
                 snackbar.show();
                 internetConnected=false;
-
             }
         }else{
             if(!internetConnected){

@@ -105,6 +105,8 @@ public class NewManuelAddTravelList extends AppCompatActivity {
     public CoordinatorLayout coordinatorLayout;
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,6 +121,8 @@ public class NewManuelAddTravelList extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.manuel_list_tollbar);
         setSupportActionBar(toolbar);
+
+
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 

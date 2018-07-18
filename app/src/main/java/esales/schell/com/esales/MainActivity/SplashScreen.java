@@ -139,7 +139,7 @@ public class SplashScreen extends AppCompatActivity {
                             // Start your app main activity
 
                             if (status.equalsIgnoreCase("1")) {
-                                Intent i = new Intent(SplashScreen.this, HomeActivity.class);
+                                Intent i = new Intent(SplashScreen.this, LandingPage.class);
                                 startActivity(i);
                                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                                 finish();
@@ -230,7 +230,7 @@ public class SplashScreen extends AppCompatActivity {
                                 // Start your app main activity
 
                                 if (status.equalsIgnoreCase("1")) {
-                                    Intent i = new Intent(SplashScreen.this, HomeActivity.class);
+                                    Intent i = new Intent(SplashScreen.this, LandingPage.class);
                                     startActivity(i);
                                     overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                                     finish();

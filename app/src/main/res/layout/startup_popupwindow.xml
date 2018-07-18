@@ -5,13 +5,11 @@
     android:id="@+id/adderass_lay"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white"
-   >
+    android:background="@color/white">
     <LinearLayout
         android:orientation="vertical"
         android:layout_margin="5dp"
         android:id="@+id/serchlay"
-        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
@@ -21,7 +19,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Vehicle Type"
-            android:textColor="@color/red_800"/>
+            android:textColor="@color/red_800"
+            android:textSize="25sp"/>
         <RadioGroup
             android:id="@+id/popupradio"
             android:orientation="horizontal"
@@ -105,14 +104,17 @@
         android:id="@+id/lay"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="10dp">
         <Button
             android:id="@+id/first_popup_saveBtn"
             android:textColor="@color/white"
             android:layout_width="0dp"
             android:layout_weight=".5"
             android:layout_height="wrap_content"
-            android:text="Ok"/>
+            android:text="Ok"
+            android:textSize="15sp"
+            android:padding="10dp"/>
         <Button
             android:id="@+id/first_popup_cancelbtutton"
             android:layout_marginLeft="10dp"
@@ -120,7 +122,9 @@
             android:layout_width="0dp"
             android:layout_weight=".5"
             android:layout_height="wrap_content"
-            android:text="Cancel"/>
+            android:text="Cancel"
+            android:textSize="15sp"
+            android:padding="10dp"/>
 
     </LinearLayout>
 </LinearLayout>

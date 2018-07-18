@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SCHELL</string>
+    <string name="app_name">Travel Expense</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_splash_screen">SplashScreen</string>
     <string name="title_activity_home">HomeActivity</string>

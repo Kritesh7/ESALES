@@ -116,10 +116,6 @@ public class LoginActivity extends AppCompatActivity {
                                 conn.showNoInternetAlret();
                             }
                     }
-
-
-
-
             }
         });
 

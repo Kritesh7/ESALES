@@ -113,6 +113,7 @@ import esales.schell.com.esales.R;
 import esales.schell.com.esales.Sources.AppController;
 import esales.schell.com.esales.Sources.ConnectionDetector;
 import esales.schell.com.esales.Sources.GPSTracker;
+import esales.schell.com.esales.Sources.GetLoctionAddress;
 import esales.schell.com.esales.Sources.LocationAddress;
 import esales.schell.com.esales.Sources.RecyclerItemClickListener;
 import esales.schell.com.esales.Sources.SettingConstant;
@@ -329,14 +330,11 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         Intent i = getIntent();
         if (i!=null)
         {
-            lat = i.getDoubleExtra("lat",-34);
-            log = i.getDoubleExtra("log",151);
+//            lat = i.getDoubleExtra("lat",-34);
+//            log = i.getDoubleExtra("log",151);
         }
 
     }
-
-
-
 
     //call popup
     private void callPopup() {
@@ -345,6 +343,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
         sourceLat = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLet(ShowMapsActivity.this)));
         sourceLog = UtilsMethods.getBlankIfStringNull(String.valueOf(SharedPrefs.getSourceLog(ShowMapsActivity.this)));
+
+
 
         //Log.e("checking error lat---------------------------->>>>>>>>>>", errordouble + " null");
         Log.e("checking error log", sourceLog + " null");
@@ -362,6 +362,14 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);
         save = (Button) popupView.findViewById(R.id.saveBtn);
         cancel = (Button) popupView.findViewById(R.id.cancelbtutton);
+        searchData = (EditText) popupView.findViewById(R.id.editTextsearching);
+        serchListData = (ListView) popupView.findViewById(R.id.listview_customer_list);
+
+        if(adapter != null){
+            serchListData.setAdapter(null);
+            adapter.notifyDataSetChanged();
+            adapter.clear();
+        }
 
         // checked permission
         if (Build.VERSION.SDK_INT == 16 || Build.VERSION.SDK_INT == 17 ||
@@ -383,6 +391,9 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 dstLat = gpsTracker.getLatitude();
                 dstLog = gpsTracker.getLongitude();
 
+//                dstLat = 40.7143528;
+//                dstLog = -74.0059731;
+
               //  Toast.makeText(context, "Destination Lat" + dstLat + " Destination Log" + dstLog, Toast.LENGTH_SHORT).show();
 
                 rechedBtn.setText("Home");
@@ -398,9 +409,14 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 // get address
                 if (conn.getConnectivityStatus()>0)
                 {
-                    LocationAddress locationAddress = new LocationAddress();
-                    locationAddress.getAddressFromLocation(dstLat, dstLog, getApplicationContext(),
+                    GetLoctionAddress locationAddress = new GetLoctionAddress();
+                    locationAddress.getFromLocation(dstLat, dstLog, getApplicationContext(),
                             new GeocoderHandler());
+
+//                    LocationAddress locationAddress = new LocationAddress();
+//                    locationAddress.getAddressFromLocation(dstLat, dstLog, getApplicationContext(),
+//                            new GeocoderHandler());
+
                 }
 
                 srcLat = Double.parseDouble(sourceLat);
@@ -590,8 +606,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
             }
         });
 
-        searchData = (EditText) popupView.findViewById(R.id.editTextsearching);
-        serchListData = (ListView) popupView.findViewById(R.id.listview_customer_list);
+
+
 
 
         adapter = new DemoCustomeAdapter(context, custNameList, ShowMapsActivity.this);
@@ -736,6 +752,37 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                         // if this button is clicked, just close
                         // the dialog box and do nothing
                        // callPopup();
+                        dialog.cancel();
+                    }
+                });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
+
+    }
+
+
+    public void getAlertBoxLatLangSame()
+    {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                context);
+
+        // set title
+        alertDialogBuilder.setTitle("You are At Source Loaction");
+
+        // set dialog message
+        alertDialogBuilder
+                .setMessage("You need to travel and do your update")
+                .setCancelable(false)
+
+                .setNegativeButton("Retry",new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        // if this button is clicked, just close
+                        // the dialog box and do nothing
+                        // callPopup();
                         dialog.cancel();
                     }
                 });
@@ -1169,7 +1216,7 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(lat, log);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
         Log.e("checking lat is :", sourceLat);
 
@@ -1210,8 +1257,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
         options = new MarkerOptions();
         mMap.addMarker(options.position(point).title(empName));
 
-
-
         rechedBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1244,7 +1289,8 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                         //checked source and destination lat log is same
                         if (sourceInnerLat == dstLat && sourceInnerLog == dstLog)
                         {
-                            getAlertBox();
+                        //    getAlertBox();
+                            getAlertBoxLatLangSame();
 
                         }else
                         {
@@ -1328,8 +1374,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                                 travelDistance = distance.replaceAll("[^0-9\\.]+", "");
                                 Log.e("Travel Distance in KM>>", travelDistance + " null");
                             }
-
-
 
 
                         if (rechedBtn.getText().toString().equalsIgnoreCase("Home"))
@@ -1545,7 +1589,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
     }
 
-
     // Hit Api is Reached Point
     public void submitDetails(final String TExpID  , final String UserID, final String VehicleTypeID, final String StartAtTime,
                               final String SourceName, final String ReachedAtTime, final String DestinationName,
@@ -1618,7 +1661,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
 
                 pDialog.dismiss();
 
-
             }
         }){
             @Override
@@ -1640,7 +1682,6 @@ public class ShowMapsActivity extends FragmentActivity implements OnMapReadyCall
                 params.put("TravelRemark",TravelRemark);
                 params.put("AuthCode",AuthCode);
                 params.put("ExpAmount","0");
-
 
                  Log.e("Show Maps Lat>>>>>", params.toString());
                 return params;

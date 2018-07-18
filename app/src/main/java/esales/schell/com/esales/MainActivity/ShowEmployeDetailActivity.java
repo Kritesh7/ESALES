@@ -175,7 +175,7 @@ public class ShowEmployeDetailActivity extends FragmentActivity implements OnMap
 
         LatLng sydney = new LatLng(startLat, startlong);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
         Log.e("checking lat is :", sourceLat);
 

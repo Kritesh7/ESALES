@@ -45,13 +45,14 @@
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <Button
             android:id="@+id/saveBtn"
-            android:textColor="@color/white"
             android:layout_width="0dp"
-            android:layout_weight=".5"
             android:layout_height="wrap_content"
-            android:text="Ok"/>
+            android:layout_weight=".5"
+            android:text="Ok"
+            android:textColor="@color/white" />
         <Button
             android:id="@+id/cancelbtutton"
             android:layout_marginLeft="10dp"

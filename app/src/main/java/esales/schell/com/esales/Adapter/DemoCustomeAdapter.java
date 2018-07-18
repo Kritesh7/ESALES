@@ -114,6 +114,10 @@ public class DemoCustomeAdapter extends BaseAdapter implements Filterable {
         return filter;
     }
 
+    public void clear() {
+        mDisplayedValues.clear();
+    }
+
     private class ViewHolder {
         LinearLayout llContainer;
         TextView tvName;

@@ -35,11 +35,13 @@
         android:layout_height="match_parent"
         android:src="@drawable/backimg"
         android:scaleType="fitXY"/>
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white"
-        android:alpha=".4"/></FrameLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha=".4"
+            android:background="@color/white" />
+    </FrameLayout>
    <!-- <ImageView
         android:visibility="gone"
         android:id="@+id/net_off"

@@ -40,13 +40,32 @@
                     android:background="@drawable/rounded_corner"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="3">
+                    android:layout_weight="3"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_menu_white"
+                            android:layout_marginLeft="16dp"
+                            android:layout_marginTop="16dp"
+                            android:id="@+id/imv_menu"/>
+
+                    </LinearLayout>
+
 
                     <ImageView
                         android:layout_gravity="center"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/splash_logo"/>
+                        android:src="@drawable/cfcs"
+                        android:layout_marginTop="30dp"/>
 
                 </LinearLayout>
 
@@ -58,13 +77,13 @@
                     android:layout_weight="7">
 
                     <Button
-                    android:elevation="10dp"
-                    android:layout_gravity="center"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="     Start      "
-                    android:textColor="@color/white"
-                    android:id="@+id/startbtn"/>
+                        android:id="@+id/startbtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:elevation="10dp"
+                        android:text="     Start      "
+                        android:textColor="@color/white" />
 
                     <Button
                         android:id="@+id/trail_listbtn"

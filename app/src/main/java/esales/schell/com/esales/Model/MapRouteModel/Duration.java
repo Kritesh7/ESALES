@@ -12,11 +12,9 @@ public class Duration {
     @Expose
     private Integer value;
 
-
     public String getText() {
         return text;
     }
-
 
     public void setText(String text) {
         this.text = text;
@@ -54,7 +52,6 @@ public class Duration {
     public String getText() {
         return text;
     }
-
     /**
      *
      * @param text
@@ -63,7 +60,6 @@ public class Duration {
     public void setText(String text) {
         this.text = text;
     }
-
     /**
      *
      * @return
@@ -72,7 +68,6 @@ public class Duration {
     public Integer getValue() {
         return value;
     }
-
     /**
      *
      * @param value
